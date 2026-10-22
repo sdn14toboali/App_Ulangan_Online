@@ -41,31 +41,51 @@ const state = {
   // Active Teacher Session (Isolation State)
   currentTeacher: JSON.parse(sessionStorage.getItem('zettcbt_current_teacher') || 'null'),
 
-  // Daftar Akun Guru (Tersimpan di localStorage & Mendukung Supabase)
-  teachers: JSON.parse(localStorage.getItem('zettcbt_teachers') || JSON.stringify([
-    { id: 't-admin', username: 'admin', password: 'admin123', fullName: 'Operator Sekolah', role: 'admin_sekolah', assignedClass: null, assignedSubject: null },
-    { id: 't-7a', username: 'guru7a', password: 'guru123', fullName: 'Budi Santoso, S.Pd', role: 'guru_kelas', assignedClass: '7A', assignedSubject: 'Tematik 7A' },
-    { id: 't-7b', username: 'guru7b', password: 'guru123', fullName: 'Siti Aminah, S.Pd', role: 'guru_kelas', assignedClass: '7B', assignedSubject: 'Tematik 7B' },
-    { id: 't-mtk', username: 'gurumtk', password: 'guru123', fullName: 'Hendra Wijaya, M.Pd', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Matematika' },
-    { id: 't-ipa', username: 'guruipa', password: 'guru123', fullName: 'Dewi Lestari, S.Pd', role: 'guru_mapel', assignedClass: null, assignedSubject: 'IPA' }
-  ])),
+  // Daftar Akun Guru Khusus SD NEGERI 14 TOBOALI (Guru Kelas, PAI, Penjaskes, Operator)
+  teachers: (() => {
+    const defaultSdTeachers = [
+      { id: 't-admin', username: 'admin', password: 'admin123', fullName: 'Operator Sekolah', role: 'admin_sekolah', assignedClass: null, assignedSubject: null },
+      { id: 't-kelas6', username: 'gurukelas6', password: 'guru123', fullName: 'Siti Aminah, S.Pd (Guru Kelas 6)', role: 'guru_kelas', assignedClass: '6', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas5', username: 'gurukelas5', password: 'guru123', fullName: 'Budi Santoso, S.Pd (Guru Kelas 5)', role: 'guru_kelas', assignedClass: '5', assignedSubject: 'Tematik SD' },
+      { id: 't-pai', username: 'gurupai', password: 'guru123', fullName: 'Ahmad Zaki, S.Pd.I (Guru PAI)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Pendidikan Agama Islam (PAI)' },
+      { id: 't-pjok', username: 'gurupjok', password: 'guru123', fullName: 'Hendra Wijaya, S.Pd (Guru Penjaskes)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Penjaskes / PJOK' }
+    ];
+    try {
+      const raw = localStorage.getItem('zettcbt_teachers');
+      if (raw && !raw.includes('guru7a') && !raw.includes('guruipa')) {
+        return JSON.parse(raw);
+      }
+    } catch(e) {}
+    localStorage.setItem('zettcbt_teachers', JSON.stringify(defaultSdTeachers));
+    return defaultSdTeachers;
+  })(),
 
-  // Master Data Siswa Peserta Ujian (Dikelola oleh Guru Kelas & Operator)
-  students: JSON.parse(localStorage.getItem('zettcbt_students') || JSON.stringify([
-    { id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '7A', gender: 'L', status: 'active' },
-    { id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '7A', gender: 'P', status: 'active' },
-    { id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '7A', gender: 'L', status: 'active' },
-    { id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '7B', gender: 'P', status: 'active' },
-    { id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '7B', gender: 'L', status: 'active' },
-    { id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '7B', gender: 'P', status: 'active' },
-    { id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: 'UMUM', gender: 'L', status: 'active' }
-  ])),
+  // Master Data Siswa Peserta Ujian SD NEGERI 14 TOBOALI (Kelas 6, 5, 4)
+  students: (() => {
+    const defaultSdStudents = [
+      { id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6', gender: 'L', status: 'active' },
+      { id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6', gender: 'P', status: 'active' },
+      { id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '6', gender: 'L', status: 'active' },
+      { id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5', gender: 'P', status: 'active' },
+      { id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '5', gender: 'L', status: 'active' },
+      { id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '5', gender: 'P', status: 'active' },
+      { id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4', gender: 'L', status: 'active' }
+    ];
+    try {
+      const raw = localStorage.getItem('zettcbt_students');
+      if (raw && !raw.includes('7A') && !raw.includes('7B')) {
+        return JSON.parse(raw);
+      }
+    } catch(e) {}
+    localStorage.setItem('zettcbt_students', JSON.stringify(defaultSdStudents));
+    return defaultSdStudents;
+  })(),
 
   // Active Exam Session
   session: {
     id: 'sess-default-01',
     title: 'Penilaian Akhir Semester Ganjil 2026',
-    subject: 'Matematika Peminatan',
+    subject: 'Tematik & ANBK SD',
     token: 'PAS26A',
     durationMinutes: 90,
     isActive: true,
@@ -86,16 +106,16 @@ const state = {
     answers: {} // { [questionId]: { selected: 'A', isDoubt: false } }
   },
 
-  // Bank Soal Terisolasi (Dilengkapi Metadata Guru, Mapel, dan Target Kelas)
+  // Bank Soal Terisolasi (Materi Resmi Sekolah Dasar)
   questions: [
     {
       id: 'q-01',
       number: 1,
       type: 'pg',
-      teacherId: 't-7a',
-      teacherName: 'Budi Santoso, S.Pd',
-      subject: 'Tematik 7A',
-      targetClass: '7A',
+      teacherId: 't-kelas6',
+      teacherName: 'Siti Aminah, S.Pd',
+      subject: 'Tematik SD',
+      targetClass: '6',
       text: 'Peristiwa mengembun adalah perubahan wujud benda dari...',
       imageUrl: '',
       optionA: 'Gas menjadi cair',
@@ -110,10 +130,10 @@ const state = {
       id: 'q-02',
       number: 2,
       type: 'pg',
-      teacherId: 't-7a',
+      teacherId: 't-kelas5',
       teacherName: 'Budi Santoso, S.Pd',
-      subject: 'Tematik 7A',
-      targetClass: '7A',
+      subject: 'Tematik SD',
+      targetClass: '5',
       text: 'Lambang sila ke-3 dalam perisai Garuda Pancasila adalah...',
       imageUrl: '',
       optionA: 'Bintang Tunggal',
@@ -128,35 +148,35 @@ const state = {
       id: 'q-03',
       number: 3,
       type: 'pg',
-      teacherId: 't-7b',
-      teacherName: 'Siti Aminah, S.Pd',
-      subject: 'Tematik 7B',
-      targetClass: '7B',
-      text: 'Ide pokok dalam sebuah paragraf deduktif terletak pada...',
+      teacherId: 't-pai',
+      teacherName: 'Ahmad Zaki, S.Pd.I',
+      subject: 'Pendidikan Agama Islam (PAI)',
+      targetClass: '6',
+      text: 'Rukun iman yang ke-2 yang wajib diimani oleh setiap muslim adalah iman kepada...',
       imageUrl: '',
-      optionA: 'Akhir paragraf',
-      optionB: 'Tengah paragraf',
-      optionC: 'Awal dan akhir paragraf',
-      optionD: 'Awal paragraf',
-      optionE: 'Seluruh kalimat penjelas',
-      correctKey: 'D',
+      optionA: 'Kitab-kitab Allah',
+      optionB: 'Malaikat-malaikat Allah',
+      optionC: 'Rasul-rasul Allah',
+      optionD: 'Hari Kiamat',
+      optionE: 'Qada dan Qadar',
+      correctKey: 'B',
       scoreWeight: 20
     },
     {
       id: 'q-04',
       number: 4,
       type: 'pg',
-      teacherId: 't-mtk',
-      teacherName: 'Hendra Wijaya, M.Pd',
-      subject: 'Matematika',
-      targetClass: 'UMUM',
-      text: 'Jika f(x) = 2x³ - 4x² + 5x - 7, maka nilai turunan f\'(2) adalah...',
+      teacherId: 't-pjok',
+      teacherName: 'Hendra Wijaya, S.Pd',
+      subject: 'Penjaskes / PJOK',
+      targetClass: '6',
+      text: 'Gerakan berpindah tempat seperti berlari, melompat, dan berjalan dalam olahraga disebut gerak...',
       imageUrl: '',
-      optionA: '13',
-      optionB: '15',
-      optionC: '17',
-      optionD: '21',
-      optionE: '23',
+      optionA: 'Lokomotor',
+      optionB: 'Non-lokomotor',
+      optionC: 'Manipulatif',
+      optionD: 'Statis',
+      optionE: 'Irama',
       correctKey: 'A',
       scoreWeight: 20
     },
@@ -164,17 +184,17 @@ const state = {
       id: 'q-05',
       number: 5,
       type: 'pg',
-      teacherId: 't-ipa',
-      teacherName: 'Dewi Lestari, S.Pd',
-      subject: 'IPA',
-      targetClass: 'UMUM',
-      text: 'Organel sel yang berfungsi sebagai tempat respirasi seluler dan penghasil energi ATP adalah...',
+      teacherId: 't-kelas6',
+      teacherName: 'Siti Aminah, S.Pd',
+      subject: 'Tematik SD',
+      targetClass: '6',
+      text: 'Suku bangsa asli yang mendiami pulau Bangka Belitung dengan kearifan lokal rumah panggung adalah suku...',
       imageUrl: '',
-      optionA: 'Ribosom',
-      optionB: 'Mitokondria',
-      optionC: 'Badan Golgi',
-      optionD: 'Retikulum Endoplasma',
-      optionE: 'Lisosom',
+      optionA: 'Jawa',
+      optionB: 'Melayu Bangka',
+      optionC: 'Sunda',
+      optionD: 'Bugis',
+      optionE: 'Batak',
       correctKey: 'B',
       scoreWeight: 20
     }
