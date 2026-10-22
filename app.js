@@ -43,7 +43,7 @@ const state = {
 
   // Daftar Akun Guru (Mendukung Offline & Online Supabase)
   teachers: [
-    { id: 't-admin', username: 'admin', password: 'admin123', fullName: 'Waka Kurikulum / Kepala Sekolah', role: 'admin_sekolah', assignedClass: null, assignedSubject: null },
+    { id: 't-admin', username: 'admin', password: 'admin123', fullName: 'Operator Sekolah', role: 'admin_sekolah', assignedClass: null, assignedSubject: null },
     { id: 't-7a', username: 'guru7a', password: 'guru123', fullName: 'Budi Santoso, S.Pd (Wali Kelas 7A)', role: 'guru_kelas', assignedClass: '7A', assignedSubject: 'Tematik 7A' },
     { id: 't-7b', username: 'guru7b', password: 'guru123', fullName: 'Siti Aminah, S.Pd (Wali Kelas 7B)', role: 'guru_kelas', assignedClass: '7B', assignedSubject: 'Tematik 7B' },
     { id: 't-mtk', username: 'gurumtk', password: 'guru123', fullName: 'Hendra Wijaya, M.Pd (Guru Matematika)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Matematika' },
@@ -80,11 +80,12 @@ const state = {
     {
       id: 'q-01',
       number: 1,
+      type: 'pg',
       teacherId: 't-7a',
       teacherName: 'Budi Santoso, S.Pd',
       subject: 'Tematik 7A',
       targetClass: '7A',
-      text: '[SOAL KHUSUS KELAS 7A] Peristiwa mengembun adalah perubahan wujud benda dari...',
+      text: 'Peristiwa mengembun adalah perubahan wujud benda dari...',
       imageUrl: '',
       optionA: 'Gas menjadi cair',
       optionB: 'Cair menjadi padat',
@@ -97,11 +98,12 @@ const state = {
     {
       id: 'q-02',
       number: 2,
+      type: 'pg',
       teacherId: 't-7a',
       teacherName: 'Budi Santoso, S.Pd',
       subject: 'Tematik 7A',
       targetClass: '7A',
-      text: '[SOAL KHUSUS KELAS 7A] Lambang sila ke-3 dalam perisai Garuda Pancasila adalah...',
+      text: 'Lambang sila ke-3 dalam perisai Garuda Pancasila adalah...',
       imageUrl: '',
       optionA: 'Bintang Tunggal',
       optionB: 'Rantai Emas',
@@ -114,11 +116,12 @@ const state = {
     {
       id: 'q-03',
       number: 3,
+      type: 'pg',
       teacherId: 't-7b',
       teacherName: 'Siti Aminah, S.Pd',
       subject: 'Tematik 7B',
       targetClass: '7B',
-      text: '[SOAL KHUSUS KELAS 7B] Ide pokok dalam sebuah paragraf deduktif terletak pada...',
+      text: 'Ide pokok dalam sebuah paragraf deduktif terletak pada...',
       imageUrl: '',
       optionA: 'Akhir paragraf',
       optionB: 'Tengah paragraf',
@@ -131,11 +134,12 @@ const state = {
     {
       id: 'q-04',
       number: 4,
+      type: 'pg',
       teacherId: 't-mtk',
       teacherName: 'Hendra Wijaya, M.Pd',
       subject: 'Matematika',
       targetClass: 'UMUM',
-      text: '[SOAL MAPEL MATEMATIKA] Jika f(x) = 2x³ - 4x² + 5x - 7, maka nilai turunan f\'(2) adalah...',
+      text: 'Jika f(x) = 2x³ - 4x² + 5x - 7, maka nilai turunan f\'(2) adalah...',
       imageUrl: '',
       optionA: '13',
       optionB: '15',
@@ -148,11 +152,12 @@ const state = {
     {
       id: 'q-05',
       number: 5,
+      type: 'pg',
       teacherId: 't-ipa',
       teacherName: 'Dewi Lestari, S.Pd',
       subject: 'IPA',
       targetClass: 'UMUM',
-      text: '[SOAL MAPEL IPA] Organel sel yang berfungsi sebagai tempat respirasi seluler dan penghasil energi ATP adalah...',
+      text: 'Organel sel yang berfungsi sebagai tempat respirasi seluler dan penghasil energi ATP adalah...',
       imageUrl: '',
       optionA: 'Ribosom',
       optionB: 'Mitokondria',
@@ -399,10 +404,13 @@ function handleTeacherLogout() {
   state.currentTeacher = null;
 
   const navLabel = document.getElementById('nav-teacher-label');
-  if (navLabel) navLabel.textContent = 'Panel Guru / Admin';
+  if (navLabel) navLabel.textContent = 'Guru & Pengawas';
+
+  const tabSb = document.getElementById('tab-link-supabase');
+  if (tabSb) tabSb.style.display = 'none';
 
   showScreen('student-login');
-  showToast('Anda telah keluar dari Panel Guru.', 'info');
+  showToast('Anda telah keluar dari Panel Guru & Pengawas.', 'info');
 }
 
 // Terapkan Isolasi Tampilan berdasarkan Akun Guru yang Aktif
@@ -427,7 +435,7 @@ function applyTeacherIsolation() {
       elBadge.textContent = 'GURU MAPEL ' + (t.assignedSubject || '');
     } else {
       elBadge.className = 'teacher-badge admin';
-      elBadge.textContent = 'SUPER ADMIN SEKOLAH';
+      elBadge.textContent = 'OPERATOR SEKOLAH';
     }
   }
 
@@ -437,7 +445,7 @@ function applyTeacherIsolation() {
     } else if (t.role === 'guru_mapel') {
       elScope.textContent = 'Kewenangan: Seluruh Kelas | Khusus Mapel: ' + t.assignedSubject;
     } else {
-      elScope.textContent = 'Kewenangan Penuh: Seluruh Kelas & Seluruh Mata Pelajaran Sekolah';
+      elScope.textContent = 'Kewenangan: Operator Sekolah (Akses Penuh Seluruh Kelas & Mata Pelajaran)';
     }
   }
 
@@ -447,8 +455,14 @@ function applyTeacherIsolation() {
     } else if (t.role === 'guru_mapel') {
       elNoticeText.innerHTML = '<strong>🔒 Sistem Isolasi Aktif:</strong> Anda masuk sebagai <strong>Guru Mata Pelajaran ' + t.assignedSubject + '</strong>. Anda hanya dapat mengelola bank soal mata pelajaran <strong>' + t.assignedSubject + '</strong>. Soal guru kelas atau mapel lain tidak dapat Anda akses.';
     } else {
-      elNoticeText.innerHTML = '<strong>👑 Mode Super Administrator:</strong> Anda memiliki akses pengawas penuh (Kepala Sekolah / Kurikulum). Anda dapat melihat bank soal dan rekapitulasi nilai seluruh guru, kelas, dan mata pelajaran.';
+      elNoticeText.innerHTML = '<strong>👑 Mode Operator Sekolah:</strong> Anda memiliki akses pengawas penuh (Super Admin). Anda dapat mengelola koneksi database Supabase Cloud, seluruh bank soal, jadwal ujian, dan rekapitulasi nilai sekolah.';
     }
+  }
+
+  // 2. Tampilkan Tab Supabase HANYA jika Operator Sekolah (admin_sekolah)
+  const tabSb = document.getElementById('tab-link-supabase');
+  if (tabSb) {
+    tabSb.style.display = (t.role === 'admin_sekolah') ? 'inline-block' : 'none';
   }
 
   // 2. Render ulang data terisolasi
