@@ -105,26 +105,55 @@
     </div>
   </main>
 
-  <!-- SCREEN: LOGIN GURU & PENGAWAS (MULTI-TEACHER ISOLATION) -->
+  <!-- SCREEN: LOGIN GURU & PENGAWAS (SPLIT 2-KOLOM MODERN ALA GAMBAR 2) -->
   <main id="screen-teacher-login" class="view-screen">
-    <div class="auth-wrapper">
-      <div class="card auth-card" style="max-width: 520px;">
-        <div class="card-body">
-          <div class="auth-hero">
-            <div class="brand-icon" style="margin: 0 auto 1rem; width: 52px; height: 52px; background: linear-gradient(135deg, #059669, #047857);">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="split-auth-container">
+      <div class="split-auth-card">
+        <!-- Kolom Kiri: Hero Visual Edukasi & Inspirasi (Sesuai Gambar 2) -->
+        <div class="split-auth-hero">
+          <div class="split-auth-hero-header">
+            <div class="split-hero-logo">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <div>
+              <div class="split-hero-school">SD NEGERI 14 TOBOALI</div>
+              <div class="split-hero-tag">CBT UJIAN ONLINE RESMI</div>
+            </div>
+          </div>
+
+          <div class="split-hero-body">
+            <h2 class="split-hero-headline">Portal Pendidik & Pengawas CBT</h2>
+            <p class="split-hero-subtext">Sistem evaluasi digital berstandar ANBK dengan manajemen bank soal mandiri, isolasi kelas, dan rekapitulasi nilai instan.</p>
+          </div>
+
+          <div class="split-hero-illustration">
+            <img src="assets/hero-edtech.jpg" alt="CBT Educational Hero Illustration" class="split-hero-img">
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Formulir Login Bersih (Sesuai Gambar 2, Tanpa Box Kredensial Bawah) -->
+        <div class="split-auth-form-side">
+          <div class="split-form-header">
+            <div class="split-form-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <h2>Portal Masuk Guru & Pengawas</h2>
-            <p>Sistem Isolasi Bank Soal & Nilai per Kelas & Mata Pelajaran</p>
+            <h3 class="split-form-title">Portal Masuk Guru & Pengawas</h3>
+            <p class="split-form-subtitle">Sistem Isolasi Bank Soal & Nilai per Kelas & Mata Pelajaran</p>
           </div>
 
           <form id="form-teacher-login" onsubmit="handleTeacherLogin(event)">
             <div class="form-group">
               <label class="form-label" for="teacher-login-username">Username / NIP Guru</label>
-              <input type="text" id="teacher-login-username" class="form-control" placeholder="Contoh: guru7a atau gurumtk" required autocomplete="username">
+              <input type="text" id="teacher-login-username" class="form-control" placeholder="Masukkan username guru atau operator..." required autocomplete="username">
             </div>
 
             <div class="form-group">
@@ -140,7 +169,7 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem; background-color: var(--emerald-600); border-color: var(--emerald-600);">
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1.25rem; justify-content: center; background: #2563eb; border-color: #2563eb;">
               Masuk ke Panel Guru
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -149,19 +178,11 @@
             </button>
           </form>
 
-          <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: var(--slate-50); border: 1px dashed var(--slate-300); border-radius: var(--radius-md); font-size: 0.82rem; color: var(--slate-600); text-align: center;">
-            <div style="margin-bottom: 0.35rem;">Akses Penuh Operator Sekolah: <strong>admin</strong> / <strong>admin123</strong></div>
-            <button type="button" class="btn btn-outline btn-sm" onclick="quickFillTeacher('admin', 'admin123')" style="font-size: 0.78rem; padding: 0.3rem 0.75rem; background: #ffffff;">
-              🔑 Klik untuk Isi Otomatis Akun Operator
-            </button>
-          </div>
-
-          <div style="text-align: center; margin-top: 1rem;">
+          <div style="text-align: center; margin-top: 1.25rem;">
             <button type="button" onclick="showScreen('student-login')" style="border: none; background: transparent; color: var(--slate-500); font-size: 0.82rem; cursor: pointer; text-decoration: underline;">
               ← Kembali ke Halaman Ruang Siswa
             </button>
           </div>
-
         </div>
       </div>
     </div>
@@ -544,6 +565,22 @@
               <div class="admin-topbar-breadcrumb">Panel Pengawas CBT</div>
               <h1 class="admin-topbar-title" id="admin-topbar-page-title">Jadwal Ujian & Live Monitoring</h1>
             </div>
+          </div>
+        </div>
+
+        <!-- Welcome Hero Banner ala Gambar 3 -->
+        <div class="dashboard-welcome-banner">
+          <div class="welcome-banner-content">
+            <div class="welcome-badge">PANEL EVALUASI CBT RESMI</div>
+            <h2 class="welcome-title">Selamat Datang di Portal CBT!</h2>
+            <p class="welcome-desc">Kelola bank soal 5 tipe ANBK, pantau live ujian siswa serentak, cetak kartu peserta, dan unduh rekap nilai SD Negeri 14 Toboali.</p>
+            <div class="welcome-quick-tags">
+              <span class="quick-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Sesi Aktif Berjalan</span>
+              <span class="quick-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Anti-Curang Aktif</span>
+            </div>
+          </div>
+          <div class="welcome-banner-graphic">
+            <img src="assets/hero-edtech.jpg" alt="Dashboard Illustration" class="welcome-mascot-img">
           </div>
         </div>
 
