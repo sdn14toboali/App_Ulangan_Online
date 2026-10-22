@@ -286,7 +286,16 @@ function showScreen(screenId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Update top button active states
+  // Update top button active states & sembunyikan pada Login Guru / Admin Dashboard
+  const headerNav = document.querySelector('.header-nav');
+  if (headerNav) {
+    if (screenId === 'admin-dashboard' || screenId === 'teacher-login') {
+      headerNav.style.display = 'none';
+    } else {
+      headerNav.style.display = 'flex';
+    }
+  }
+
   const btnStudent = document.getElementById('nav-btn-student');
   const btnAdmin = document.getElementById('nav-btn-admin');
   if (screenId.startsWith('student')) {
