@@ -454,6 +454,12 @@ function handleTeacherLogout() {
   const tabTeachers = document.getElementById('tab-link-teachers');
   if (tabTeachers) tabTeachers.style.display = 'none';
 
+  const navSb = document.getElementById('tab-nav-database-config');
+  if (navSb) navSb.style.display = 'none';
+
+  const navTeachers = document.getElementById('tab-nav-manage-teachers');
+  if (navTeachers) navTeachers.style.display = 'none';
+
   showScreen('student-login');
   showToast('Anda telah keluar dari Panel Guru & Pengawas.', 'info');
 }
@@ -506,14 +512,16 @@ function applyTeacherIsolation() {
 
   // 2. Tampilkan Tab Supabase & Kelola Guru HANYA jika Operator Sekolah (admin_sekolah)
   const tabSb = document.getElementById('tab-link-supabase');
-  if (tabSb) {
-    tabSb.style.display = (t.role === 'admin_sekolah') ? 'inline-block' : 'none';
-  }
+  if (tabSb) tabSb.style.display = (t.role === 'admin_sekolah') ? 'inline-block' : 'none';
 
   const tabTeachers = document.getElementById('tab-link-teachers');
-  if (tabTeachers) {
-    tabTeachers.style.display = (t.role === 'admin_sekolah') ? 'inline-block' : 'none';
-  }
+  if (tabTeachers) tabTeachers.style.display = (t.role === 'admin_sekolah') ? 'inline-block' : 'none';
+
+  const navSb = document.getElementById('tab-nav-database-config');
+  if (navSb) navSb.style.display = (t.role === 'admin_sekolah') ? 'flex' : 'none';
+
+  const navTeachers = document.getElementById('tab-nav-manage-teachers');
+  if (navTeachers) navTeachers.style.display = (t.role === 'admin_sekolah') ? 'flex' : 'none';
 
   // Kunci dropdown filter siswa jika Guru Kelas
   const studentFilter = document.getElementById('filter-manage-student-class');
@@ -1200,20 +1208,82 @@ function scaleFontSize(direction) {
 // ==============================================================================
 
 function switchAdminTab(tabId, element) {
-  document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-link, .sidebar-nav-item').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
 
-  element.classList.add('active');
+  if (element) {
+    element.classList.add('active');
+  } else {
+    const el = document.getElementById('tab-nav-' + tabId);
+    if (el) el.classList.add('active');
+  }
+
   const target = document.getElementById('tab-' + tabId);
   if (target) target.style.display = 'block';
 
+  // Update topbar title
+  const topbarTitle = document.getElementById('admin-topbar-page-title');
+  if (topbarTitle) {
+    const titles = {
+      'live-monitor': 'Jadwal Ujian & Live Monitoring',
+      'question-bank': 'Bank Soal (5 Tipe ANBK)',
+      'session-setting': 'Pengaturan Sesi Ujian Aktif',
+      'manage-students': 'Kelola Data Siswa Peserta Ujian',
+      'manage-teachers': 'Kelola Data Guru & Pengawas',
+      'results-analysis': 'Rekapitulasi & Analisis Nilai Siswa',
+      'exam-cards': 'Cetak Kartu Peserta Ujian',
+      'school-identity': 'Pengaturan Identitas & Kop Sekolah',
+      'database-config': 'Koneksi Supabase Cloud Database'
+    };
+    if (titles[tabId]) topbarTitle.textContent = titles[tabId];
+  }
+
+  // Close mobile drawer on selection
+  toggleMobileSidebar(false);
+
   if (tabId === 'live-monitor') renderLiveMonitoringTable();
   if (tabId === 'question-bank') renderAdminQuestionBank();
+  if (tabId === 'session-setting') populateSessionSettings();
   if (tabId === 'manage-students') renderStudentsTable();
   if (tabId === 'manage-teachers') renderTeachersTable();
   if (tabId === 'results-analysis') renderResultsTable();
   if (tabId === 'exam-cards') renderExamCardsTab();
   if (tabId === 'school-identity') populateSchoolIdentityForm();
+  if (tabId === 'database-config') populateDatabaseConfig();
+}
+
+function toggleMobileSidebar(open) {
+  const sidebar = document.getElementById('admin-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+  if (open === undefined) {
+    open = !sidebar.classList.contains('open');
+  }
+  if (open) {
+    sidebar.classList.add('open');
+    if (backdrop) backdrop.classList.add('active');
+  } else {
+    sidebar.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('active');
+  }
+}
+
+function populateSessionSettings() {
+  const setTokenInput = document.getElementById('setting-token');
+  if (setTokenInput) setTokenInput.value = state.session.token;
+  const setDurationInput = document.getElementById('setting-duration');
+  if (setDurationInput) setDurationInput.value = state.session.durationMinutes;
+  const setTitleInput = document.getElementById('setting-title');
+  if (setTitleInput) setTitleInput.value = state.session.title;
+  const setSubjectInput = document.getElementById('setting-subject');
+  if (setSubjectInput) setSubjectInput.value = state.session.subject;
+}
+
+function populateDatabaseConfig() {
+  const sbUrlInput = document.getElementById('config-supabase-url');
+  const sbKeyInput = document.getElementById('config-supabase-key');
+  if (sbUrlInput && state.supabase.url) sbUrlInput.value = state.supabase.url;
+  if (sbKeyInput && state.supabase.key) sbKeyInput.value = state.supabase.key;
 }
 
 function updateAdminMetrics() {
