@@ -41,14 +41,25 @@ const state = {
   // Active Teacher Session (Isolation State)
   currentTeacher: JSON.parse(sessionStorage.getItem('zettcbt_current_teacher') || 'null'),
 
-  // Daftar Akun Guru (Mendukung Offline & Online Supabase)
-  teachers: [
+  // Daftar Akun Guru (Tersimpan di localStorage & Mendukung Supabase)
+  teachers: JSON.parse(localStorage.getItem('zettcbt_teachers') || JSON.stringify([
     { id: 't-admin', username: 'admin', password: 'admin123', fullName: 'Operator Sekolah', role: 'admin_sekolah', assignedClass: null, assignedSubject: null },
-    { id: 't-7a', username: 'guru7a', password: 'guru123', fullName: 'Budi Santoso, S.Pd (Wali Kelas 7A)', role: 'guru_kelas', assignedClass: '7A', assignedSubject: 'Tematik 7A' },
-    { id: 't-7b', username: 'guru7b', password: 'guru123', fullName: 'Siti Aminah, S.Pd (Wali Kelas 7B)', role: 'guru_kelas', assignedClass: '7B', assignedSubject: 'Tematik 7B' },
-    { id: 't-mtk', username: 'gurumtk', password: 'guru123', fullName: 'Hendra Wijaya, M.Pd (Guru Matematika)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Matematika' },
-    { id: 't-ipa', username: 'guruipa', password: 'guru123', fullName: 'Dewi Lestari, S.Pd (Guru IPA)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'IPA' }
-  ],
+    { id: 't-7a', username: 'guru7a', password: 'guru123', fullName: 'Budi Santoso, S.Pd', role: 'guru_kelas', assignedClass: '7A', assignedSubject: 'Tematik 7A' },
+    { id: 't-7b', username: 'guru7b', password: 'guru123', fullName: 'Siti Aminah, S.Pd', role: 'guru_kelas', assignedClass: '7B', assignedSubject: 'Tematik 7B' },
+    { id: 't-mtk', username: 'gurumtk', password: 'guru123', fullName: 'Hendra Wijaya, M.Pd', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Matematika' },
+    { id: 't-ipa', username: 'guruipa', password: 'guru123', fullName: 'Dewi Lestari, S.Pd', role: 'guru_mapel', assignedClass: null, assignedSubject: 'IPA' }
+  ])),
+
+  // Master Data Siswa Peserta Ujian (Dikelola oleh Guru Kelas & Operator)
+  students: JSON.parse(localStorage.getItem('zettcbt_students') || JSON.stringify([
+    { id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '7A', gender: 'L', status: 'active' },
+    { id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '7A', gender: 'P', status: 'active' },
+    { id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '7A', gender: 'L', status: 'active' },
+    { id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '7B', gender: 'P', status: 'active' },
+    { id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '7B', gender: 'L', status: 'active' },
+    { id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '7B', gender: 'P', status: 'active' },
+    { id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: 'UMUM', gender: 'L', status: 'active' }
+  ])),
 
   // Active Exam Session
   session: {
@@ -409,6 +420,9 @@ function handleTeacherLogout() {
   const tabSb = document.getElementById('tab-link-supabase');
   if (tabSb) tabSb.style.display = 'none';
 
+  const tabTeachers = document.getElementById('tab-link-teachers');
+  if (tabTeachers) tabTeachers.style.display = 'none';
+
   showScreen('student-login');
   showToast('Anda telah keluar dari Panel Guru & Pengawas.', 'info');
 }
@@ -451,23 +465,41 @@ function applyTeacherIsolation() {
 
   if (elNoticeText) {
     if (t.role === 'guru_kelas') {
-      elNoticeText.innerHTML = '<strong>🔒 Sistem Isolasi Aktif:</strong> Anda masuk sebagai <strong>Wali/Guru Kelas ' + t.assignedClass + '</strong>. Anda hanya dapat melihat dan mengelola bank soal serta nilai siswa <strong>Kelas ' + t.assignedClass + '</strong>. Soal guru kelas lain atau mapel lain diisolasi secara aman.';
+      elNoticeText.innerHTML = '<strong>🔒 Sistem Isolasi Aktif:</strong> Anda masuk sebagai <strong>Wali/Guru Kelas ' + t.assignedClass + '</strong>. Anda hanya dapat melihat dan mengelola bank soal, data siswa, serta nilai siswa <strong>Kelas ' + t.assignedClass + '</strong>. Soal guru kelas lain diisolasi secara aman.';
     } else if (t.role === 'guru_mapel') {
-      elNoticeText.innerHTML = '<strong>🔒 Sistem Isolasi Aktif:</strong> Anda masuk sebagai <strong>Guru Mata Pelajaran ' + t.assignedSubject + '</strong>. Anda hanya dapat mengelola bank soal mata pelajaran <strong>' + t.assignedSubject + '</strong>. Soal guru kelas atau mapel lain tidak dapat Anda akses.';
+      elNoticeText.innerHTML = '<strong>🔒 Sistem Isolasi Aktif:</strong> Anda masuk sebagai <strong>Guru Mata Pelajaran ' + t.assignedSubject + '</strong>. Anda hanya dapat mengelola bank soal mata pelajaran <strong>' + t.assignedSubject + '</strong>.';
     } else {
-      elNoticeText.innerHTML = '<strong>👑 Mode Operator Sekolah:</strong> Anda memiliki akses pengawas penuh (Super Admin). Anda dapat mengelola koneksi database Supabase Cloud, seluruh bank soal, jadwal ujian, dan rekapitulasi nilai sekolah.';
+      elNoticeText.innerHTML = '<strong>👑 Mode Operator Sekolah:</strong> Anda memiliki akses pengawas penuh (Super Admin). Anda dapat mengelola akun guru, database Supabase Cloud, seluruh bank soal, master siswa, jadwal ujian, dan rekapitulasi nilai sekolah.';
     }
   }
 
-  // 2. Tampilkan Tab Supabase HANYA jika Operator Sekolah (admin_sekolah)
+  // 2. Tampilkan Tab Supabase & Kelola Guru HANYA jika Operator Sekolah (admin_sekolah)
   const tabSb = document.getElementById('tab-link-supabase');
   if (tabSb) {
     tabSb.style.display = (t.role === 'admin_sekolah') ? 'inline-block' : 'none';
   }
 
-  // 2. Render ulang data terisolasi
+  const tabTeachers = document.getElementById('tab-link-teachers');
+  if (tabTeachers) {
+    tabTeachers.style.display = (t.role === 'admin_sekolah') ? 'inline-block' : 'none';
+  }
+
+  // Kunci dropdown filter siswa jika Guru Kelas
+  const studentFilter = document.getElementById('filter-manage-student-class');
+  if (studentFilter) {
+    if (t.role === 'guru_kelas' && t.assignedClass) {
+      studentFilter.value = t.assignedClass;
+      studentFilter.disabled = true;
+    } else {
+      studentFilter.disabled = false;
+    }
+  }
+
+  // 3. Render ulang data terisolasi
   renderAdminQuestionBank();
   renderLiveMonitoringTable();
+  renderStudentsTable();
+  if (t.role === 'admin_sekolah') renderTeachersTable();
   updateAdminMetrics();
   renderResultsTable();
 }
@@ -536,6 +568,19 @@ function handleStudentLogin(event) {
     return;
   }
 
+  // Validasi Akun Siswa terhadap Master Data yang dikelola Guru
+  let activeName = name;
+  let activeClass = className;
+  if (state.students && state.students.length > 0) {
+    const matched = state.students.find(s => s.nisn.toLowerCase() === nisn.toLowerCase());
+    if (!matched) {
+      showToast('Nomor Peserta / NISN "' + nisn + '" belum didaftarkan oleh guru kelas! Hubungi pengawas.', 'danger');
+      return;
+    }
+    if (!activeName) activeName = matched.name;
+    if (!activeClass) activeClass = matched.className;
+  }
+
   if (state.questions.length === 0) {
     showToast('Bank soal belum dibuat oleh pengawas!', 'danger');
     return;
@@ -543,14 +588,14 @@ function handleStudentLogin(event) {
 
   // Set student state
   state.student.nisn = nisn;
-  state.student.name = name;
-  state.student.className = className;
+  state.student.name = activeName;
+  state.student.className = activeClass;
   state.student.answers = {};
   state.warningCount = 0;
 
   // Populate Confirmation Screen
   document.getElementById('confirm-nisn').textContent = nisn;
-  document.getElementById('confirm-name').textContent = name;
+  document.getElementById('confirm-name').textContent = activeName;
   document.getElementById('confirm-class').textContent = className;
   document.getElementById('confirm-subject').textContent = state.session.subject + ' (' + state.session.title + ')';
   document.getElementById('confirm-total-q').textContent = state.questions.length + ' Butir Soal (Pilihan Ganda)';
@@ -1133,6 +1178,8 @@ function switchAdminTab(tabId, element) {
 
   if (tabId === 'live-monitor') renderLiveMonitoringTable();
   if (tabId === 'question-bank') renderAdminQuestionBank();
+  if (tabId === 'manage-students') renderStudentsTable();
+  if (tabId === 'manage-teachers') renderTeachersTable();
   if (tabId === 'results-analysis') renderResultsTable();
   if (tabId === 'exam-cards') renderExamCardsTab();
   if (tabId === 'school-identity') populateSchoolIdentityForm();
@@ -1462,6 +1509,419 @@ function handleSaveQuestion(event) {
   renderAdminQuestionBank();
   closeQuestionModal();
   showToast('Butir soal berhasil disimpan!', 'success');
+}
+
+// ==============================================================================
+// MANAJEMEN DATA SISWA (MENU GURU & OPERATOR)
+// ==============================================================================
+
+function getVisibleStudents() {
+  if (!state.currentTeacher) return state.students;
+  const t = state.currentTeacher;
+  const filterClass = document.getElementById('filter-manage-student-class')?.value || 'ALL';
+
+  let list = state.students;
+
+  // Isolasi Guru Kelas
+  if (t.role === 'guru_kelas' && t.assignedClass) {
+    list = list.filter(s => s.className === t.assignedClass || s.className === 'Kelas ' + t.assignedClass || s.className.includes(t.assignedClass));
+  } else if (filterClass !== 'ALL') {
+    list = list.filter(s => s.className === filterClass || s.className.includes(filterClass));
+  }
+
+  return list;
+}
+
+function renderStudentsTable() {
+  const tbody = document.getElementById('table-students-body');
+  if (!tbody) return;
+
+  const students = getVisibleStudents();
+  tbody.innerHTML = '';
+
+  if (students.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada data siswa di kelas kewenangan Anda. Klik "+ Tambah Siswa Baru" di atas.</td></tr>';
+    return;
+  }
+
+  students.forEach((s, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = 
+      '<td>' + (idx + 1) + '</td>' +
+      '<td><strong>' + escapeHtml(s.nisn) + '</strong></td>' +
+      '<td>' + escapeHtml(s.name) + '</td>' +
+      '<td><span class="badge badge-info">' + escapeHtml(s.className) + '</span></td>' +
+      '<td>' + (s.gender === 'P' ? 'Perempuan (P)' : 'Laki-laki (L)') + '</td>' +
+      '<td><span class="badge badge-success">Terdaftar (Aktif)</span></td>' +
+      '<td>' +
+        '<div style="display: flex; gap: 0.35rem;">' +
+          '<button class="btn btn-outline btn-sm" onclick="openEditStudentModal(\'' + escapeHtml(s.nisn) + '\')">Edit</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="deleteStudent(\'' + escapeHtml(s.nisn) + '\')">Hapus</button>' +
+        '</div>' +
+      '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function openAddStudentModal() {
+  document.getElementById('modal-student-title').textContent = 'Tambah Data Siswa Baru';
+  document.getElementById('edit-student-original-nisn').value = '';
+  document.getElementById('form-student-editor').reset();
+
+  const classInput = document.getElementById('edit-student-class');
+  if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
+    if (classInput) {
+      classInput.value = state.currentTeacher.assignedClass || '';
+      classInput.readOnly = true;
+    }
+  } else {
+    if (classInput) classInput.readOnly = false;
+  }
+
+  document.getElementById('modal-student-editor').style.display = 'flex';
+}
+
+function openEditStudentModal(nisn) {
+  const s = state.students.find(item => item.nisn === nisn);
+  if (!s) return;
+
+  // Proteksi Isolasi Guru Kelas
+  if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
+    if (s.className !== state.currentTeacher.assignedClass && !s.className.includes(state.currentTeacher.assignedClass)) {
+      showToast('Akses ditolak: Anda tidak memiliki hak mengedit siswa kelas lain!', 'danger');
+      return;
+    }
+  }
+
+  document.getElementById('modal-student-title').textContent = 'Edit Data Siswa';
+  document.getElementById('edit-student-original-nisn').value = s.nisn;
+  document.getElementById('edit-student-nisn').value = s.nisn;
+  document.getElementById('edit-student-name').value = s.name;
+  
+  const classInput = document.getElementById('edit-student-class');
+  if (classInput) {
+    classInput.value = s.className;
+    if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
+      classInput.readOnly = true;
+    } else {
+      classInput.readOnly = false;
+    }
+  }
+
+  document.getElementById('edit-student-gender').value = s.gender || 'L';
+  document.getElementById('modal-student-editor').style.display = 'flex';
+}
+
+function closeStudentModal() {
+  const modal = document.getElementById('modal-student-editor');
+  if (modal) modal.style.display = 'none';
+}
+
+async function handleSaveStudent(event) {
+  event.preventDefault();
+  const originalNisn = document.getElementById('edit-student-original-nisn').value.trim();
+  const nisn = document.getElementById('edit-student-nisn').value.trim();
+  const name = document.getElementById('edit-student-name').value.trim();
+  const className = document.getElementById('edit-student-class').value.trim().toUpperCase();
+  const gender = document.getElementById('edit-student-gender').value;
+
+  if (!nisn || !name || !className) {
+    showToast('Harap lengkapi seluruh isian siswa!', 'warning');
+    return;
+  }
+
+  // Cek duplikasi NISN jika NISN baru
+  if (!originalNisn && state.students.some(s => s.nisn.toLowerCase() === nisn.toLowerCase())) {
+    showToast('NISN ' + nisn + ' sudah terdaftar untuk siswa lain!', 'danger');
+    return;
+  }
+
+  const studentObj = {
+    id: originalNisn ? (state.students.find(s => s.nisn === originalNisn)?.id || 'st-' + Date.now()) : 'st-' + Date.now(),
+    nisn: nisn,
+    name: name,
+    className: className,
+    gender: gender,
+    status: 'active'
+  };
+
+  if (originalNisn) {
+    const idx = state.students.findIndex(s => s.nisn === originalNisn);
+    if (idx >= 0) state.students[idx] = studentObj;
+  } else {
+    state.students.push(studentObj);
+  }
+
+  localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
+
+  // Sinkronisasi ke Supabase jika aktif
+  if (state.supabase.url && state.supabase.key) {
+    try {
+      await fetch(state.supabase.url + '/rest/v1/students', {
+        method: 'POST',
+        headers: {
+          'apikey': state.supabase.key,
+          'Authorization': 'Bearer ' + state.supabase.key,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          nisn: studentObj.nisn,
+          full_name: studentObj.name,
+          class_name: studentObj.className,
+          gender: studentObj.gender
+        })
+      });
+    } catch (e) {
+      console.warn('Gagal sinkron siswa ke Supabase:', e);
+    }
+  }
+
+  renderStudentsTable();
+  renderExamCardsTab();
+  closeStudentModal();
+  showToast('Data siswa ' + name + ' berhasil disimpan!', 'success');
+}
+
+async function deleteStudent(nisn) {
+  if (!confirm('Yakin ingin menghapus data siswa NISN: ' + nisn + '?')) return;
+
+  state.students = state.students.filter(s => s.nisn !== nisn);
+  localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
+
+  if (state.supabase.url && state.supabase.key) {
+    try {
+      await fetch(state.supabase.url + '/rest/v1/students?nisn=eq.' + encodeURIComponent(nisn), {
+        method: 'DELETE',
+        headers: {
+          'apikey': state.supabase.key,
+          'Authorization': 'Bearer ' + state.supabase.key
+        }
+      });
+    } catch (e) {
+      console.warn('Gagal hapus siswa di Supabase:', e);
+    }
+  }
+
+  renderStudentsTable();
+  renderExamCardsTab();
+  showToast('Siswa berhasil dihapus!', 'info');
+}
+
+// ==============================================================================
+// MANAJEMEN AKUN GURU (MENU ADMIN / OPERATOR SEKOLAH)
+// ==============================================================================
+
+function renderTeachersTable() {
+  const tbody = document.getElementById('table-teachers-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  state.teachers.forEach((t, idx) => {
+    const tr = document.createElement('tr');
+
+    let badgeRole = '<span class="teacher-badge admin">Operator Sekolah</span>';
+    if (t.role === 'guru_kelas') {
+      badgeRole = '<span class="teacher-badge kelas">Guru Kelas</span>';
+    } else if (t.role === 'guru_mapel') {
+      badgeRole = '<span class="teacher-badge mapel">Guru Mapel</span>';
+    }
+
+    let scopeInfo = '-';
+    if (t.role === 'guru_kelas') {
+      scopeInfo = 'Kelas: <strong>' + (t.assignedClass || '-') + '</strong>';
+    } else if (t.role === 'guru_mapel') {
+      scopeInfo = 'Mapel: <strong>' + (t.assignedSubject || '-') + '</strong>';
+    } else {
+      scopeInfo = 'Akses Penuh Seluruh Sekolah';
+    }
+
+    const isPrimaryAdmin = t.username === 'admin';
+    const deleteBtn = isPrimaryAdmin 
+      ? '<span style="font-size:0.75rem; color:var(--slate-400);">Akun Utama</span>'
+      : '<button class="btn btn-danger btn-sm" onclick="deleteTeacher(\'' + t.id + '\')">Hapus</button>';
+
+    tr.innerHTML = 
+      '<td>' + (idx + 1) + '</td>' +
+      '<td><strong>' + escapeHtml(t.fullName) + '</strong></td>' +
+      '<td><code>' + escapeHtml(t.username) + '</code></td>' +
+      '<td><span style="letter-spacing: 0.15em; font-family: monospace;">••••••</span></td>' +
+      '<td>' + badgeRole + '</td>' +
+      '<td>' + scopeInfo + '</td>' +
+      '<td>' +
+        '<div style="display: flex; gap: 0.35rem; align-items: center;">' +
+          '<button class="btn btn-outline btn-sm" onclick="openEditTeacherModal(\'' + t.id + '\')">Edit</button>' +
+          deleteBtn +
+        '</div>' +
+      '</td>';
+
+    tbody.appendChild(tr);
+  });
+}
+
+function openAddTeacherModal() {
+  document.getElementById('modal-teacher-title').textContent = 'Tambah Akun Guru Baru';
+  document.getElementById('edit-teacher-id').value = '';
+  document.getElementById('form-teacher-editor').reset();
+  document.getElementById('edit-teacher-username').readOnly = false;
+  handleTeacherRoleChange();
+  document.getElementById('modal-teacher-editor').style.display = 'flex';
+}
+
+function openEditTeacherModal(id) {
+  const t = state.teachers.find(item => item.id === id);
+  if (!t) return;
+
+  document.getElementById('modal-teacher-title').textContent = 'Edit Akun Guru & Pengawas';
+  document.getElementById('edit-teacher-id').value = t.id;
+  document.getElementById('edit-teacher-fullname').value = t.fullName;
+  document.getElementById('edit-teacher-username').value = t.username;
+  document.getElementById('edit-teacher-username').readOnly = (t.username === 'admin');
+  document.getElementById('edit-teacher-password').value = t.password;
+  document.getElementById('edit-teacher-role').value = t.role;
+  document.getElementById('edit-teacher-class').value = t.assignedClass || '';
+  document.getElementById('edit-teacher-subject').value = t.assignedSubject || '';
+
+  handleTeacherRoleChange();
+  document.getElementById('modal-teacher-editor').style.display = 'flex';
+}
+
+function closeTeacherModal() {
+  const modal = document.getElementById('modal-teacher-editor');
+  if (modal) modal.style.display = 'none';
+}
+
+function toggleEditTeacherPasswordVisibility() {
+  const input = document.getElementById('edit-teacher-password');
+  const icon = document.getElementById('eye-icon-teacher-edit');
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+  } else {
+    input.type = 'password';
+    if (icon) icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+  }
+}
+
+function handleTeacherRoleChange() {
+  const role = document.getElementById('edit-teacher-role').value;
+  const grpClass = document.getElementById('group-teacher-class');
+  const grpSubject = document.getElementById('group-teacher-subject');
+
+  if (role === 'guru_kelas') {
+    if (grpClass) grpClass.style.display = 'block';
+    if (grpSubject) grpSubject.style.display = 'none';
+  } else if (role === 'guru_mapel') {
+    if (grpClass) grpClass.style.display = 'none';
+    if (grpSubject) grpSubject.style.display = 'block';
+  } else {
+    if (grpClass) grpClass.style.display = 'none';
+    if (grpSubject) grpSubject.style.display = 'none';
+  }
+}
+
+async function handleSaveTeacher(event) {
+  event.preventDefault();
+  const id = document.getElementById('edit-teacher-id').value;
+  const fullName = document.getElementById('edit-teacher-fullname').value.trim();
+  const username = document.getElementById('edit-teacher-username').value.trim().toLowerCase();
+  const password = document.getElementById('edit-teacher-password').value.trim();
+  const role = document.getElementById('edit-teacher-role').value;
+  const assignedClass = document.getElementById('edit-teacher-class').value.trim().toUpperCase() || null;
+  const assignedSubject = document.getElementById('edit-teacher-subject').value.trim() || null;
+
+  if (!fullName || !username || !password) {
+    showToast('Harap lengkapi nama, username, dan password guru!', 'warning');
+    return;
+  }
+
+  // Cek duplikasi username jika akun baru
+  if (!id && state.teachers.some(t => t.username === username)) {
+    showToast('Username "' + username + '" sudah digunakan oleh guru lain!', 'danger');
+    return;
+  }
+
+  const teacherObj = {
+    id: id || 't-' + Date.now(),
+    username: username,
+    password: password,
+    fullName: fullName,
+    role: role,
+    assignedClass: assignedClass,
+    assignedSubject: assignedSubject
+  };
+
+  if (id) {
+    const idx = state.teachers.findIndex(t => t.id === id);
+    if (idx >= 0) state.teachers[idx] = teacherObj;
+  } else {
+    state.teachers.push(teacherObj);
+  }
+
+  localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
+
+  // Sinkronisasi ke Supabase jika aktif
+  if (state.supabase.url && state.supabase.key) {
+    try {
+      await fetch(state.supabase.url + '/rest/v1/teachers', {
+        method: 'POST',
+        headers: {
+          'apikey': state.supabase.key,
+          'Authorization': 'Bearer ' + state.supabase.key,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          username: teacherObj.username,
+          password_hash: teacherObj.password,
+          full_name: teacherObj.fullName,
+          role: teacherObj.role,
+          assigned_class: teacherObj.assignedClass,
+          assigned_subject: teacherObj.assignedSubject
+        })
+      });
+    } catch (e) {
+      console.warn('Gagal sinkron akun guru ke Supabase:', e);
+    }
+  }
+
+  renderTeachersTable();
+  closeTeacherModal();
+  showToast('Akun guru ' + fullName + ' berhasil disimpan!', 'success');
+}
+
+async function deleteTeacher(id) {
+  const target = state.teachers.find(t => t.id === id);
+  if (!target) return;
+
+  if (target.username === 'admin') {
+    showToast('Akun Operator Sekolah utama tidak dapat dihapus!', 'danger');
+    return;
+  }
+
+  if (!confirm('Yakin ingin menghapus akun guru: ' + target.fullName + ' (' + target.username + ')?')) return;
+
+  state.teachers = state.teachers.filter(t => t.id !== id);
+  localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
+
+  if (state.supabase.url && state.supabase.key) {
+    try {
+      await fetch(state.supabase.url + '/rest/v1/teachers?username=eq.' + encodeURIComponent(target.username), {
+        method: 'DELETE',
+        headers: {
+          'apikey': state.supabase.key,
+          'Authorization': 'Bearer ' + state.supabase.key
+        }
+      });
+    } catch (e) {
+      console.warn('Gagal hapus guru di Supabase:', e);
+    }
+  }
+
+  renderTeachersTable();
+  showToast('Akun guru berhasil dihapus!', 'info');
 }
 
 // ==============================================================================
