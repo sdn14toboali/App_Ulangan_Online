@@ -35,10 +35,11 @@
           Ruang Siswa
         </button>
         <button id="nav-btn-admin" class="btn btn-primary btn-sm" onclick="openTeacherPortal()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
           </svg>
-          <span id="nav-teacher-label">Panel Guru / Admin</span>
+          <span id="nav-teacher-label">Guru & Pengawas</span>
         </button>
       </div>
     </div>
@@ -188,10 +189,10 @@
 
               <div class="account-chip" onclick="quickFillTeacher('admin', 'admin123')">
                 <div>
-                  <div style="font-weight: 700; font-size: 0.88rem; color: var(--slate-800);">Waka Kurikulum / Kepsek</div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: var(--slate-800);">Operator Sekolah</div>
                   <div style="font-size: 0.78rem; color: var(--slate-500);">Username: <code>admin</code> | Pass: <code>admin123</code></div>
                 </div>
-                <span class="teacher-badge admin">Super Admin</span>
+                <span class="teacher-badge admin">Operator Sekolah</span>
               </div>
             </div>
           </div>
@@ -461,29 +462,8 @@
         </div>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-        <div>
-          <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900);">Panel Guru & Pengawas Ujian</h1>
-          <p style="font-size: 0.88rem; color: var(--slate-500);">Monitor 300 siswa aktif serentak, kelola bank soal, dan unduh nilai.</p>
-        </div>
-
-        <div style="display: flex; gap: 0.75rem;">
-          <button class="btn btn-outline btn-sm" onclick="exportResultsToExcel()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Export Nilai Excel (.xlsx)
-          </button>
-          <button class="btn btn-primary btn-sm" onclick="openNewSessionModal()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Buat Sesi Ujian Baru
-          </button>
-        </div>
+      <div style="margin-bottom: 1.25rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900);">Guru & Pengawas</h1>
       </div>
 
       <!-- Dashboard Metric Cards -->
@@ -575,7 +555,7 @@
         <div class="tab-link" onclick="switchAdminTab('results-analysis', this)">📊 Rekap Nilai</div>
         <div class="tab-link" onclick="switchAdminTab('exam-cards', this)">🪪 Kartu Peserta Ujian</div>
         <div class="tab-link" onclick="switchAdminTab('school-identity', this)">🏫 Identitas Sekolah</div>
-        <div class="tab-link" onclick="switchAdminTab('database-config', this)">☁️ Koneksi Supabase</div>
+        <div class="tab-link" id="tab-link-supabase" onclick="switchAdminTab('database-config', this)" style="display: none;">☁️ Koneksi Supabase</div>
       </div>
 
       <!-- TAB 1: LIVE MONITOR -->
