@@ -499,13 +499,15 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs (Sesuai Gambar 4) -->
+      <!-- Navigation Tabs -->
       <div class="admin-header-tabs">
         <div class="tab-link active" onclick="switchAdminTab('live-monitor', this)">📅 Jadwal Ujian & Live</div>
         <div class="tab-link" onclick="switchAdminTab('question-bank', this)">📝 Bank Soal (5 Tipe ANBK)</div>
+        <div class="tab-link" id="tab-link-students" onclick="switchAdminTab('manage-students', this)">🎓 Kelola Data Siswa</div>
         <div class="tab-link" onclick="switchAdminTab('results-analysis', this)">📊 Rekap Nilai</div>
         <div class="tab-link" onclick="switchAdminTab('exam-cards', this)">🪪 Kartu Peserta Ujian</div>
         <div class="tab-link" onclick="switchAdminTab('school-identity', this)">🏫 Identitas Sekolah</div>
+        <div class="tab-link" id="tab-link-teachers" onclick="switchAdminTab('manage-teachers', this)" style="display: none;">👨‍🏫 Kelola Data Guru</div>
         <div class="tab-link" id="tab-link-supabase" onclick="switchAdminTab('database-config', this)" style="display: none;">☁️ Koneksi Supabase</div>
       </div>
 
@@ -698,12 +700,6 @@
         </div>
       </div>
 
-              <button type="submit" class="btn btn-primary">Simpan Pengaturan Sesi</button>
-            </form>
-          </div>
-        </div>
-      </div>
-
       <!-- TAB 4: REKAP & ANALISIS NILAI -->
       <div id="tab-results-analysis" class="admin-tab-content" style="display: none;">
         <div class="card">
@@ -773,6 +769,78 @@
                 <button type="button" class="btn btn-outline" onclick="copySqlSchema()">Salin Kode SQL Schema</button>
               </div>
             </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: KELOLA DATA SISWA (MENU GURU & OPERATOR) -->
+      <div id="tab-manage-students" class="admin-tab-content" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Kelola Data Siswa Peserta Ujian</h3>
+              <p style="font-size: 0.8rem; color: var(--slate-500);">Data siswa resmi sekolah yang berhak login ke ruang ujian online</p>
+            </div>
+            <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+              <select id="filter-manage-student-class" class="form-control" style="width: 140px; font-size: 0.85rem;" onchange="renderStudentsTable()">
+                <option value="ALL">Semua Kelas</option>
+                <option value="7A">Kelas 7A</option>
+                <option value="7B">Kelas 7B</option>
+                <option value="UMUM">Kelas UMUM</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Tambah Siswa Baru</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 45px;">No</th>
+                  <th style="width: 140px;">No Peserta / NISN</th>
+                  <th>Nama Lengkap Siswa</th>
+                  <th style="width: 110px;">Kelas / Rombel</th>
+                  <th style="width: 100px;">Jenis Kelamin</th>
+                  <th style="width: 130px;">Status Akun</th>
+                  <th style="width: 130px;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-students-body">
+                <!-- Injected via Javascript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: KELOLA DATA GURU (KHUSUS OPERATOR SEKOLAH) -->
+      <div id="tab-manage-teachers" class="admin-tab-content" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Manajemen Akun Guru & Pengawas Ujian</h3>
+              <p style="font-size: 0.8rem; color: var(--slate-500);">Kelola akses pendidik, reset password login, dan atur hak kewenangan kelas/mapel</p>
+            </div>
+            <div>
+              <button class="btn btn-primary btn-sm" onclick="openAddTeacherModal()">+ Tambah Guru Baru</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 45px;">No</th>
+                  <th>Nama Lengkap Guru</th>
+                  <th style="width: 130px;">Username</th>
+                  <th style="width: 120px;">Password</th>
+                  <th style="width: 150px;">Peran (Role)</th>
+                  <th>Kewenangan Binaan</th>
+                  <th style="width: 130px;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-teachers-body">
+                <!-- Injected via Javascript -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1005,6 +1073,114 @@
           <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1rem;">
             <button type="button" class="btn btn-outline" onclick="closeQuestionModal()">Batal</button>
             <button type="submit" class="btn btn-primary">Simpan Butir Soal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT DATA GURU (OPERATOR SEKOLAH) -->
+  <div id="modal-teacher-editor" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;" id="modal-teacher-title">Tambah Akun Guru Baru</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeTeacherModal()" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-teacher-editor" onsubmit="handleSaveTeacher(event)">
+          <input type="hidden" id="edit-teacher-id">
+
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap & Gelar Pendidik</label>
+            <input type="text" id="edit-teacher-fullname" class="form-control" placeholder="Contoh: Budi Santoso, S.Pd" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Username Login</label>
+              <input type="text" id="edit-teacher-username" class="form-control" placeholder="Contoh: guru7a" required autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password Login</label>
+              <div style="position: relative;">
+                <input type="password" id="edit-teacher-password" class="form-control" placeholder="Minimal 6 karakter" required autocomplete="off">
+                <button type="button" onclick="toggleEditTeacherPasswordVisibility()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-400);">
+                  <svg id="eye-icon-teacher-edit" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Peran / Tugas Pendidik (Role)</label>
+            <select id="edit-teacher-role" class="form-control" onchange="handleTeacherRoleChange()" required>
+              <option value="guru_kelas">Guru Kelas (Wali Rombel)</option>
+              <option value="guru_mapel">Guru Mata Pelajaran</option>
+              <option value="admin_sekolah">Operator Sekolah (Super Admin)</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group" id="group-teacher-class">
+              <label class="form-label">Kelas Binaan</label>
+              <input type="text" id="edit-teacher-class" class="form-control" placeholder="Contoh: 7A, 7B, dsb">
+              <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Kelas</small>
+            </div>
+            <div class="form-group" id="group-teacher-subject">
+              <label class="form-label">Mata Pelajaran Binaan</label>
+              <input type="text" id="edit-teacher-subject" class="form-control" placeholder="Contoh: Matematika, IPA, Tematik">
+              <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Mapel</small>
+            </div>
+          </div>
+
+          <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
+            <button type="button" class="btn btn-outline" onclick="closeTeacherModal()">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Akun Guru</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT DATA SISWA (GURU & OPERATOR) -->
+  <div id="modal-student-editor" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;" id="modal-student-title">Tambah Data Siswa Baru</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeStudentModal()" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-student-editor" onsubmit="handleSaveStudent(event)">
+          <input type="hidden" id="edit-student-original-nisn">
+
+          <div class="form-group">
+            <label class="form-label">Nomor Peserta / NISN</label>
+            <input type="text" id="edit-student-nisn" class="form-control" placeholder="Contoh: 2026-001" required autocomplete="off">
+            <small style="font-size: 0.75rem; color: var(--slate-500);">*Digunakan siswa saat login ujian</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap Siswa</label>
+            <input type="text" id="edit-student-name" class="form-control" placeholder="Contoh: Ahmad Rizki" required autocomplete="off">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Kelas / Rombel</label>
+              <input type="text" id="edit-student-class" class="form-control" placeholder="Contoh: 7A, 7B, UMUM" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Jenis Kelamin</label>
+              <select id="edit-student-gender" class="form-control" required>
+                <option value="L">Laki-laki (L)</option>
+                <option value="P">Perempuan (P)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
+            <button type="button" class="btn btn-outline" onclick="closeStudentModal()">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Data Siswa</button>
           </div>
         </form>
       </div>
