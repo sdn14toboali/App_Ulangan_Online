@@ -11,7 +11,7 @@
     --primary-500: #2563eb;
     --primary-600: #1d4ed8;
     --primary-700: #1e40af;
-    
+
     --slate-50: #f8fafc;
     --slate-100: #f1f5f9;
     --slate-200: #e2e8f0;
@@ -154,6 +154,7 @@
     color: #ffffff;
     box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
   }
+
   .btn-primary:hover {
     background-color: var(--primary-700);
   }
@@ -163,6 +164,7 @@
     border-color: var(--slate-300);
     color: var(--slate-700);
   }
+
   .btn-outline:hover {
     background-color: var(--slate-50);
     border-color: var(--slate-400);
@@ -173,6 +175,7 @@
     background-color: var(--emerald-600);
     color: #ffffff;
   }
+
   .btn-success:hover {
     background-color: var(--emerald-700);
   }
@@ -181,6 +184,7 @@
     background-color: var(--amber-500);
     color: #ffffff;
   }
+
   .btn-warning:hover {
     background-color: var(--amber-600);
   }
@@ -189,6 +193,7 @@
     background-color: var(--rose-600);
     color: #ffffff;
   }
+
   .btn-danger:hover {
     background-color: var(--rose-700);
   }
@@ -266,8 +271,15 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* Screen 1: Student Login */
@@ -499,13 +511,16 @@
       max-width: 480px;
       border-radius: 20px;
     }
+
     .split-auth-hero {
       padding: 2rem 1.5rem 1.75rem;
     }
+
     .split-hero-features {
       padding-top: 0.75rem;
       gap: 0.5rem;
     }
+
     .split-auth-form-side {
       padding: 2rem 1.5rem;
     }
@@ -621,13 +636,19 @@
     background-color: var(--rose-600);
     animation: pulseTimer 1s infinite alternate;
   }
+
   .timer-danger .timer-value {
     color: #ffffff;
   }
 
   @keyframes pulseTimer {
-    from { transform: scale(1); }
-    to { transform: scale(1.02); }
+    from {
+      transform: scale(1);
+    }
+
+    to {
+      transform: scale(1.02);
+    }
   }
 
   .autosave-badge {
@@ -849,9 +870,17 @@
     border-radius: 3px;
   }
 
-  .legend-dot.empty { background-color: var(--slate-200); }
-  .legend-dot.answered { background-color: var(--emerald-500); }
-  .legend-dot.doubt { background-color: var(--amber-500); }
+  .legend-dot.empty {
+    background-color: var(--slate-200);
+  }
+
+  .legend-dot.answered {
+    background-color: var(--emerald-500);
+  }
+
+  .legend-dot.doubt {
+    background-color: var(--amber-500);
+  }
 
   .nav-grid-body {
     padding: 1.25rem;
@@ -931,8 +960,15 @@
   }
 
   @keyframes modalScale {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 
   .modal-header {
@@ -982,7 +1018,8 @@
   /* Sidebar Samping Kiri */
   .admin-sidebar {
     width: 270px;
-    background-color: #0f172a; /* Slate 900 */
+    background-color: #0f172a;
+    /* Slate 900 */
     color: #f8fafc;
     display: flex;
     flex-direction: column;
@@ -1304,6 +1341,7 @@
       align-items: flex-start;
       padding: 1.5rem 1.25rem;
     }
+
     .welcome-vector-badge {
       display: none;
     }
@@ -1440,10 +1478,25 @@
     flex-shrink: 0;
   }
 
-  .metric-icon-box.blue { background-color: var(--primary-50); color: var(--primary-600); }
-  .metric-icon-box.green { background-color: #ecfdf5; color: var(--emerald-600); }
-  .metric-icon-box.amber { background-color: #fef3c7; color: var(--amber-600); }
-  .metric-icon-box.rose { background-color: #fff1f2; color: var(--rose-600); }
+  .metric-icon-box.blue {
+    background-color: var(--primary-50);
+    color: var(--primary-600);
+  }
+
+  .metric-icon-box.green {
+    background-color: #ecfdf5;
+    color: var(--emerald-600);
+  }
+
+  .metric-icon-box.amber {
+    background-color: #fef3c7;
+    color: var(--amber-600);
+  }
+
+  .metric-icon-box.rose {
+    background-color: #fff1f2;
+    color: var(--rose-600);
+  }
 
   .metric-content h4 {
     font-size: 0.8rem;
@@ -1504,10 +1557,25 @@
     font-weight: 700;
   }
 
-  .badge-success { background-color: #ecfdf5; color: var(--emerald-600); }
-  .badge-warning { background-color: #fef3c7; color: var(--amber-600); }
-  .badge-danger { background-color: #fff1f2; color: var(--rose-600); }
-  .badge-info { background-color: var(--primary-50); color: var(--primary-600); }
+  .badge-success {
+    background-color: #ecfdf5;
+    color: var(--emerald-600);
+  }
+
+  .badge-warning {
+    background-color: #fef3c7;
+    color: var(--amber-600);
+  }
+
+  .badge-danger {
+    background-color: #fff1f2;
+    color: var(--rose-600);
+  }
+
+  .badge-info {
+    background-color: var(--primary-50);
+    color: var(--primary-600);
+  }
 
   /* Toast Notifications */
   .toast-container {
@@ -1534,8 +1602,15 @@
   }
 
   @keyframes slideToast {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 
   /* Mobile Responsiveness */
@@ -1560,13 +1635,15 @@
       flex-direction: column;
       align-items: flex-start;
     }
-    
+
     .exam-timer-box {
       width: 100%;
       justify-content: space-between;
     }
 
-    .question-header, .question-body, .question-footer {
+    .question-header,
+    .question-body,
+    .question-footer {
       padding-left: 1rem;
       padding-right: 1rem;
     }
@@ -1709,6 +1786,7 @@
     border-color: #bae6fd;
     color: #0369a1;
   }
+
   .qtype-btn.type-pg.active {
     border-color: #0284c7;
     background-color: #e0f2fe;
@@ -1721,6 +1799,7 @@
     border-color: #bbf7d0;
     color: #15803d;
   }
+
   .qtype-btn.type-kompleks.active {
     border-color: #16a34a;
     background-color: #dcfce7;
@@ -1733,6 +1812,7 @@
     border-color: #fde68a;
     color: #b45309;
   }
+
   .qtype-btn.type-jodoh.active {
     border-color: #d97706;
     background-color: #fef3c7;
@@ -1745,6 +1825,7 @@
     border-color: #e9d5ff;
     color: #7e22ce;
   }
+
   .qtype-btn.type-esai.active {
     border-color: #9333ea;
     background-color: #f3e8ff;
@@ -1757,6 +1838,7 @@
     border-color: #99f6e4;
     color: #0f766e;
   }
+
   .qtype-btn.type-bs.active {
     border-color: #0d9488;
     background-color: #ccfbf1;
@@ -1850,7 +1932,8 @@
       visibility: hidden;
     }
 
-    #print-container, #print-container * {
+    #print-container,
+    #print-container * {
       visibility: visible;
     }
 
@@ -1907,5 +1990,3 @@
     border: 1px solid #bfdbfe;
     letter-spacing: 0.05em;
   }
-
-
