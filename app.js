@@ -2068,8 +2068,13 @@ function printResultsPdf() {
 // 3. Cetak Kartu Peserta Ujian ke PDF (Format ANBK Kotak A4)
 function printExamCardsPdf() {
   const container = document.getElementById('print-container');
-  const students = getVisibleLiveStudents();
+  const students = getVisibleStudents();
   const sch = state.school;
+
+  if (!students || students.length === 0) {
+    showToast('Tidak ada data siswa untuk dicetak kartu ujiannya!', 'warning');
+    return;
+  }
 
   let cardsHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
 
@@ -2094,9 +2099,9 @@ function printExamCardsPdf() {
             PAS FOTO<br>2 x 3
           </div>
           <div>
-            <div style="margin-bottom: 3px;"><strong>No. Peserta:</strong> ${st.nisn}</div>
-            <div style="margin-bottom: 3px;"><strong>Nama:</strong> ${st.name}</div>
-            <div style="margin-bottom: 3px;"><strong>Kelas:</strong> ${st.className}</div>
+            <div style="margin-bottom: 3px;"><strong>No. Peserta:</strong> ${escapeHtml(st.nisn)}</div>
+            <div style="margin-bottom: 3px;"><strong>Nama:</strong> ${escapeHtml(st.name)}</div>
+            <div style="margin-bottom: 3px;"><strong>Kelas:</strong> ${escapeHtml(st.className)}</div>
             <div style="margin-bottom: 3px;"><strong>Ruang / Sesi:</strong> Lab Komputer / Sesi 1</div>
             <div style="margin-bottom: 3px;"><strong>Tahun Ajaran:</strong> ${sch.academicYear}</div>
           </div>
@@ -2122,9 +2127,14 @@ function renderExamCardsTab() {
   const container = document.getElementById('container-exam-cards');
   if (!container) return;
 
-  const students = getVisibleLiveStudents();
+  const students = getVisibleStudents();
   const sch = state.school;
   container.innerHTML = '';
+
+  if (!students || students.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem; color: var(--slate-400);">Belum ada data siswa terdaftar. Tambahkan siswa di menu "Kelola Data Siswa" atau klik "Impor dari Excel" untuk membuat kartu ujian.</div>';
+    return;
+  }
 
   students.forEach((st) => {
     const card = document.createElement('div');
@@ -2139,9 +2149,9 @@ function renderExamCardsTab() {
           FOTO<br>SISWA
         </div>
         <div style="font-size: 0.82rem; line-height: 1.5;">
-          <div><span style="color: var(--slate-500);">Nomor:</span> <strong>${st.nisn}</strong></div>
-          <div><span style="color: var(--slate-500);">Nama:</span> <strong>${st.name}</strong></div>
-          <div><span style="color: var(--slate-500);">Kelas:</span> ${st.className}</div>
+          <div><span style="color: var(--slate-500);">Nomor:</span> <strong>${escapeHtml(st.nisn)}</strong></div>
+          <div><span style="color: var(--slate-500);">Nama:</span> <strong>${escapeHtml(st.name)}</strong></div>
+          <div><span style="color: var(--slate-500);">Kelas:</span> ${escapeHtml(st.className)}</div>
           <div><span style="color: var(--slate-500);">Ruang:</span> Lab Komputer</div>
         </div>
       </div>
