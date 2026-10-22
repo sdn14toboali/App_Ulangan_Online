@@ -20,6 +20,24 @@ const state = {
     key: localStorage.getItem('zettcbt_sb_key') || '',
   },
 
+  // Identitas Sekolah SD NEGERI 14 TOBOALI
+  school: JSON.parse(localStorage.getItem('zettcbt_school') || JSON.stringify({
+    name: 'SD NEGERI 14 TOBOALI',
+    npsn: '10901234',
+    academicYear: '2026/2027 - Ganjil',
+    address: 'Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung',
+    headmaster: 'H. Suhardi, S.Pd., M.Pd',
+    headmasterNip: '19750312 199903 1 004'
+  })),
+
+  // Token Proktor Dinamis (Auto-Refresh 3 Menit = 180 Detik)
+  proctorToken: {
+    remainingSeconds: 180,
+    interval: null
+  },
+
+  currentEditorQType: 'pg',
+
   // Active Teacher Session (Isolation State)
   currentTeacher: JSON.parse(sessionStorage.getItem('zettcbt_current_teacher') || 'null'),
 
@@ -163,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAdminQuestionBank();
   renderLiveMonitoringTable();
   updateAdminMetrics();
+  startProctorTokenTimer();
 });
 
 // Load Persisted Storage
@@ -235,6 +254,75 @@ function showScreen(screenId) {
 // ==============================================================================
 // TEACHER AUTHENTICATION & MULTI-TENANCY ISOLATION ENGINE
 // ==============================================================================
+
+function toggleTeacherPasswordVisibility() {
+  const input = document.getElementById('teacher-login-password');
+  const icon = document.getElementById('eye-icon');
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+  } else {
+    input.type = 'password';
+    if (icon) icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+  }
+}
+
+// Mesin Token Dinamis 3 Menit (180 Detik)
+function startProctorTokenTimer() {
+  if (state.proctorToken.interval) clearInterval(state.proctorToken.interval);
+
+  const displayToken = document.getElementById('proctor-token-display');
+  const displayTimer = document.getElementById('token-timer-countdown');
+  const progressBar = document.getElementById('token-progress-bar');
+
+  if (displayToken) displayToken.textContent = state.session.token;
+
+  state.proctorToken.interval = setInterval(() => {
+    state.proctorToken.remainingSeconds--;
+
+    if (state.proctorToken.remainingSeconds <= 0) {
+      // Regenerate Token Baru Otomatis
+      generateNewProctorToken();
+      state.proctorToken.remainingSeconds = 180;
+    }
+
+    const mins = Math.floor(state.proctorToken.remainingSeconds / 60);
+    const secs = state.proctorToken.remainingSeconds % 60;
+    const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+    if (displayTimer) displayTimer.textContent = timeStr;
+    if (progressBar) {
+      const pct = (state.proctorToken.remainingSeconds / 180) * 100;
+      progressBar.style.width = pct + '%';
+    }
+  }, 1000);
+}
+
+function generateNewProctorToken() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  state.session.token = result;
+  localStorage.setItem('zettcbt_session', JSON.stringify(state.session));
+
+  const displayToken = document.getElementById('proctor-token-display');
+  const metricToken = document.getElementById('metric-active-token');
+  const settingToken = document.getElementById('setting-token');
+
+  if (displayToken) displayToken.textContent = result;
+  if (metricToken) metricToken.textContent = result;
+  if (settingToken) settingToken.value = result;
+
+  showToast('Token ujian diperbarui otomatis: ' + result, 'info');
+}
+
+function forceRefreshToken() {
+  state.proctorToken.remainingSeconds = 180;
+  generateNewProctorToken();
+}
 
 function openTeacherPortal() {
   if (state.currentTeacher) {
@@ -576,40 +664,166 @@ function renderCurrentQuestion() {
     imgBox.style.display = 'none';
   }
 
-  // Answer Options A - E
-  const optionsContainer = document.getElementById('options-list-container');
-  optionsContainer.innerHTML = '';
-
+  // Render Berdasarkan 5 Tipe Soal ANBK
+  const qType = q.type || 'pg';
   const studentAns = state.student.answers[q.id] || { selected: null, isDoubt: false };
 
-  const optionsData = [
-    { key: 'A', text: q.optionA },
-    { key: 'B', text: q.optionB },
-    { key: 'C', text: q.optionC },
-    { key: 'D', text: q.optionD }
-  ];
-  if (q.optionE && q.optionE.trim()) {
-    optionsData.push({ key: 'E', text: q.optionE });
+  // 1. Tipe: Pilihan Ganda (Single Choice)
+  if (qType === 'pg') {
+    const optionsData = [
+      { key: 'A', text: q.optionA },
+      { key: 'B', text: q.optionB },
+      { key: 'C', text: q.optionC },
+      { key: 'D', text: q.optionD }
+    ];
+    if (q.optionE && q.optionE.trim()) {
+      optionsData.push({ key: 'E', text: q.optionE });
+    }
+
+    optionsData.forEach((opt) => {
+      const isSelected = studentAns.selected === opt.key;
+      const item = document.createElement('div');
+      item.className = 'option-item' + (isSelected ? ' selected' : '');
+      item.onclick = () => selectOptionAnswer(q.id, opt.key);
+
+      const keyCircle = document.createElement('div');
+      keyCircle.className = 'option-key';
+      keyCircle.textContent = opt.key;
+
+      const optText = document.createElement('div');
+      optText.className = 'option-text';
+      optText.textContent = opt.text;
+
+      item.appendChild(keyCircle);
+      item.appendChild(optText);
+      optionsContainer.appendChild(item);
+    });
+  } 
+  // 2. Tipe: PG Kompleks (Multi Select Checkbox)
+  else if (qType === 'kompleks') {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size: 0.85rem; color: #16a34a; font-weight: 700; margin-bottom: 0.75rem; background: #f0fdf4; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);';
+    hint.textContent = 'ℹ️ Pilihan Ganda Kompleks: Anda dapat memilih LEBIH DARI SATU jawaban yang benar.';
+    optionsContainer.appendChild(hint);
+
+    const selectedKeys = Array.isArray(studentAns.selected) ? studentAns.selected : [];
+    const optionsData = [
+      { key: 'A', text: q.optionA },
+      { key: 'B', text: q.optionB },
+      { key: 'C', text: q.optionC },
+      { key: 'D', text: q.optionD }
+    ];
+    if (q.optionE && q.optionE.trim()) optionsData.push({ key: 'E', text: q.optionE });
+
+    optionsData.forEach((opt) => {
+      const isSelected = selectedKeys.includes(opt.key);
+      const item = document.createElement('div');
+      item.className = 'option-item' + (isSelected ? ' selected' : '');
+      item.onclick = () => toggleMultiKeyAnswer(q.id, opt.key);
+
+      const chkBox = document.createElement('input');
+      chkBox.type = 'checkbox';
+      chkBox.checked = isSelected;
+      chkBox.style.cssText = 'width: 18px; height: 18px; margin-right: 0.75rem;';
+
+      const optText = document.createElement('div');
+      optText.className = 'option-text';
+      optText.innerHTML = '<strong>(' + opt.key + ')</strong> ' + escapeHtml(opt.text);
+
+      item.appendChild(chkBox);
+      item.appendChild(optText);
+      optionsContainer.appendChild(item);
+    });
   }
+  // 3. Tipe: Menjodohkan (Matching Pairs)
+  else if (qType === 'jodoh') {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size: 0.85rem; color: #b45309; font-weight: 700; margin-bottom: 0.75rem; background: #fffbeb; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);';
+    hint.textContent = 'ℹ️ Menjodohkan: Pasangkan pernyataan di kolom kiri dengan pilihan yang tepat di kolom kanan.';
+    optionsContainer.appendChild(hint);
 
-  optionsData.forEach((opt) => {
-    const isSelected = studentAns.selected === opt.key;
-    const item = document.createElement('div');
-    item.className = 'option-item' + (isSelected ? ' selected' : '');
-    item.onclick = () => selectOptionAnswer(q.id, opt.key);
+    const pairs = q.pairs || [
+      { premis: 'Pernyataan A', jawab: 'Pasangan 1' },
+      { premis: 'Pernyataan B', jawab: 'Pasangan 2' }
+    ];
+    const userPairs = studentAns.selected || {};
 
-    const keyCircle = document.createElement('div');
-    keyCircle.className = 'option-key';
-    keyCircle.textContent = opt.key;
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse; margin-top: 0.5rem; background: #ffffff; border: 1px solid var(--slate-200); border-radius: var(--radius-md); overflow: hidden;';
+    table.innerHTML = '<thead style="background: var(--slate-100);"><tr><th style="padding: 0.6rem; text-align: left;">Pernyataan / Premis</th><th style="padding: 0.6rem; text-align: left;">Pilihan Jawaban Pasangan</th></tr></thead><tbody></tbody>';
+    const tbody = table.querySelector('tbody');
 
-    const optText = document.createElement('div');
-    optText.className = 'option-text';
-    optText.textContent = opt.text;
+    pairs.forEach((p, pIdx) => {
+      const tr = document.createElement('tr');
+      tr.style.borderTop = '1px solid var(--slate-200)';
+      
+      let optionsHtml = '<option value="">-- Pilih Pasangan --</option>';
+      pairs.forEach((item, aIdx) => {
+        const isSel = userPairs[pIdx] === item.jawab ? 'selected' : '';
+        optionsHtml += '<option value="' + escapeHtml(item.jawab) + '" ' + isSel + '>' + escapeHtml(item.jawab) + '</option>';
+      });
 
-    item.appendChild(keyCircle);
-    item.appendChild(optText);
-    optionsContainer.appendChild(item);
-  });
+      tr.innerHTML = 
+        '<td style="padding: 0.75rem; font-weight: 600;">' + (pIdx + 1) + '. ' + escapeHtml(p.premis) + '</td>' +
+        '<td style="padding: 0.75rem;">' +
+          '<select class="form-control" onchange="selectPairAnswer(\'' + q.id + '\', ' + pIdx + ', this.value)">' +
+            optionsHtml +
+          '</select>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+    optionsContainer.appendChild(table);
+  }
+  // 4. Tipe: Esai / Isian Singkat
+  else if (qType === 'esai') {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size: 0.85rem; color: #7e22ce; font-weight: 700; margin-bottom: 0.75rem; background: #faf5ff; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);';
+    hint.textContent = 'ℹ️ Soal Isian / Esai: Tuliskan jawaban Anda pada kolom di bawah ini secara jelas.';
+    optionsContainer.appendChild(hint);
+
+    const txt = document.createElement('textarea');
+    txt.className = 'form-control';
+    txt.rows = 4;
+    txt.placeholder = 'Ketik jawaban Anda di sini...';
+    txt.value = typeof studentAns.selected === 'string' ? studentAns.selected : '';
+    txt.oninput = (e) => selectOptionAnswer(q.id, e.target.value);
+    optionsContainer.appendChild(txt);
+  }
+  // 5. Tipe: Benar / Salah (True / False Table)
+  else if (qType === 'bs') {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size: 0.85rem; color: #0f766e; font-weight: 700; margin-bottom: 0.75rem; background: #f0fdfa; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);';
+    hint.textContent = 'ℹ️ Benar / Salah: Tentukan status kebenaran dari setiap pernyataan di bawah ini.';
+    optionsContainer.appendChild(hint);
+
+    const statements = q.statements || [
+      { text: 'Pernyataan 1', key: 'B' },
+      { text: 'Pernyataan 2', key: 'S' }
+    ];
+    const userBs = studentAns.selected || {};
+
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid var(--slate-200); border-radius: var(--radius-md); overflow: hidden;';
+    table.innerHTML = '<thead style="background: var(--slate-100);"><tr><th style="padding: 0.6rem; text-align: left;">Pernyataan</th><th style="padding: 0.6rem; width: 140px; text-align: center;">Pilihan Anda</th></tr></thead><tbody></tbody>';
+    const tbody = table.querySelector('tbody');
+
+    statements.forEach((st, sIdx) => {
+      const tr = document.createElement('tr');
+      tr.style.borderTop = '1px solid var(--slate-200)';
+      const currentVal = userBs[sIdx];
+
+      tr.innerHTML = 
+        '<td style="padding: 0.75rem; font-weight: 600;">' + (sIdx + 1) + '. ' + escapeHtml(st.text) + '</td>' +
+        '<td style="padding: 0.75rem; text-align: center;">' +
+          '<div style="display: inline-flex; gap: 0.4rem;">' +
+            '<button type="button" class="btn btn-sm ' + (currentVal === 'B' ? 'btn-success' : 'btn-outline') + '" onclick="selectBsAnswer(\'' + q.id + '\', ' + sIdx + ', \'B\')">Benar</button>' +
+            '<button type="button" class="btn btn-sm ' + (currentVal === 'S' ? 'btn-danger' : 'btn-outline') + '" onclick="selectBsAnswer(\'' + q.id + '\', ' + sIdx + ', \'S\')">Salah</button>' +
+          '</div>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+    optionsContainer.appendChild(table);
+  }
 
   // Doubt Checkbox Status
   const doubtBox = document.getElementById('checkbox-doubt');
@@ -906,6 +1120,8 @@ function switchAdminTab(tabId, element) {
   if (tabId === 'live-monitor') renderLiveMonitoringTable();
   if (tabId === 'question-bank') renderAdminQuestionBank();
   if (tabId === 'results-analysis') renderResultsTable();
+  if (tabId === 'exam-cards') renderExamCardsTab();
+  if (tabId === 'school-identity') populateSchoolIdentityForm();
 }
 
 function updateAdminMetrics() {
@@ -1102,41 +1318,339 @@ function closeQuestionModal() {
   document.getElementById('modal-question-editor').style.display = 'none';
 }
 
+// Helper untuk 5 Tipe Soal
+function toggleMultiKeyAnswer(qId, key) {
+  if (!state.student.answers[qId]) {
+    state.student.answers[qId] = { selected: [key], isDoubt: false };
+  } else {
+    let arr = Array.isArray(state.student.answers[qId].selected) ? state.student.answers[qId].selected : [];
+    if (arr.includes(key)) {
+      arr = arr.filter(k => k !== key);
+    } else {
+      arr.push(key);
+    }
+    state.student.answers[qId].selected = arr;
+  }
+  renderCurrentQuestion();
+  triggerAutoSaveIndicator();
+}
+
+function selectPairAnswer(qId, premisIdx, selectedJawab) {
+  if (!state.student.answers[qId]) {
+    state.student.answers[qId] = { selected: {}, isDoubt: false };
+  }
+  if (typeof state.student.answers[qId].selected !== 'object' || Array.isArray(state.student.answers[qId].selected)) {
+    state.student.answers[qId].selected = {};
+  }
+  state.student.answers[qId].selected[premisIdx] = selectedJawab;
+  triggerAutoSaveIndicator();
+}
+
+function selectBsAnswer(qId, stIdx, val) {
+  if (!state.student.answers[qId]) {
+    state.student.answers[qId] = { selected: {}, isDoubt: false };
+  }
+  if (typeof state.student.answers[qId].selected !== 'object' || Array.isArray(state.student.answers[qId].selected)) {
+    state.student.answers[qId].selected = {};
+  }
+  state.student.answers[qId].selected[stIdx] = val;
+  renderCurrentQuestion();
+  triggerAutoSaveIndicator();
+}
+
+// Selector 5 Tipe Soal pada Modal Editor (Gambar 3)
+function setEditorQuestionType(type, buttonEl) {
+  state.currentEditorQType = type;
+  document.getElementById('edit-question-type').value = type;
+
+  // Update button active state
+  document.querySelectorAll('.qtype-btn').forEach(btn => btn.classList.remove('active'));
+  if (buttonEl) buttonEl.classList.add('active');
+
+  // Toggle dynamic panels
+  const panelPg = document.getElementById('qtype-panel-pg');
+  const panelJodoh = document.getElementById('qtype-panel-jodoh');
+  const panelEsai = document.getElementById('qtype-panel-esai');
+  const panelBs = document.getElementById('qtype-panel-bs');
+
+  const groupSingle = document.getElementById('group-single-key');
+  const groupMulti = document.getElementById('group-multi-key');
+
+  if (panelPg) panelPg.style.display = (type === 'pg' || type === 'kompleks') ? 'block' : 'none';
+  if (panelJodoh) panelJodoh.style.display = type === 'jodoh' ? 'block' : 'none';
+  if (panelEsai) panelEsai.style.display = type === 'esai' ? 'block' : 'none';
+  if (panelBs) panelBs.style.display = type === 'bs' ? 'block' : 'none';
+
+  if (groupSingle) groupSingle.style.display = type === 'pg' ? 'block' : 'none';
+  if (groupMulti) groupMulti.style.display = type === 'kompleks' ? 'block' : 'none';
+}
+
 function handleSaveQuestion(event) {
   event.preventDefault();
 
   const qId = document.getElementById('edit-question-id').value;
   const teacher = state.currentTeacher;
+  const qType = state.currentEditorQType || 'pg';
 
-  const newQuestion = {
+  let questionData = {
     id: qId || 'q-' + Date.now(),
     number: state.questions.length + 1,
+    type: qType,
     teacherId: teacher ? teacher.id : 't-admin',
     teacherName: teacher ? teacher.fullName : 'Admin',
     subject: document.getElementById('edit-question-subject')?.value.trim() || 'Matematika',
     targetClass: document.getElementById('edit-question-class')?.value.trim().toUpperCase() || 'UMUM',
     text: document.getElementById('edit-question-text').value.trim(),
     imageUrl: document.getElementById('edit-question-image').value.trim(),
-    optionA: document.getElementById('edit-opt-a').value.trim(),
-    optionB: document.getElementById('edit-opt-b').value.trim(),
-    optionC: document.getElementById('edit-opt-c').value.trim(),
-    optionD: document.getElementById('edit-opt-d').value.trim(),
-    optionE: document.getElementById('edit-opt-e').value.trim(),
-    correctKey: document.getElementById('edit-correct-key').value,
     scoreWeight: parseInt(document.getElementById('edit-score-weight').value) || 10
   };
 
+  if (qType === 'pg' || qType === 'kompleks') {
+    questionData.optionA = document.getElementById('edit-opt-a').value.trim();
+    questionData.optionB = document.getElementById('edit-opt-b').value.trim();
+    questionData.optionC = document.getElementById('edit-opt-c').value.trim();
+    questionData.optionD = document.getElementById('edit-opt-d').value.trim();
+    questionData.optionE = document.getElementById('edit-opt-e').value.trim();
+
+    if (qType === 'pg') {
+      questionData.correctKey = document.getElementById('edit-correct-key').value;
+    } else {
+      const keys = [];
+      ['a', 'b', 'c', 'd', 'e'].forEach(ch => {
+        const el = document.getElementById('key-chk-' + ch);
+        if (el && el.checked) keys.push(ch.toUpperCase());
+      });
+      questionData.correctKeys = keys.length > 0 ? keys : ['A'];
+    }
+  } else if (qType === 'jodoh') {
+    questionData.pairs = [
+      { premis: document.getElementById('jodoh-premis-1').value.trim() || 'Premis 1', jawab: document.getElementById('jodoh-jawab-1').value.trim() || 'Jawaban 1' },
+      { premis: document.getElementById('jodoh-premis-2').value.trim() || 'Premis 2', jawab: document.getElementById('jodoh-jawab-2').value.trim() || 'Jawaban 2' },
+      { premis: document.getElementById('jodoh-premis-3').value.trim() || 'Premis 3', jawab: document.getElementById('jodoh-jawab-3').value.trim() || 'Jawaban 3' }
+    ];
+  } else if (qType === 'esai') {
+    questionData.referenceKey = document.getElementById('esai-key-text').value.trim();
+  } else if (qType === 'bs') {
+    questionData.statements = [
+      { text: document.getElementById('bs-text-1').value.trim() || 'Pernyataan 1', key: document.getElementById('bs-key-1').value },
+      { text: document.getElementById('bs-text-2').value.trim() || 'Pernyataan 2', key: document.getElementById('bs-key-2').value }
+    ];
+  }
+
   if (qId) {
     const idx = state.questions.findIndex(q => q.id === qId);
-    if (idx >= 0) state.questions[idx] = newQuestion;
+    if (idx >= 0) state.questions[idx] = questionData;
   } else {
-    state.questions.push(newQuestion);
+    state.questions.push(questionData);
   }
 
   localStorage.setItem('zettcbt_questions', JSON.stringify(state.questions));
   renderAdminQuestionBank();
   closeQuestionModal();
-  showToast('Butir soal berhasil disimpan untuk ' + newQuestion.targetClass + ' (' + newQuestion.subject + ')!', 'success');
+  showToast('Butir soal berhasil disimpan!', 'success');
+}
+
+// ==============================================================================
+// CETAK PDF ENGINE (KOP SURAT SD NEGERI 14 TOBOALI)
+// ==============================================================================
+
+function generateKopSuratHtml() {
+  const sch = state.school;
+  return `
+    <div style="text-align: center; border-bottom: 3px double #000000; padding-bottom: 8px; margin-bottom: 16px; font-family: 'Times New Roman', serif;">
+      <div style="font-size: 13pt; font-weight: bold; text-transform: uppercase;">PEMERINTAH KABUPATEN BANGKA SELATAN</div>
+      <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN DAN KEBUDAYAAN</div>
+      <div style="font-size: 16pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">${sch.name}</div>
+      <div style="font-size: 9pt; margin-top: 3px;">NPSN: ${sch.npsn} | Alamat: ${sch.address}</div>
+    </div>
+  `;
+}
+
+// 1. Cetak Naskah Soal ke PDF
+function printExamQuestionsPdf() {
+  const container = document.getElementById('print-container');
+  const visibleQ = getVisibleQuestions();
+  const sch = state.school;
+
+  let questionsHtml = '';
+  visibleQ.forEach((q, idx) => {
+    let qContent = '<div style="margin-bottom: 12px; font-size: 10.5pt; line-height: 1.4;"><strong>' + (idx + 1) + '. ' + escapeHtml(q.text) + '</strong>';
+    if (q.type === 'pg' || !q.type || q.type === 'kompleks') {
+      qContent += '<div style="margin-left: 20px; margin-top: 4px;">';
+      qContent += '<div>A. ' + escapeHtml(q.optionA || '') + '</div>';
+      qContent += '<div>B. ' + escapeHtml(q.optionB || '') + '</div>';
+      qContent += '<div>C. ' + escapeHtml(q.optionC || '') + '</div>';
+      qContent += '<div>D. ' + escapeHtml(q.optionD || '') + '</div>';
+      if (q.optionE) qContent += '<div>E. ' + escapeHtml(q.optionE) + '</div>';
+      qContent += '</div>';
+    } else if (q.type === 'esai') {
+      qContent += '<div style="margin-left: 20px; margin-top: 8px; border-bottom: 1px dashed #666; height: 35px;">Jawaban: </div>';
+    } else if (q.type === 'bs') {
+      qContent += '<div style="margin-left: 20px; margin-top: 4px;">[ ] Benar &nbsp;&nbsp;&nbsp;&nbsp; [ ] Salah</div>';
+    }
+    qContent += '</div>';
+    questionsHtml += qContent;
+  });
+
+  container.innerHTML = 
+    generateKopSuratHtml() +
+    '<div style="text-align: center; margin-bottom: 16px;">' +
+      '<strong style="font-size: 12pt; text-transform: uppercase;">NASKAH BUTIR SOAL UJIAN SEKOLAH</strong><br>' +
+      '<span style="font-size: 10pt;">Mata Pelajaran: ' + state.session.subject + ' | Tahun Ajaran: ' + sch.academicYear + '</span>' +
+    '</div>' +
+    questionsHtml;
+
+  window.print();
+}
+
+// 2. Cetak Rekap Nilai ke PDF
+function printResultsPdf() {
+  const container = document.getElementById('print-container');
+  const finishedList = getVisibleLiveStudents().filter(s => s.status === 'submitted');
+  const sch = state.school;
+
+  finishedList.sort((a, b) => b.score - a.score);
+
+  let rowsHtml = '';
+  finishedList.forEach((st, idx) => {
+    rowsHtml += `
+      <tr>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${idx + 1}</td>
+        <td style="border: 1px solid #000; padding: 6px;">${st.nisn}</td>
+        <td style="border: 1px solid #000; padding: 6px;"><strong>${st.name}</strong></td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${st.className}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">${st.score}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${st.score >= 75 ? 'TUNTAS' : 'REMEDIAL'}</td>
+      </tr>
+    `;
+  });
+
+  container.innerHTML = 
+    generateKopSuratHtml() +
+    '<div style="text-align: center; margin-bottom: 16px;">' +
+      '<strong style="font-size: 12pt; text-transform: uppercase;">REKAPITULASI HASIL PENILAIAN UJIAN BERBASIS KOMPUTER</strong><br>' +
+      '<span style="font-size: 10pt;">Mata Pelajaran: ' + state.session.subject + ' | Tahun Pelajaran: ' + sch.academicYear + '</span>' +
+    '</div>' +
+    '<table style="width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 30px;">' +
+      '<thead><tr style="background: #f0f0f0;">' +
+        '<th style="border: 1px solid #000; padding: 6px;">No</th>' +
+        '<th style="border: 1px solid #000; padding: 6px;">NISN / No Peserta</th>' +
+        '<th style="border: 1px solid #000; padding: 6px;">Nama Lengkap Siswa</th>' +
+        '<th style="border: 1px solid #000; padding: 6px;">Kelas</th>' +
+        '<th style="border: 1px solid #000; padding: 6px;">Nilai Akhir</th>' +
+        '<th style="border: 1px solid #000; padding: 6px;">Status</th>' +
+      '</tr></thead>' +
+      '<tbody>' + (rowsHtml || '<tr><td colspan="6" style="text-align:center; padding: 10px;">Belum ada data nilai submit.</td></tr>') + '</tbody>' +
+    '</table>' +
+    '<div style="display: flex; justify-content: space-between; font-size: 10pt; margin-top: 30px;">' +
+      '<div>Mengetahui,<br>Kepala ' + sch.name + '<br><br><br><br><strong>' + sch.headmaster + '</strong><br>NIP. ' + sch.headmasterNip + '</div>' +
+      '<div>Toboali, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '<br>Guru Mata Pelajaran / Wali Kelas<br><br><br><br><strong>' + (state.currentTeacher ? state.currentTeacher.fullName : 'Pengawas Ujian') + '</strong></div>' +
+    '</div>';
+
+  window.print();
+}
+
+// 3. Cetak Kartu Peserta Ujian ke PDF (Format ANBK Kotak A4)
+function printExamCardsPdf() {
+  const container = document.getElementById('print-container');
+  const students = getVisibleLiveStudents();
+  const sch = state.school;
+
+  let cardsHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+
+  students.forEach((st) => {
+    cardsHtml += `
+      <div style="border: 2px solid #000; padding: 12px; border-radius: 6px; font-family: 'Times New Roman', serif; background: #fff; page-break-inside: avoid;">
+        <div style="text-align: center; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 8px;">
+          <div style="font-size: 8.5pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN KABUPATEN BANGKA SELATAN</div>
+          <div style="font-size: 10pt; font-weight: bold;">${sch.name}</div>
+          <div style="font-size: 8pt; font-weight: bold; color: #2563eb;">KARTU PESERTA UJIAN ONLINE</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; font-size: 8.5pt;">
+          <div style="width: 75px; height: 95px; border: 1px dashed #666; display: flex; align-items: center; justify-content: center; font-size: 7.5pt; color: #777; text-align: center; background: #fafafa;">
+            PAS FOTO<br>2 x 3
+          </div>
+          <div>
+            <div style="margin-bottom: 3px;"><strong>No. Peserta:</strong> ${st.nisn}</div>
+            <div style="margin-bottom: 3px;"><strong>Nama:</strong> ${st.name}</div>
+            <div style="margin-bottom: 3px;"><strong>Kelas:</strong> ${st.className}</div>
+            <div style="margin-bottom: 3px;"><strong>Ruang / Sesi:</strong> Lab Komputer / Sesi 1</div>
+            <div style="margin-bottom: 3px;"><strong>Tahun Ajaran:</strong> ${sch.academicYear}</div>
+          </div>
+        </div>
+
+        <div style="text-align: right; margin-top: 8px; font-size: 7.5pt;">
+          Kepala Sekolah,<br><br><br>
+          <strong>${sch.headmaster}</strong><br>
+          NIP. ${sch.headmasterNip}
+        </div>
+      </div>
+    `;
+  });
+
+  cardsHtml += '</div>';
+
+  container.innerHTML = cardsHtml;
+  window.print();
+}
+
+// Render Tab Kartu Peserta Ujian pada Dashboard Admin
+function renderExamCardsTab() {
+  const container = document.getElementById('container-exam-cards');
+  if (!container) return;
+
+  const students = getVisibleLiveStudents();
+  const sch = state.school;
+  container.innerHTML = '';
+
+  students.forEach((st) => {
+    const card = document.createElement('div');
+    card.className = 'exam-student-card';
+    card.innerHTML = `
+      <div style="border-bottom: 1.5px double var(--slate-400); padding-bottom: 0.5rem; margin-bottom: 0.75rem; text-align: center;">
+        <div style="font-size: 0.75rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">KARTU PESERTA UJIAN CBT</div>
+        <div style="font-size: 0.95rem; font-weight: 800; color: var(--slate-900);">${sch.name}</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 75px 1fr; gap: 0.75rem;">
+        <div style="width: 75px; height: 90px; border: 1px dashed var(--slate-300); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--slate-400); text-align: center; background: var(--slate-50);">
+          FOTO<br>SISWA
+        </div>
+        <div style="font-size: 0.82rem; line-height: 1.5;">
+          <div><span style="color: var(--slate-500);">Nomor:</span> <strong>${st.nisn}</strong></div>
+          <div><span style="color: var(--slate-500);">Nama:</span> <strong>${st.name}</strong></div>
+          <div><span style="color: var(--slate-500);">Kelas:</span> ${st.className}</div>
+          <div><span style="color: var(--slate-500);">Ruang:</span> Lab Komputer</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function populateSchoolIdentityForm() {
+  const sch = state.school;
+  if (document.getElementById('school-name')) document.getElementById('school-name').value = sch.name;
+  if (document.getElementById('school-npsn')) document.getElementById('school-npsn').value = sch.npsn;
+  if (document.getElementById('school-academic-year')) document.getElementById('school-academic-year').value = sch.academicYear;
+  if (document.getElementById('school-address')) document.getElementById('school-address').value = sch.address;
+  if (document.getElementById('school-headmaster')) document.getElementById('school-headmaster').value = sch.headmaster;
+  if (document.getElementById('school-headmaster-nip')) document.getElementById('school-headmaster-nip').value = sch.headmasterNip;
+}
+
+function handleSaveSchoolIdentity(event) {
+  event.preventDefault();
+  state.school = {
+    name: document.getElementById('school-name').value.trim(),
+    npsn: document.getElementById('school-npsn').value.trim(),
+    academicYear: document.getElementById('school-academic-year').value.trim(),
+    address: document.getElementById('school-address').value.trim(),
+    headmaster: document.getElementById('school-headmaster').value.trim(),
+    headmasterNip: document.getElementById('school-headmaster-nip').value.trim()
+  };
+
+  localStorage.setItem('zettcbt_school', JSON.stringify(state.school));
+  showToast('Identitas sekolah & Kop Surat berhasil diperbarui!', 'success');
 }
 
 function deleteQuestion(qId) {
