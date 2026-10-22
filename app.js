@@ -26,6 +26,7 @@ const state = {
       name: 'SD NEGERI 14 TOBOALI',
       npsn: '10901234',
       academicYear: '2026/2027 - Ganjil',
+      examType: 'UTS',
       address: 'Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung',
       headmaster: 'H. Suhardi, S.Pd., M.Pd',
       headmasterNip: '19750312 199903 1 004',
@@ -56,8 +57,8 @@ const state = {
   teachers: (() => {
     const defaultSdTeachers = [
       { id: 't-admin', username: 'admin', password: 'admin123', fullName: 'Operator Sekolah', role: 'admin_sekolah', assignedClass: null, assignedSubject: null },
-      { id: 't-kelas6', username: 'gurukelas6', password: 'guru123', fullName: 'Siti Aminah, S.Pd (Guru Kelas 6)', role: 'guru_kelas', assignedClass: '6', assignedSubject: 'Tematik SD' },
-      { id: 't-kelas5', username: 'gurukelas5', password: 'guru123', fullName: 'Budi Santoso, S.Pd (Guru Kelas 5)', role: 'guru_kelas', assignedClass: '5', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas6', username: 'gurukelas6', password: 'guru123', fullName: 'Siti Aminah, S.Pd (Guru Kelas 6A)', role: 'guru_kelas', assignedClass: '6A', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas5', username: 'gurukelas5', password: 'guru123', fullName: 'Budi Santoso, S.Pd (Guru Kelas 5A)', role: 'guru_kelas', assignedClass: '5A', assignedSubject: 'Tematik SD' },
       { id: 't-pai', username: 'gurupai', password: 'guru123', fullName: 'Ahmad Zaki, S.Pd.I (Guru PAI)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Pendidikan Agama Islam (PAI)' },
       { id: 't-pjok', username: 'gurupjok', password: 'guru123', fullName: 'Hendra Wijaya, S.Pd (Guru Penjaskes)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Penjaskes / PJOK' }
     ];
@@ -71,16 +72,16 @@ const state = {
     return defaultSdTeachers;
   })(),
 
-  // Master Data Siswa Peserta Ujian SD NEGERI 14 TOBOALI (Kelas 6, 5, 4)
+  // Master Data Siswa Peserta Ujian SD NEGERI 14 TOBOALI (Kelas 4A - 6B)
   students: (() => {
     const defaultSdStudents = [
-      { id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6', gender: 'L', status: 'active' },
-      { id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6', gender: 'P', status: 'active' },
-      { id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '6', gender: 'L', status: 'active' },
-      { id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5', gender: 'P', status: 'active' },
-      { id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '5', gender: 'L', status: 'active' },
-      { id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '5', gender: 'P', status: 'active' },
-      { id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4', gender: 'L', status: 'active' }
+      { id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active' },
+      { id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active' },
+      { id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active' },
+      { id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active' },
+      { id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active' },
+      { id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active' },
+      { id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active' }
     ];
     try {
       const raw = localStorage.getItem('zettcbt_students');
@@ -211,13 +212,13 @@ const state = {
     }
   ],
 
-  // Mock Active Students (Tersebar di Kelas 7A, 7B, dan Umum untuk Menguji Isolasi)
+  // Mock Active Students (Tersebar di Kelas 6A, 6B, 5A, 5B, 4A untuk Menguji Isolasi)
   liveStudents: [
-    { nisn: '2026-001', name: 'Ahmad Fauzi', className: '7A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, time: '08:45 WIB' },
-    { nisn: '2026-002', name: 'Siti Rahmawati', className: '7A', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, time: '-' },
-    { nisn: '2026-003', name: 'Bambang Trianto', className: '7B', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 90, time: '08:50 WIB' },
-    { nisn: '2026-004', name: 'Dewi Lestari', className: '7B', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' },
-    { nisn: '2026-005', name: 'Eko Prasetyo', className: 'UMUM', answeredCount: 2, totalQ: 5, warningCount: 2, status: 'in_progress', score: 0, time: '-' }
+    { nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, time: '08:45 WIB' },
+    { nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, time: '-' },
+    { nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 90, time: '08:50 WIB' },
+    { nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' },
+    { nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', answeredCount: 2, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' }
   ]
 };
 
@@ -225,6 +226,7 @@ const state = {
 document.addEventListener('DOMContentLoaded', () => {
   loadSavedState();
   initAntiCheatProtection();
+  applySchoolBrandingUI();
   renderAdminQuestionBank();
   renderLiveMonitoringTable();
   updateAdminMetrics();
@@ -2304,6 +2306,7 @@ function populateSchoolIdentityForm() {
   if (document.getElementById('school-name')) document.getElementById('school-name').value = sch.name || '';
   if (document.getElementById('school-npsn')) document.getElementById('school-npsn').value = sch.npsn || '';
   if (document.getElementById('school-academic-year')) document.getElementById('school-academic-year').value = sch.academicYear || '';
+  if (document.getElementById('school-exam-type')) document.getElementById('school-exam-type').value = sch.examType || 'UTS';
   if (document.getElementById('school-address')) document.getElementById('school-address').value = sch.address || '';
   if (document.getElementById('school-headmaster')) document.getElementById('school-headmaster').value = sch.headmaster || '';
   if (document.getElementById('school-headmaster-nip')) document.getElementById('school-headmaster-nip').value = sch.headmasterNip || '';
@@ -2319,6 +2322,7 @@ function handleSaveSchoolIdentity(event) {
     name: document.getElementById('school-name').value.trim(),
     npsn: document.getElementById('school-npsn').value.trim(),
     academicYear: document.getElementById('school-academic-year').value.trim(),
+    examType: document.getElementById('school-exam-type') ? document.getElementById('school-exam-type').value : (state.school.examType || 'UTS'),
     address: document.getElementById('school-address').value.trim(),
     headmaster: document.getElementById('school-headmaster').value.trim(),
     headmasterNip: document.getElementById('school-headmaster-nip').value.trim(),
@@ -2328,8 +2332,96 @@ function handleSaveSchoolIdentity(event) {
   };
 
   localStorage.setItem('zettcbt_school', JSON.stringify(state.school));
+  applySchoolBrandingUI();
   renderExamCardsTab();
-  showToast('Identitas sekolah & Kop Surat berhasil diperbarui!', 'success');
+  showToast('Identitas sekolah & pengaturan ujian berhasil disimpan!', 'success');
+}
+
+/**
+ * Memasang logo sekolah dan label ujian (UTS/UAS) secara dinamis ke seluruh antarmuka
+ */
+function applySchoolBrandingUI() {
+  const sch = state.school || {};
+  const logo = sch.logoUrl || '';
+  const schoolName = sch.name || 'SD NEGERI 14 TOBOALI';
+  const examType = sch.examType || 'UTS';
+
+  // 1. Header Global
+  const headerIcon = document.querySelector('.brand-icon');
+  if (headerIcon) {
+    if (logo) {
+      headerIcon.innerHTML = `<img src="${logo}" alt="Logo Sekolah">`;
+    } else {
+      headerIcon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+    }
+  }
+  document.querySelectorAll('.brand-title').forEach(el => el.textContent = schoolName);
+  document.querySelectorAll('.brand-badge').forEach(el => el.textContent = `CBT ${examType} ONLINE`);
+
+  // 2. Ruang Siswa (screen-student-login)
+  const studentScreen = document.getElementById('screen-student-login');
+  if (studentScreen) {
+    const heroLogo = studentScreen.querySelector('.split-hero-logo');
+    if (heroLogo) {
+      if (logo) {
+        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah">`;
+      } else {
+        heroLogo.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+      }
+    }
+    const heroSchool = studentScreen.querySelector('.split-hero-school');
+    if (heroSchool) heroSchool.textContent = schoolName;
+
+    const heroTag = studentScreen.querySelector('.split-hero-tag');
+    if (heroTag) heroTag.textContent = `CBT ${examType} RESMI`;
+
+    const heroHeadline = studentScreen.querySelector('.split-hero-headline');
+    if (heroHeadline) heroHeadline.textContent = `Ruang Ujian Siswa Berstandar ${examType}`;
+
+    const formSubtitle = studentScreen.querySelector('.split-form-subtitle');
+    if (formSubtitle) formSubtitle.textContent = `Masukkan data peserta dan token ${examType} dari pengawas`;
+  }
+
+  // 3. Login Guru (screen-teacher-login)
+  const teacherScreen = document.getElementById('screen-teacher-login');
+  if (teacherScreen) {
+    const heroLogo = teacherScreen.querySelector('.split-hero-logo');
+    if (heroLogo) {
+      if (logo) {
+        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah">`;
+      } else {
+        heroLogo.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+      }
+    }
+    const heroSchool = teacherScreen.querySelector('.split-hero-school');
+    if (heroSchool) heroSchool.textContent = schoolName;
+
+    const heroTag = teacherScreen.querySelector('.split-hero-tag');
+    if (heroTag) heroTag.textContent = `CBT ${examType} RESMI`;
+
+    const heroHeadline = teacherScreen.querySelector('.split-hero-headline');
+    if (heroHeadline) heroHeadline.textContent = `Portal Pendidik & Pengawas CBT ${examType}`;
+
+    // Update label fitur 5 tipe soal
+    const featureItems = teacherScreen.querySelectorAll('.split-feature-item span');
+    featureItems.forEach(el => {
+      if (el.textContent.includes('Tipe Soal Standar')) {
+        el.textContent = `5 Tipe Soal Standar ${examType}`;
+      }
+    });
+  }
+
+  // 4. Dashboard Admin Welcome Banner
+  const welcomeBadge = document.querySelector('.welcome-badge');
+  if (welcomeBadge) welcomeBadge.textContent = `PANEL EVALUASI ${examType} RESMI`;
+
+  const welcomeTitle = document.querySelector('.welcome-title');
+  if (welcomeTitle) welcomeTitle.textContent = `Selamat Datang di Portal CBT ${examType}!`;
+
+  const welcomeDesc = document.querySelector('.welcome-desc');
+  if (welcomeDesc) {
+    welcomeDesc.textContent = `Kelola bank soal 5 tipe ${examType}, pantau live ujian siswa serentak, cetak kartu peserta, dan unduh rekap nilai ${schoolName}.`;
+  }
 }
 
 // ==============================================================================
