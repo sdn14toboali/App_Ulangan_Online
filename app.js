@@ -21,14 +21,25 @@ const state = {
   },
 
   // Identitas Sekolah SD NEGERI 14 TOBOALI
-  school: JSON.parse(localStorage.getItem('zettcbt_school') || JSON.stringify({
-    name: 'SD NEGERI 14 TOBOALI',
-    npsn: '10901234',
-    academicYear: '2026/2027 - Ganjil',
-    address: 'Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung',
-    headmaster: 'H. Suhardi, S.Pd., M.Pd',
-    headmasterNip: '19750312 199903 1 004'
-  })),
+  school: (() => {
+    const defaultSchool = {
+      name: 'SD NEGERI 14 TOBOALI',
+      npsn: '10901234',
+      academicYear: '2026/2027 - Ganjil',
+      address: 'Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung',
+      headmaster: 'H. Suhardi, S.Pd., M.Pd',
+      headmasterNip: '19750312 199903 1 004',
+      logoUrl: '',
+      teacherSigner: 'Siti Aminah, S.Pd',
+      teacherSignerNip: '-'
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
+      return { ...defaultSchool, ...saved };
+    } catch(e) {
+      return defaultSchool;
+    }
+  })(),
 
   // Token Proktor Dinamis (Auto-Refresh 3 Menit = 180 Detik)
   proctorToken: {
@@ -1950,12 +1961,19 @@ async function deleteTeacher(id) {
 
 function generateKopSuratHtml() {
   const sch = state.school;
+  const logoHtml = sch.logoUrl 
+    ? `<div style="flex-shrink: 0; margin-right: 18px;"><img src="${sch.logoUrl}" alt="Logo Sekolah" style="height: 75px; max-width: 85px; object-fit: contain;"></div>` 
+    : '';
+
   return `
-    <div style="text-align: center; border-bottom: 3px double #000000; padding-bottom: 8px; margin-bottom: 16px; font-family: 'Times New Roman', serif;">
-      <div style="font-size: 13pt; font-weight: bold; text-transform: uppercase;">PEMERINTAH KABUPATEN BANGKA SELATAN</div>
-      <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN DAN KEBUDAYAAN</div>
-      <div style="font-size: 16pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">${sch.name}</div>
-      <div style="font-size: 9pt; margin-top: 3px;">NPSN: ${sch.npsn} | Alamat: ${sch.address}</div>
+    <div style="display: flex; align-items: center; justify-content: center; border-bottom: 3px double #000000; padding-bottom: 10px; margin-bottom: 18px; font-family: 'Times New Roman', serif;">
+      ${logoHtml}
+      <div style="text-align: center; flex: 1;">
+        <div style="font-size: 13pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.02em;">PEMERINTAH KABUPATEN BANGKA SELATAN</div>
+        <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN DAN KEBUDAYAAN</div>
+        <div style="font-size: 16pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin: 2px 0;">${sch.name}</div>
+        <div style="font-size: 9pt; margin-top: 2px;">NPSN: ${sch.npsn} | Alamat: ${sch.address}</div>
+      </div>
     </div>
   `;
 }
@@ -2019,6 +2037,9 @@ function printResultsPdf() {
     `;
   });
 
+  const teacherSignerName = sch.teacherSigner || (state.currentTeacher ? state.currentTeacher.fullName : 'Pengawas Ujian');
+  const teacherSignerNipHtml = (sch.teacherSignerNip && sch.teacherSignerNip !== '-') ? `<br>NIP. ${sch.teacherSignerNip}` : '';
+
   container.innerHTML = 
     generateKopSuratHtml() +
     '<div style="text-align: center; margin-bottom: 16px;">' +
@@ -2038,7 +2059,7 @@ function printResultsPdf() {
     '</table>' +
     '<div style="display: flex; justify-content: space-between; font-size: 10pt; margin-top: 30px;">' +
       '<div>Mengetahui,<br>Kepala ' + sch.name + '<br><br><br><br><strong>' + sch.headmaster + '</strong><br>NIP. ' + sch.headmasterNip + '</div>' +
-      '<div>Toboali, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '<br>Guru Mata Pelajaran / Wali Kelas<br><br><br><br><strong>' + (state.currentTeacher ? state.currentTeacher.fullName : 'Pengawas Ujian') + '</strong></div>' +
+      '<div>Toboali, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '<br>Guru Mata Pelajaran / Wali Kelas<br><br><br><br><strong>' + teacherSignerName + '</strong>' + teacherSignerNipHtml + '</div>' +
     '</div>';
 
   window.print();
@@ -2053,12 +2074,19 @@ function printExamCardsPdf() {
   let cardsHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
 
   students.forEach((st) => {
+    const cardLogoHtml = sch.logoUrl 
+      ? `<img src="${sch.logoUrl}" style="height: 38px; width: 38px; object-fit: contain; margin-right: 8px;">` 
+      : '';
+
     cardsHtml += `
       <div style="border: 2px solid #000; padding: 12px; border-radius: 6px; font-family: 'Times New Roman', serif; background: #fff; page-break-inside: avoid;">
-        <div style="text-align: center; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 8px;">
-          <div style="font-size: 8.5pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN KABUPATEN BANGKA SELATAN</div>
-          <div style="font-size: 10pt; font-weight: bold;">${sch.name}</div>
-          <div style="font-size: 8pt; font-weight: bold; color: #2563eb;">KARTU PESERTA UJIAN ONLINE</div>
+        <div style="display: flex; align-items: center; justify-content: center; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 8px;">
+          ${cardLogoHtml}
+          <div style="text-align: center; flex: 1;">
+            <div style="font-size: 8pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN KABUPATEN BANGKA SELATAN</div>
+            <div style="font-size: 9.5pt; font-weight: bold;">${sch.name}</div>
+            <div style="font-size: 8pt; font-weight: bold; color: #2563eb;">KARTU PESERTA UJIAN ONLINE</div>
+          </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; font-size: 8.5pt;">
@@ -2122,14 +2150,75 @@ function renderExamCardsTab() {
   });
 }
 
+function updateLogoPreviewUI(url) {
+  const imgEl = document.getElementById('school-logo-img');
+  const placeholderEl = document.getElementById('school-logo-placeholder');
+  if (!imgEl || !placeholderEl) return;
+
+  if (url && url.trim()) {
+    imgEl.src = url.trim();
+    imgEl.style.display = 'block';
+    placeholderEl.style.display = 'none';
+  } else {
+    imgEl.src = '';
+    imgEl.style.display = 'none';
+    placeholderEl.style.display = 'block';
+  }
+}
+
+function handleLogoFileUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast('File harus berupa gambar (PNG, JPG, SVG, WebP)!', 'warning');
+    return;
+  }
+
+  // Prevent giant files (> 3MB) from blowing up localStorage
+  if (file.size > 3 * 1024 * 1024) {
+    showToast('Ukuran file logo terlalu besar (maksimal 3MB).', 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    if (document.getElementById('school-logo-url')) {
+      document.getElementById('school-logo-url').value = dataUrl;
+    }
+    updateLogoPreviewUI(dataUrl);
+    showToast('Logo berhasil dimuat! Klik "Simpan Pengaturan" untuk menyimpan.', 'info');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleLogoUrlInput(url) {
+  updateLogoPreviewUI(url);
+}
+
+function removeSchoolLogo() {
+  if (document.getElementById('school-logo-url')) {
+    document.getElementById('school-logo-url').value = '';
+  }
+  const fileInput = document.getElementById('school-logo-file-input');
+  if (fileInput) fileInput.value = '';
+  updateLogoPreviewUI('');
+  showToast('Logo dihapus dari form preview. Klik "Simpan Pengaturan" untuk menetapkan.', 'info');
+}
+
 function populateSchoolIdentityForm() {
   const sch = state.school;
-  if (document.getElementById('school-name')) document.getElementById('school-name').value = sch.name;
-  if (document.getElementById('school-npsn')) document.getElementById('school-npsn').value = sch.npsn;
-  if (document.getElementById('school-academic-year')) document.getElementById('school-academic-year').value = sch.academicYear;
-  if (document.getElementById('school-address')) document.getElementById('school-address').value = sch.address;
-  if (document.getElementById('school-headmaster')) document.getElementById('school-headmaster').value = sch.headmaster;
-  if (document.getElementById('school-headmaster-nip')) document.getElementById('school-headmaster-nip').value = sch.headmasterNip;
+  if (document.getElementById('school-name')) document.getElementById('school-name').value = sch.name || '';
+  if (document.getElementById('school-npsn')) document.getElementById('school-npsn').value = sch.npsn || '';
+  if (document.getElementById('school-academic-year')) document.getElementById('school-academic-year').value = sch.academicYear || '';
+  if (document.getElementById('school-address')) document.getElementById('school-address').value = sch.address || '';
+  if (document.getElementById('school-headmaster')) document.getElementById('school-headmaster').value = sch.headmaster || '';
+  if (document.getElementById('school-headmaster-nip')) document.getElementById('school-headmaster-nip').value = sch.headmasterNip || '';
+  if (document.getElementById('school-teacher-signer')) document.getElementById('school-teacher-signer').value = sch.teacherSigner || '';
+  if (document.getElementById('school-teacher-signer-nip')) document.getElementById('school-teacher-signer-nip').value = sch.teacherSignerNip || '';
+  if (document.getElementById('school-logo-url')) document.getElementById('school-logo-url').value = sch.logoUrl || '';
+  updateLogoPreviewUI(sch.logoUrl || '');
 }
 
 function handleSaveSchoolIdentity(event) {
@@ -2140,11 +2229,196 @@ function handleSaveSchoolIdentity(event) {
     academicYear: document.getElementById('school-academic-year').value.trim(),
     address: document.getElementById('school-address').value.trim(),
     headmaster: document.getElementById('school-headmaster').value.trim(),
-    headmasterNip: document.getElementById('school-headmaster-nip').value.trim()
+    headmasterNip: document.getElementById('school-headmaster-nip').value.trim(),
+    logoUrl: document.getElementById('school-logo-url') ? document.getElementById('school-logo-url').value.trim() : (state.school.logoUrl || ''),
+    teacherSigner: document.getElementById('school-teacher-signer') ? document.getElementById('school-teacher-signer').value.trim() : (state.school.teacherSigner || ''),
+    teacherSignerNip: document.getElementById('school-teacher-signer-nip') ? document.getElementById('school-teacher-signer-nip').value.trim() : (state.school.teacherSignerNip || '')
   };
 
   localStorage.setItem('zettcbt_school', JSON.stringify(state.school));
+  renderExamCardsTab();
   showToast('Identitas sekolah & Kop Surat berhasil diperbarui!', 'success');
+}
+
+// ==============================================================================
+// MODAL & ENGINE IMPOR DATA SISWA EXCEL / CSV
+// ==============================================================================
+
+function openImportStudentsModal() {
+  const modal = document.getElementById('modal-import-students');
+  if (modal) {
+    modal.style.display = 'flex';
+    if (document.getElementById('import-students-raw-text')) {
+      document.getElementById('import-students-raw-text').value = '';
+    }
+    const fileInput = document.getElementById('import-student-file-input');
+    if (fileInput) fileInput.value = '';
+    updateImportTextPreview();
+  }
+}
+
+function closeImportStudentsModal() {
+  const modal = document.getElementById('modal-import-students');
+  if (modal) modal.style.display = 'none';
+}
+
+function downloadStudentTemplateCsv() {
+  const csvContent = "NISN,Nama Lengkap,Kelas,Jenis Kelamin\n" +
+    "2026-001,Ahmad Rizki Pratama,6,L\n" +
+    "2026-002,Bella Anggraini Putri,6,P\n" +
+    "2026-003,Dimas Aditya Nugraha,5,L\n" +
+    "2026-004,Fatimah Az-Zahra,5,P\n" +
+    "2026-005,Rian Hidayat,4,L\n";
+
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'template_data_siswa_sdn14.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function handleStudentImportFile(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const content = e.target.result;
+    const textarea = document.getElementById('import-students-raw-text');
+    if (textarea) {
+      textarea.value = content;
+      updateImportTextPreview();
+      showToast(`File ${file.name} berhasil dibaca!`, 'info');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function parseStudentDataFromText(rawText) {
+  if (!rawText || !rawText.trim()) return [];
+  const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  const parsed = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Abaikan header jika ada
+    if (i === 0 && (line.toLowerCase().includes('nisn') || line.toLowerCase().includes('nama'))) {
+      continue;
+    }
+
+    // Deteksi pemisah: tab (\t), titik koma (;), atau koma (,)
+    let tokens = [];
+    if (line.includes('\t')) {
+      tokens = line.split('\t');
+    } else if (line.includes(';')) {
+      tokens = line.split(';');
+    } else {
+      tokens = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+    }
+
+    tokens = tokens.map(t => t.replace(/^["']|["']$/g, '').trim());
+
+    if (tokens.length >= 2) {
+      const nisn = tokens[0] || '';
+      const name = tokens[1] || '';
+      const defaultClass = (state.currentTeacher && state.currentTeacher.assignedClass) ? state.currentTeacher.assignedClass : '6';
+      const className = tokens[2] || defaultClass;
+      let gender = (tokens[3] || 'L').toUpperCase();
+      if (gender !== 'L' && gender !== 'P') {
+        gender = gender.startsWith('P') ? 'P' : 'L';
+      }
+
+      if (nisn && name) {
+        parsed.push({
+          id: 'st-' + Math.random().toString(36).substr(2, 9),
+          nisn: nisn,
+          name: name,
+          className: className,
+          gender: gender,
+          status: 'active'
+        });
+      }
+    }
+  }
+
+  return parsed;
+}
+
+function updateImportTextPreview() {
+  const text = document.getElementById('import-students-raw-text') ? document.getElementById('import-students-raw-text').value : '';
+  const students = parseStudentDataFromText(text);
+  const countEl = document.getElementById('import-preview-count');
+  if (countEl) {
+    countEl.textContent = `Terdeteksi: ${students.length} siswa valid`;
+    countEl.style.color = students.length > 0 ? 'var(--emerald-600)' : 'var(--slate-500)';
+  }
+}
+
+async function executeBatchImportStudents() {
+  const text = document.getElementById('import-students-raw-text') ? document.getElementById('import-students-raw-text').value : '';
+  const importedList = parseStudentDataFromText(text);
+
+  if (importedList.length === 0) {
+    showToast('Tidak ada data siswa valid yang terdeteksi untuk diimpor!', 'warning');
+    return;
+  }
+
+  let addedCount = 0;
+  let updatedCount = 0;
+
+  importedList.forEach(imp => {
+    const existingIndex = state.students.findIndex(s => s.nisn.toLowerCase() === imp.nisn.toLowerCase());
+    if (existingIndex >= 0) {
+      // Update data siswa yang sudah ada
+      state.students[existingIndex].name = imp.name;
+      state.students[existingIndex].className = imp.className;
+      state.students[existingIndex].gender = imp.gender;
+      updatedCount++;
+    } else {
+      // Siswa baru
+      state.students.push(imp);
+      addedCount++;
+    }
+  });
+
+  localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
+
+  // Sinkronisasi massal ke Supabase jika aktif
+  if (state.supabase.url && state.supabase.key) {
+    try {
+      showToast('Menyinkronkan data impor ke Supabase...', 'info');
+      const payload = importedList.map(st => ({
+        nisn: st.nisn,
+        full_name: st.name,
+        class_name: st.className,
+        gender: st.gender
+      }));
+
+      await fetch(state.supabase.url + '/rest/v1/students', {
+        method: 'POST',
+        headers: {
+          'apikey': state.supabase.key,
+          'Authorization': 'Bearer ' + state.supabase.key,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.warn('Gagal sinkron impor ke Supabase:', e);
+    }
+  }
+
+  closeImportStudentsModal();
+  renderStudentsTable();
+  renderExamCardsTab();
+  updateAdminMetrics();
+
+  showToast(`Sukses mengimpor siswa! (${addedCount} baru ditambahkan, ${updatedCount} diperbarui)`, 'success');
 }
 
 function deleteQuestion(qId) {
