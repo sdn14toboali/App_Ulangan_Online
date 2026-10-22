@@ -1,1295 +1,1478 @@
-  <!DOCTYPE html>
-  <html lang="id">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SD NEGERI 14 TOBOALI - CBT Ujian Online</title>
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
+<!DOCTYPE html>
+<html lang="id">
 
-    <!-- Top Global Header -->
-    <header class="app-header" id="global-header">
-      <div class="header-container">
-        <div class="brand-wrapper">
-          <div class="brand-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-          </div>
-          <div>
-            <span class="brand-title">SD NEGERI 14 TOBOALI</span>
-            <span class="brand-badge">CBT UJIAN ONLINE</span>
-          </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SD NEGERI 14 TOBOALI - CBT Ujian Online</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Top Global Header -->
+  <header class="app-header" id="global-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
         </div>
-        <div class="header-nav">
-          <button id="nav-btn-student" class="btn btn-outline btn-sm" onclick="showScreen('student-login')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            Ruang Siswa
-          </button>
-          <button id="nav-btn-admin" class="btn btn-primary btn-sm" onclick="openTeacherPortal()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-              <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-            </svg>
-            <span id="nav-teacher-label">Guru & Pengawas</span>
-          </button>
+        <div>
+          <span class="brand-title">SD NEGERI 14 TOBOALI</span>
+          <span class="brand-badge">CBT UJIAN ONLINE</span>
         </div>
       </div>
-    </header>
-
-    <!-- SCREEN 1: LOGIN SISWA -->
-    <main id="screen-student-login" class="view-screen active">
-      <div class="auth-wrapper">
-        <div class="card auth-card">
-          <div class="card-body">
-            <div class="auth-hero">
-              <div class="brand-icon" style="margin: 0 auto 1rem; width: 52px; height: 52px;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                </svg>
-              </div>
-              <h2>Masuk Ruang Ujian</h2>
-              <p>Silakan masukkan nomor peserta dan token yang diberikan pengawas</p>
-            </div>
-
-            <form id="form-student-login" onsubmit="handleStudentLogin(event)">
-              <div class="form-group">
-                <label class="form-label" for="login-nisn">Nomor Peserta / NISN</label>
-                <input type="text" id="login-nisn" class="form-control" placeholder="Contoh: 2026-001" required autocomplete="off">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="login-name">Nama Lengkap Siswa</label>
-                <input type="text" id="login-name" class="form-control" placeholder="Contoh: Budi Pratama" required autocomplete="off">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="login-class">Kelas / Rombel</label>
-                <select id="login-class" class="form-control" required>
-                  <option value="">-- Pilih Kelas --</option>
-                  <option value="6">Kelas 6</option>
-                  <option value="5">Kelas 5</option>
-                  <option value="4">Kelas 4</option>
-                  <option value="3">Kelas 3</option>
-                  <option value="2">Kelas 2</option>
-                  <option value="1">Kelas 1</option>
-                  <option value="UMUM">Kelas Umum</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="login-token">Token Ujian (6 Karakter)</label>
-                <input type="text" id="login-token" class="form-control" placeholder="Contoh: PAS26A" maxlength="10" style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em;" required autocomplete="off">
-                <small style="color: var(--slate-500); font-size: 0.78rem; margin-top: 0.25rem; display: block;">*Minta token ke pengawas ujian</small>
-              </div>
-
-              <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
-                Masuk ke Sesi Ujian
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </button>
-            </form>
-          </div>
-        </div>
+      <div class="header-nav">
+        <button id="nav-btn-student" class="btn btn-outline btn-sm" onclick="showScreen('student-login')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Ruang Siswa
+        </button>
+        <button id="nav-btn-admin" class="btn btn-primary btn-sm" onclick="openTeacherPortal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+          </svg>
+          <span id="nav-teacher-label">Guru & Pengawas</span>
+        </button>
       </div>
-    </main>
+    </div>
+  </header>
 
-    <!-- SCREEN: LOGIN GURU & PENGAWAS (MULTI-TEACHER ISOLATION) -->
-    <main id="screen-teacher-login" class="view-screen">
-      <div class="auth-wrapper">
-        <div class="card auth-card" style="max-width: 520px;">
-          <div class="card-body">
-            <div class="auth-hero">
-              <div class="brand-icon" style="margin: 0 auto 1rem; width: 52px; height: 52px; background: linear-gradient(135deg, #059669, #047857);">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
-              <h2>Portal Masuk Guru & Pengawas</h2>
-              <p>Sistem Isolasi Bank Soal & Nilai per Kelas & Mata Pelajaran</p>
-            </div>
-
-            <form id="form-teacher-login" onsubmit="handleTeacherLogin(event)">
-              <div class="form-group">
-                <label class="form-label" for="teacher-login-username">Username / NIP Guru</label>
-                <input type="text" id="teacher-login-username" class="form-control" placeholder="Contoh: guru7a atau gurumtk" required autocomplete="username">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="teacher-login-password">Kata Sandi (Password)</label>
-                <div style="position: relative;">
-                  <input type="password" id="teacher-login-password" class="form-control" placeholder="Masukkan password..." required autocomplete="current-password" style="padding-right: 42px;">
-                  <button type="button" onclick="toggleTeacherPasswordVisibility()" title="Tampilkan / Sembunyikan Password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-500); padding: 4px;">
-                    <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem; background-color: var(--emerald-600); border-color: var(--emerald-600);">
-                Masuk ke Panel Guru
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </button>
-            </form>
-
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <!-- SCREEN 2: KONFIRMASI DATA & TATA TERTIB -->
-    <main id="screen-student-confirm" class="view-screen">
-      <div class="auth-wrapper">
-        <div class="card auth-card" style="max-width: 560px;">
-          <div class="card-header">
-            <h3 style="font-size: 1.15rem; font-weight: 700;">Konfirmasi Peserta Ujian</h3>
-          </div>
-          <div class="card-body">
-            <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
-              <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.6rem; font-size: 0.9rem;">
-                <span style="color: var(--slate-500);">Nomor Peserta:</span>
-                <strong id="confirm-nisn" style="color: var(--slate-900);">-</strong>
-
-                <span style="color: var(--slate-500);">Nama Siswa:</span>
-                <strong id="confirm-name" style="color: var(--slate-900);">-</strong>
-
-                <span style="color: var(--slate-500);">Kelas:</span>
-                <strong id="confirm-class" style="color: var(--slate-900);">-</strong>
-
-                <span style="color: var(--slate-500);">Mata Pelajaran:</span>
-                <strong id="confirm-subject" style="color: var(--primary-700);">-</strong>
-
-                <span style="color: var(--slate-500);">Jumlah Soal:</span>
-                <strong id="confirm-total-q" style="color: var(--slate-900);">-</strong>
-
-                <span style="color: var(--slate-500);">Alokasi Waktu:</span>
-                <strong id="confirm-duration" style="color: var(--emerald-600);">-</strong>
-              </div>
-            </div>
-
-            <div class="cheat-alert-box">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+  <!-- SCREEN 1: LOGIN SISWA -->
+  <main id="screen-student-login" class="view-screen active">
+    <div class="auth-wrapper">
+      <div class="card auth-card">
+        <div class="card-body">
+          <div class="auth-hero">
+            <div class="brand-icon" style="margin: 0 auto 1rem; width: 52px; height: 52px;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
               </svg>
-              <div>
-                <strong style="display: block; margin-bottom: 0.2rem; font-size: 0.88rem;">Peringatan Anti-Curang:</strong>
-                <p style="font-size: 0.82rem; line-height: 1.4;">
-                  Dilarang meminimalkan layar, membuka tab lain, atau beralih aplikasi. Sistem mencatat setiap pelanggaran secara otomatis dan mengirim peringatan ke pengawas.
-                </p>
-              </div>
             </div>
-
-            <div style="display: flex; gap: 0.75rem;">
-              <button class="btn btn-outline" style="flex: 1;" onclick="showScreen('student-login')">Batal</button>
-              <button class="btn btn-primary" style="flex: 2;" onclick="startExamSession()">
-                Mulai Mengerjakan
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <!-- SCREEN 3: RUANG UJIAN CBT (ANBK STYLE) -->
-    <main id="screen-student-exam" class="view-screen">
-      <!-- Exam Banner Sticky -->
-      <div class="exam-banner">
-        <div class="exam-banner-inner">
-          <div class="student-identity">
-            <div class="student-avatar" id="exam-avatar">S</div>
-            <div class="student-meta">
-              <h3 id="exam-student-name">Nama Siswa</h3>
-              <p><span id="exam-subject-name">Matematika</span> • Kelas: <span id="exam-class-name">XII</span></p>
-            </div>
+            <h2>Masuk Ruang Ujian</h2>
+            <p>Silakan masukkan nomor peserta dan token yang diberikan pengawas</p>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div class="autosave-badge" id="exam-autosave-indicator">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
+          <form id="form-student-login" onsubmit="handleStudentLogin(event)">
+            <div class="form-group">
+              <label class="form-label" for="login-nisn">Nomor Peserta / NISN</label>
+              <input type="text" id="login-nisn" class="form-control" placeholder="Contoh: 2026-001" required
+                autocomplete="off">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="login-name">Nama Lengkap Siswa</label>
+              <input type="text" id="login-name" class="form-control" placeholder="Contoh: Budi Pratama" required
+                autocomplete="off">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="login-class">Kelas / Rombel</label>
+              <select id="login-class" class="form-control" required>
+                <option value="">-- Pilih Kelas --</option>
+                <option value="6">Kelas 6</option>
+                <option value="5">Kelas 5</option>
+                <option value="4">Kelas 4</option>
+                <option value="3">Kelas 3</option>
+                <option value="2">Kelas 2</option>
+                <option value="1">Kelas 1</option>
+                <option value="UMUM">Kelas Umum</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="login-token">Token Ujian (6 Karakter)</label>
+              <input type="text" id="login-token" class="form-control" placeholder="Contoh: PAS26A" maxlength="10"
+                style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em;" required autocomplete="off">
+              <small style="color: var(--slate-500); font-size: 0.78rem; margin-top: 0.25rem; display: block;">*Minta
+                token ke pengawas ujian</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+              Masuk ke Sesi Ujian
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
-              <span>Auto-Save Aktif</span>
-            </div>
-
-            <div class="exam-timer-box" id="exam-timer-wrapper">
-              <div>
-                <div class="timer-label">SISA WAKTU</div>
-                <div class="timer-value" id="exam-timer-display">00:00:00</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Exam Layout (Question + Navigator) -->
-      <div class="exam-layout">
-        <!-- Question Container -->
-        <div class="question-card">
-          <div class="question-header">
-            <div class="question-index-badge" id="exam-question-badge">Soal No. 1</div>
-            <div class="font-size-control">
-              <span style="font-size: 0.78rem; color: var(--slate-500); margin-right: 0.25rem;">Ukuran Huruf:</span>
-              <button class="btn-font-scale" onclick="scaleFontSize(-1)">A-</button>
-              <button class="btn-font-scale" onclick="scaleFontSize(0)">A</button>
-              <button class="btn-font-scale" onclick="scaleFontSize(1)">A+</button>
-            </div>
-          </div>
-
-          <div class="question-body" id="question-text-container">
-            <div id="question-image-box" class="question-image-box" style="display: none;">
-              <img id="question-image-tag" src="" alt="Lampiran Soal">
-            </div>
-            <div class="question-content" id="question-content-text">
-              Memuat butir soal...
-            </div>
-
-            <!-- Options List (A - E) -->
-            <div class="options-list" id="options-list-container">
-              <!-- Rendered by Javascript -->
-            </div>
-          </div>
-
-          <!-- Question Navigation Buttons -->
-          <div class="question-footer">
-            <button id="btn-prev-q" class="btn btn-outline" onclick="navigateQuestion(-1)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              Sebelumnya
             </button>
-
-            <label class="doubt-checkbox-wrapper">
-              <input type="checkbox" id="checkbox-doubt" onchange="toggleDoubtAnswer()">
-              <span>Ragu-ragu</span>
-            </label>
-
-            <div style="display: flex; gap: 0.5rem;">
-              <button id="btn-next-q" class="btn btn-primary" onclick="navigateQuestion(1)">
-                Berikutnya
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </button>
-              <button class="btn btn-danger" onclick="openSubmitConfirmModal()">
-                Selesai Ujian
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Navigation Panel (Grid Nomor Soal) -->
-        <aside class="nav-panel">
-          <div class="nav-panel-header">
-            <div class="nav-panel-title">Daftar Nomor Soal</div>
-            <div class="nav-panel-legend">
-              <div class="legend-item"><div class="legend-dot answered"></div> Dijawab</div>
-              <div class="legend-item"><div class="legend-dot doubt"></div> Ragu</div>
-              <div class="legend-item"><div class="legend-dot empty"></div> Belum</div>
-            </div>
-          </div>
-
-          <div class="nav-grid-body">
-            <div class="grid-buttons" id="question-grid-container">
-              <!-- Buttons 1 to N generated by Javascript -->
-            </div>
-          </div>
-        </aside>
-      </div>
-    </main>
-
-    <!-- SCREEN 4: HASIL / BUKTI SELESAI UJIAN -->
-    <main id="screen-student-finish" class="view-screen">
-      <div class="auth-wrapper">
-        <div class="card auth-card" style="max-width: 520px; text-align: center;">
-          <div class="card-body">
-            <div style="width: 70px; height: 70px; background-color: #ecfdf5; color: var(--emerald-600); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-            </div>
-
-            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900);">Ujian Telah Selesai</h2>
-            <p style="color: var(--slate-500); font-size: 0.9rem; margin-top: 0.35rem;">
-              Seluruh jawaban Anda telah berhasil tersimpan dengan aman di server sistem.
-            </p>
-
-            <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem; margin: 1.5rem 0; text-align: left; font-size: 0.9rem;">
-              <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem;">
-                <span style="color: var(--slate-500);">Nama:</span>
-                <strong id="finish-student-name">-</strong>
-                <span style="color: var(--slate-500);">Mata Pelajaran:</span>
-                <strong id="finish-subject-name">-</strong>
-                <span style="color: var(--slate-500);">Status:</span>
-                <span class="badge badge-success">BERHASIL DISUBMIT</span>
-                <span style="color: var(--slate-500);">Waktu Selesai:</span>
-                <strong id="finish-timestamp">-</strong>
-                <span style="color: var(--slate-500);">Pelanggaran Tab:</span>
-                <strong id="finish-warnings" style="color: var(--slate-700);">0x</strong>
-              </div>
-
-              <div id="finish-score-box" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed var(--slate-300); display: none;">
-                <div style="text-align: center;">
-                  <span style="font-size: 0.8rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase;">NILAI UJIAN ANDA</span>
-                  <div id="finish-score-value" style="font-size: 2.5rem; font-weight: 800; color: var(--primary-600); line-height: 1.2;">0</div>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-outline btn-lg" style="width: 100%;" onclick="showScreen('student-login')">
-              Kembali ke Halaman Awal
-            </button>
-          </div>
+          </form>
         </div>
       </div>
-    </main>
+    </div>
+  </main>
 
-    <!-- SCREEN 5: ADMIN DASHBOARD PANEL -->
-    <main id="screen-admin-dashboard" class="view-screen">
-      <div class="admin-container">
-        <!-- Active Teacher Profile Banner -->
-        <div class="teacher-profile-banner">
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div class="teacher-avatar-box">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- SCREEN: LOGIN GURU & PENGAWAS (MULTI-TEACHER ISOLATION) -->
+  <main id="screen-teacher-login" class="view-screen">
+    <div class="auth-wrapper">
+      <div class="card auth-card" style="max-width: 520px;">
+        <div class="card-body">
+          <div class="auth-hero">
+            <div class="brand-icon"
+              style="margin: 0 auto 1rem; width: 52px; height: 52px; background: linear-gradient(135deg, #059669, #047857);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <div>
-              <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
-                <h2 id="teacher-profile-name" style="font-size: 1.15rem; font-weight: 800; color: var(--slate-900);">Nama Guru</h2>
-                <span id="teacher-profile-badge" class="teacher-badge kelas">GURU KELAS</span>
+            <h2>Portal Masuk Guru & Pengawas</h2>
+            <p>Sistem Isolasi Bank Soal & Nilai per Kelas & Mata Pelajaran</p>
+          </div>
+
+          <form id="form-teacher-login" onsubmit="handleTeacherLogin(event)">
+            <div class="form-group">
+              <label class="form-label" for="teacher-login-username">Username / NIP Guru</label>
+              <input type="text" id="teacher-login-username" class="form-control"
+                placeholder="Contoh: guru7a atau gurumtk" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="teacher-login-password">Kata Sandi (Password)</label>
+              <div style="position: relative;">
+                <input type="password" id="teacher-login-password" class="form-control"
+                  placeholder="Masukkan password..." required autocomplete="current-password"
+                  style="padding-right: 42px;">
+                <button type="button" onclick="toggleTeacherPasswordVisibility()"
+                  title="Tampilkan / Sembunyikan Password"
+                  style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-500); padding: 4px;">
+                  <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
               </div>
-              <p id="teacher-profile-scope" style="font-size: 0.82rem; color: var(--slate-500); margin-top: 0.2rem;">
-                Kewenangan: Kelas 7A | Mata Pelajaran: Semua
-              </p>
             </div>
-          </div>
 
-          <button class="btn btn-outline btn-sm" onclick="handleTeacherLogout()" style="color: var(--rose-600); border-color: var(--rose-200);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Keluar / Ganti Akun
-          </button>
-        </div>
-
-        <!-- Isolation Notice Callout -->
-        <div class="isolation-callout" id="teacher-isolation-notice">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          <div id="teacher-isolation-text">
-            <strong>Sistem Isolasi Aktif:</strong> Anda masuk sebagai Guru Kelas. Anda hanya dapat melihat dan mengelola bank soal serta nilai ujian untuk kelas Anda sendiri.
-          </div>
-        </div>
-
-        <div style="margin-bottom: 1.25rem;">
-          <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900);">Guru & Pengawas</h1>
-        </div>
-
-        <!-- Dashboard Metric Cards -->
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-icon-box blue">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            <button type="submit" class="btn btn-primary btn-lg"
+              style="width: 100%; margin-top: 1rem; background-color: var(--emerald-600); border-color: var(--emerald-600);">
+              Masuk ke Panel Guru
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
-            </div>
-            <div class="metric-content">
-              <h4>Siswa Aktif Ujian</h4>
-              <div class="metric-value" id="metric-active-students">0</div>
-            </div>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-icon-box green">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-            </div>
-            <div class="metric-content">
-              <h4>Sudah Selesai</h4>
-              <div class="metric-value" id="metric-submitted-students">0</div>
-            </div>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-icon-box amber">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-            </div>
-            <div class="metric-content">
-              <h4>Token Ujian Aktif</h4>
-              <div class="metric-value" id="metric-active-token">PAS26A</div>
-            </div>
-          </div>
-
-          <div class="metric-card">
-            <div class="metric-icon-box rose">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-            </div>
-            <div class="metric-content">
-              <h4>Terdeteksi Keluar Tab</h4>
-              <div class="metric-value" id="metric-warning-students">0</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Token Proktor Dinamis (Auto-Refresh 3 Menit ala ANBK/UTBK) -->
-        <div class="token-proktor-card">
-          <div>
-            <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 0.4rem;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              TOKEN UJIAN DINAMIS (OTOMATIS BERGANTI TIAP 3 MENIT)
-            </div>
-            <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 0.35rem;">
-              <span class="token-digits" id="proctor-token-display">PAS26A</span>
-              <span style="font-size: 0.95rem; color: #38bdf8; font-weight: 700;" id="token-timer-countdown">03:00</span>
-            </div>
-            <div class="token-countdown-bar-wrapper">
-              <div class="token-countdown-bar" id="token-progress-bar"></div>
-            </div>
-          </div>
-          <div style="display: flex; gap: 0.6rem; align-items: center;">
-            <button class="btn btn-outline btn-sm" onclick="forceRefreshToken()" style="color: #ffffff; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1);">
-              🔄 Ganti Token Sekarang
             </button>
-          </div>
+          </form>
+
         </div>
-
-        <!-- Navigation Tabs -->
-        <div class="admin-header-tabs">
-          <div class="tab-link active" onclick="switchAdminTab('live-monitor', this)">📅 Jadwal Ujian & Live</div>
-          <div class="tab-link" onclick="switchAdminTab('question-bank', this)">📝 Bank Soal (5 Tipe ANBK)</div>
-          <div class="tab-link" id="tab-link-students" onclick="switchAdminTab('manage-students', this)">🎓 Kelola Data Siswa</div>
-          <div class="tab-link" onclick="switchAdminTab('results-analysis', this)">📊 Rekap Nilai</div>
-          <div class="tab-link" onclick="switchAdminTab('exam-cards', this)">🪪 Kartu Peserta Ujian</div>
-          <div class="tab-link" onclick="switchAdminTab('school-identity', this)">🏫 Identitas Sekolah</div>
-          <div class="tab-link" id="tab-link-teachers" onclick="switchAdminTab('manage-teachers', this)" style="display: none;">👨‍🏫 Kelola Data Guru</div>
-          <div class="tab-link" id="tab-link-supabase" onclick="switchAdminTab('database-config', this)" style="display: none;">☁️ Koneksi Supabase</div>
-        </div>
-
-        <!-- TAB 1: LIVE MONITOR -->
-        <div id="tab-live-monitor" class="admin-tab-content">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Daftar Siswa Sedang Mengerjakan</h3>
-                <p style="font-size: 0.8rem; color: var(--slate-500);">Auto-update realtime setiap 5 detik tanpa me-refresh halaman</p>
-              </div>
-              <div style="display: flex; gap: 0.5rem;">
-                <input type="text" id="filter-search-student" class="form-control" placeholder="Cari nama / NISN..." style="width: 220px; padding: 0.4rem 0.75rem; font-size: 0.85rem;" oninput="renderLiveMonitoringTable()">
-                <button class="btn btn-outline btn-sm" onclick="renderLiveMonitoringTable()">Refresh</button>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>No Peserta</th>
-                    <th>Nama Lengkap</th>
-                    <th>Kelas</th>
-                    <th>Progress Jawaban</th>
-                    <th>Pelanggaran Tab</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody id="table-live-students-body">
-                  <!-- Injected via Javascript -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 2: BANK SOAL -->
-        <div id="tab-question-bank" class="admin-tab-content" style="display: none;">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Daftar Bank Soal Pilihan Ganda</h3>
-                <p style="font-size: 0.8rem; color: var(--slate-500);">Total Soal Aktif: <strong id="admin-total-q-badge">0</strong> Soal</p>
-              </div>
-            <div style="display: flex; gap: 0.5rem;">
-              <button class="btn btn-outline btn-sm" onclick="printExamQuestionsPdf()">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                🖨️ Cetak Soal (PDF)
-              </button>
-              <button class="btn btn-primary btn-sm" onclick="openAddQuestionModal()">+ Tambah Soal Baru</button>
-            </div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th style="width: 50px;">No</th>
-                    <th>Pertanyaan Soal</th>
-                    <th style="width: 120px;">Mata Pelajaran</th>
-                    <th style="width: 100px;">Target Kelas</th>
-                    <th style="width: 80px;">Kunci</th>
-                    <th style="width: 70px;">Bobot</th>
-                    <th style="width: 130px;">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody id="table-questions-body">
-                  <!-- Injected via JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 3: PENGATURAN SESI -->
-        <div id="tab-session-setting" class="admin-tab-content" style="display: none;">
-          <div class="card" style="max-width: 700px;">
-            <div class="card-header">
-              <h3 style="font-size: 1.05rem; font-weight: 700;">Atur Sesi Ujian Aktif</h3>
-            </div>
-            <div class="card-body">
-              <form onsubmit="handleSaveSessionSettings(event)">
-                <div class="form-group">
-                  <label class="form-label">Judul Ujian</label>
-                  <input type="text" id="setting-title" class="form-control" value="Penilaian Akhir Semester Ganjil 2026" required>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Mata Pelajaran</label>
-                  <input type="text" id="setting-subject" class="form-control" value="Matematika Peminatan" required>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                  <div class="form-group">
-                    <label class="form-label">Token Rilis Ujian</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                      <input type="text" id="setting-token" class="form-control" value="PAS26A" style="font-weight: 700; text-transform: uppercase;" required>
-                      <button type="button" class="btn btn-outline btn-sm" onclick="generateRandomToken()">Acak</button>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Durasi (Menit)</label>
-                    <input type="number" id="setting-duration" class="form-control" value="90" min="5" max="300" required>
-                  </div>
-                </div>
-
-                <div style="margin: 1.25rem 0; display: flex; flex-direction: column; gap: 0.75rem;">
-                  <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer;">
-                    <input type="checkbox" id="setting-random-q" checked>
-                    <span style="font-size: 0.9rem; font-weight: 600;">Acak Urutan Soal untuk Setiap Siswa</span>
-                  </label>
-                  <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer;">
-                    <input type="checkbox" id="setting-random-opt">
-                    <span style="font-size: 0.9rem; font-weight: 600;">Acak Pilihan Jawaban (A, B, C, D, E)</span>
-                  </label>
-                  <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer;">
-                    <input type="checkbox" id="setting-show-score" checked>
-                    <span style="font-size: 0.9rem; font-weight: 600;">Tampilkan Nilai ke Siswa Saat Selesai Ujian</span>
-                  </label>
-                </div>
-
-        <!-- TAB 4: KARTU PESERTA UJIAN (SESUAI GAMBAR 4) -->
-        <div id="tab-exam-cards" class="admin-tab-content" style="display: none;">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Kartu Peserta Ujian SD NEGERI 14 TOBOALI</h3>
-                <p style="font-size: 0.8rem; color: var(--slate-500);">Kartu ujian resmi format ANBK/Ujian Sekolah siap cetak PDF per lembar A4</p>
-              </div>
-              <button class="btn btn-primary btn-sm" onclick="printExamCardsPdf()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                🖨️ Cetak Semua Kartu Ujian (PDF)
-              </button>
-            </div>
-            <div class="card-body">
-              <div class="exam-card-grid" id="container-exam-cards">
-                <!-- Injected by JavaScript -->
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 5: IDENTITAS SEKOLAH (SESUAI GAMBAR 4) -->
-        <div id="tab-school-identity" class="admin-tab-content" style="display: none;">
-          <div class="card" style="max-width: 800px;">
-            <div class="card-header">
-              <div>
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Identitas Sekolah & Kop Surat Resmi</h3>
-                <p style="font-size: 0.8rem; color: var(--slate-500);">Informasi ini otomatis tercetak pada Kop Surat Naskah Soal, Kartu Ujian, dan Laporan Rekap Nilai.</p>
-              </div>
-            </div>
-            <div class="card-body">
-              <form onsubmit="handleSaveSchoolIdentity(event)">
-                <!-- Logo Sekolah Resmi -->
-                <div class="form-group" style="background: var(--slate-50); border: 1px dashed var(--slate-300); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
-                  <label class="form-label" style="font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
-                    <span>Logo Resmi Sekolah (Tercetak di Kop Surat & Kartu Ujian)</span>
-                    <span style="font-size: 0.75rem; color: var(--slate-400); font-weight: normal;">Format: PNG / JPG / SVG</span>
-                  </label>
-                  <div style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
-                    <div id="school-logo-preview-box" style="width: 75px; height: 75px; border: 1px solid var(--slate-200); border-radius: var(--radius-sm); background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
-                      <img id="school-logo-img" src="" alt="Logo" style="max-width: 100%; max-height: 100%; object-fit: contain; display: none;">
-                      <span id="school-logo-placeholder" style="font-size: 0.7rem; color: var(--slate-400); text-align: center; padding: 4px;">Belum Ada Logo</span>
-                    </div>
-                    <div style="flex: 1; min-width: 220px;">
-                      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <label class="btn btn-outline btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                          Upload File Logo
-                          <input type="file" id="school-logo-file-input" accept="image/*" onchange="handleLogoFileUpload(event)" style="display: none;">
-                        </label>
-                        <button type="button" class="btn btn-outline btn-sm" onclick="removeSchoolLogo()" style="color: var(--rose-600);">Hapus Logo</button>
-                      </div>
-                      <input type="url" id="school-logo-url" class="form-control" placeholder="Atau masukkan URL logo: https://..." oninput="handleLogoUrlInput(this.value)">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Nama Sekolah / Lembaga</label>
-                  <input type="text" id="school-name" class="form-control" value="SD NEGERI 14 TOBOALI" required>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                  <div class="form-group">
-                    <label class="form-label">NPSN Sekolah</label>
-                    <input type="text" id="school-npsn" class="form-control" value="10901234" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Tahun Ajaran / Semester</label>
-                    <input type="text" id="school-academic-year" class="form-control" value="2026/2027 - Ganjil" required>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Alamat Lengkap Sekolah</label>
-                  <input type="text" id="school-address" class="form-control" value="Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung" required>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                  <div class="form-group">
-                    <label class="form-label">Nama Kepala Sekolah</label>
-                    <input type="text" id="school-headmaster" class="form-control" value="H. Suhardi, S.Pd., M.Pd" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">NIP Kepala Sekolah</label>
-                    <input type="text" id="school-headmaster-nip" class="form-control" value="19750312 199903 1 004" required>
-                  </div>
-                </div>
-
-                <!-- Data Guru / Pengawas Penandatangan Ujian -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--slate-200);">
-                  <div class="form-group">
-                    <label class="form-label">Nama Guru / Pengawas Penandatangan</label>
-                    <input type="text" id="school-teacher-signer" class="form-control" placeholder="Contoh: Siti Aminah, S.Pd" required>
-                    <small style="font-size: 0.75rem; color: var(--slate-500);">*Tercetak pada tanda tangan rekapitulasi nilai</small>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">NIP Guru / Pengawas (Opsional)</label>
-                    <input type="text" id="school-teacher-signer-nip" class="form-control" placeholder="Contoh: 19820514 200801 2 007 / -">
-                  </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="margin-top: 0.75rem;">
-                  Simpan Pengaturan Identitas Sekolah
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 4: REKAP & ANALISIS NILAI -->
-        <div id="tab-results-analysis" class="admin-tab-content" style="display: none;">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Rekap Hasil Ujian & Peringkat Siswa</h3>
-                <p style="font-size: 0.8rem; color: var(--slate-500);">Daftar nilai seluruh peserta yang sudah selesai submit</p>
-              </div>
-              <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-outline btn-sm" onclick="printResultsPdf()">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                  🖨️ Cetak Rekap Nilai (PDF)
-                </button>
-                <button class="btn btn-success btn-sm" onclick="exportResultsToExcel()">
-                  Download Excel (.xlsx)
-                </button>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>No Peserta</th>
-                    <th>Nama Lengkap</th>
-                    <th>Kelas</th>
-                    <th>Jawaban Benar</th>
-                    <th>Total Nilai</th>
-                    <th>Waktu Submit</th>
-                  </tr>
-                </thead>
-                <tbody id="table-results-body">
-                  <!-- Injected via JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 5: DATABASE CONFIG (SUPABASE) -->
-        <div id="tab-database-config" class="admin-tab-content" style="display: none;">
-          <div class="card" style="max-width: 800px;">
-            <div class="card-header">
-              <div>
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Koneksi Database Supabase Cloud (Produksi 300 Siswa)</h3>
-                <p style="font-size: 0.8rem; color: var(--slate-500);">Hubungkan dengan akun Supabase gratis Anda agar data 300 siswa tersimpan aman di cloud.</p>
-              </div>
-            </div>
-            <div class="card-body">
-              <div style="background-color: var(--primary-50); border: 1px solid var(--primary-100); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
-                <p style="font-size: 0.85rem; color: var(--primary-700); line-height: 1.5;">
-                  💡 <strong>Mode Saat Ini:</strong> Aplikasi dilengkapi dengan <em>Hybrid Cloud Storage</em>. Jika kredensial Supabase di bawah diisi, data otomatis tersinkron ke Cloud. Jika kosong, sistem menggunakan penyimpanan in-browser yang siap dicoba langsung.
-                </p>
-              </div>
-
-              <form onsubmit="handleSaveDatabaseConfig(event)">
-                <div class="form-group">
-                  <label class="form-label">Supabase Project URL</label>
-                  <input type="text" id="config-supabase-url" class="form-control" placeholder="https://xyzcompany.supabase.co">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Supabase Anon Public API Key</label>
-                  <input type="password" id="config-supabase-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-                </div>
-                <div style="display: flex; gap: 0.75rem;">
-                  <button type="submit" class="btn btn-primary">Simpan Kredensial Supabase</button>
-                  <button type="button" class="btn btn-outline" onclick="copySqlSchema()">Salin Kode SQL Schema</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB: KELOLA DATA SISWA (MENU GURU & OPERATOR) -->
-        <div id="tab-manage-students" class="admin-tab-content" style="display: none;">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Kelola Data Siswa Peserta Ujian</h3>
-                <p style="font-size: 0.8rem; color: var(--slate-500);">Data siswa resmi sekolah yang berhak login ke ruang ujian online</p>
-              </div>
-              <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
-                <select id="filter-manage-student-class" class="form-control" style="width: 140px; font-size: 0.85rem;" onchange="renderStudentsTable()">
-                  <option value="ALL">Semua Kelas</option>
-                  <option value="6">Kelas 6</option>
-                  <option value="5">Kelas 5</option>
-                  <option value="4">Kelas 4</option>
-                  <option value="3">Kelas 3</option>
-                  <option value="2">Kelas 2</option>
-                  <option value="1">Kelas 1</option>
-                  <option value="UMUM">Kelas UMUM</option>
-                </select>
-                <button class="btn btn-outline btn-sm" onclick="openImportStudentsModal()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                  📥 Impor dari Excel / CSV
-                </button>
-                <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  + Tambah Siswa Baru
-                </button>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th style="width: 45px;">No</th>
-                    <th style="width: 140px;">No Peserta / NISN</th>
-                    <th>Nama Lengkap Siswa</th>
-                    <th style="width: 110px;">Kelas / Rombel</th>
-                    <th style="width: 100px;">Jenis Kelamin</th>
-                    <th style="width: 130px;">Status Akun</th>
-                    <th style="width: 130px;">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody id="table-students-body">
-                  <!-- Injected via Javascript -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB: KELOLA DATA GURU (KHUSUS OPERATOR SEKOLAH) -->
-        <div id="tab-manage-teachers" class="admin-tab-content" style="display: none;">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Manajemen Akun Guru & Pengawas Ujian</h3>
-                <p style="font-size: 0.8rem; color: var(--slate-500);">Kelola akses pendidik, reset password login, dan atur hak kewenangan kelas/mapel</p>
-              </div>
-              <div>
-                <button class="btn btn-primary btn-sm" onclick="openAddTeacherModal()" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  + Tambah Guru Baru
-                </button>
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th style="width: 45px;">No</th>
-                    <th>Nama Lengkap Guru</th>
-                    <th style="width: 130px;">Username</th>
-                    <th style="width: 120px;">Password</th>
-                    <th style="width: 150px;">Peran (Role)</th>
-                    <th>Kewenangan Binaan</th>
-                    <th style="width: 130px;">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody id="table-teachers-body">
-                  <!-- Injected via Javascript -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
       </div>
-    </main>
+    </div>
+  </main>
 
-    <!-- MODAL: ANTI-CURANG PERINGATAN KELUAR TAB -->
-    <div id="modal-cheat-alert" class="modal-overlay" style="display: none;">
-      <div class="modal-content" style="border: 2px solid var(--rose-600);">
-        <div class="modal-header" style="background-color: #fff1f2;">
-          <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--rose-600); font-weight: 700;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+  <!-- SCREEN 2: KONFIRMASI DATA & TATA TERTIB -->
+  <main id="screen-student-confirm" class="view-screen">
+    <div class="auth-wrapper">
+      <div class="card auth-card" style="max-width: 560px;">
+        <div class="card-header">
+          <h3 style="font-size: 1.15rem; font-weight: 700;">Konfirmasi Peserta Ujian</h3>
+        </div>
+        <div class="card-body">
+          <div
+            style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.6rem; font-size: 0.9rem;">
+              <span style="color: var(--slate-500);">Nomor Peserta:</span>
+              <strong id="confirm-nisn" style="color: var(--slate-900);">-</strong>
+
+              <span style="color: var(--slate-500);">Nama Siswa:</span>
+              <strong id="confirm-name" style="color: var(--slate-900);">-</strong>
+
+              <span style="color: var(--slate-500);">Kelas:</span>
+              <strong id="confirm-class" style="color: var(--slate-900);">-</strong>
+
+              <span style="color: var(--slate-500);">Mata Pelajaran:</span>
+              <strong id="confirm-subject" style="color: var(--primary-700);">-</strong>
+
+              <span style="color: var(--slate-500);">Jumlah Soal:</span>
+              <strong id="confirm-total-q" style="color: var(--slate-900);">-</strong>
+
+              <span style="color: var(--slate-500);">Alokasi Waktu:</span>
+              <strong id="confirm-duration" style="color: var(--emerald-600);">-</strong>
+            </div>
+          </div>
+
+          <div class="cheat-alert-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="flex-shrink: 0; margin-top: 2px;">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
               <line x1="12" y1="9" x2="12" y2="13"></line>
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
-            PERINGATAN PELANGGARAN UJIAN!
+            <div>
+              <strong style="display: block; margin-bottom: 0.2rem; font-size: 0.88rem;">Peringatan
+                Anti-Curang:</strong>
+              <p style="font-size: 0.82rem; line-height: 1.4;">
+                Dilarang meminimalkan layar, membuka tab lain, atau beralih aplikasi. Sistem mencatat setiap pelanggaran
+                secara otomatis dan mengirim peringatan ke pengawas.
+              </p>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-outline" style="flex: 1;" onclick="showScreen('student-login')">Batal</button>
+            <button class="btn btn-primary" style="flex: 2;" onclick="startExamSession()">
+              Mulai Mengerjakan
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </button>
           </div>
         </div>
-        <div class="modal-body">
-          <p style="font-size: 0.95rem; line-height: 1.6; color: var(--slate-800);">
-            Anda terdeteksi **meninggalkan layar ujian** (membuka tab baru, meminimalkan browser, atau berpindah aplikasi).
-          </p>
-          <div style="margin-top: 1rem; padding: 0.85rem; background-color: var(--slate-100); border-radius: var(--radius-md); font-size: 0.88rem;">
-            Peringatan ke: <strong id="modal-warning-count" style="color: var(--rose-600); font-size: 1.1rem;">1</strong> dari maksimal <strong>3x</strong>.<br>
-            <span style="color: var(--slate-500); font-size: 0.78rem;">Jika mencapai 3x, ujian akan dikunci dan dikumpulkan otomatis ke pengawas.</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- SCREEN 3: RUANG UJIAN CBT (ANBK STYLE) -->
+  <main id="screen-student-exam" class="view-screen">
+    <!-- Exam Banner Sticky -->
+    <div class="exam-banner">
+      <div class="exam-banner-inner">
+        <div class="student-identity">
+          <div class="student-avatar" id="exam-avatar">S</div>
+          <div class="student-meta">
+            <h3 id="exam-student-name">Nama Siswa</h3>
+            <p><span id="exam-subject-name">Matematika</span> • Kelas: <span id="exam-class-name">XII</span></p>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-danger" onclick="dismissCheatAlert()">Saya Mengerti & Kembali Ujian</button>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div class="autosave-badge" id="exam-autosave-indicator">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Auto-Save Aktif</span>
+          </div>
+
+          <div class="exam-timer-box" id="exam-timer-wrapper">
+            <div>
+              <div class="timer-label">SISA WAKTU</div>
+              <div class="timer-value" id="exam-timer-display">00:00:00</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAL: KONFIRMASI SUBMIT FINAL -->
-    <div id="modal-submit-confirm" class="modal-overlay" style="display: none;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 style="font-size: 1.15rem; font-weight: 700;">Konfirmasi Pengumpulan Ujian</h3>
+    <!-- Exam Layout (Question + Navigator) -->
+    <div class="exam-layout">
+      <!-- Question Container -->
+      <div class="question-card">
+        <div class="question-header">
+          <div class="question-index-badge" id="exam-question-badge">Soal No. 1</div>
+          <div class="font-size-control">
+            <span style="font-size: 0.78rem; color: var(--slate-500); margin-right: 0.25rem;">Ukuran Huruf:</span>
+            <button class="btn-font-scale" onclick="scaleFontSize(-1)">A-</button>
+            <button class="btn-font-scale" onclick="scaleFontSize(0)">A</button>
+            <button class="btn-font-scale" onclick="scaleFontSize(1)">A+</button>
+          </div>
         </div>
-        <div class="modal-body">
-          <p style="font-size: 0.92rem; color: var(--slate-600); margin-bottom: 1.25rem;">
-            Apakah Anda yakin ingin menyelesaikan ujian ini? Jawaban yang telah dikirim tidak dapat diubah kembali.
-          </p>
-          <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1rem; font-size: 0.9rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
-              <span>Sudah Dijawab:</span>
-              <strong id="confirm-answered-count" style="color: var(--emerald-600);">0</strong>
+
+        <div class="question-body" id="question-text-container">
+          <div id="question-image-box" class="question-image-box" style="display: none;">
+            <img id="question-image-tag" src="" alt="Lampiran Soal">
+          </div>
+          <div class="question-content" id="question-content-text">
+            Memuat butir soal...
+          </div>
+
+          <!-- Options List (A - E) -->
+          <div class="options-list" id="options-list-container">
+            <!-- Rendered by Javascript -->
+          </div>
+        </div>
+
+        <!-- Question Navigation Buttons -->
+        <div class="question-footer">
+          <button id="btn-prev-q" class="btn btn-outline" onclick="navigateQuestion(-1)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Sebelumnya
+          </button>
+
+          <label class="doubt-checkbox-wrapper">
+            <input type="checkbox" id="checkbox-doubt" onchange="toggleDoubtAnswer()">
+            <span>Ragu-ragu</span>
+          </label>
+
+          <div style="display: flex; gap: 0.5rem;">
+            <button id="btn-next-q" class="btn btn-primary" onclick="navigateQuestion(1)">
+              Berikutnya
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+            <button class="btn btn-danger" onclick="openSubmitConfirmModal()">
+              Selesai Ujian
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Panel (Grid Nomor Soal) -->
+      <aside class="nav-panel">
+        <div class="nav-panel-header">
+          <div class="nav-panel-title">Daftar Nomor Soal</div>
+          <div class="nav-panel-legend">
+            <div class="legend-item">
+              <div class="legend-dot answered"></div> Dijawab
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
-              <span>Masih Ragu-ragu:</span>
-              <strong id="confirm-doubt-count" style="color: var(--amber-600);">0</strong>
+            <div class="legend-item">
+              <div class="legend-dot doubt"></div> Ragu
             </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span>Belum Dijawab:</span>
-              <strong id="confirm-empty-count" style="color: var(--rose-600);">0</strong>
+            <div class="legend-item">
+              <div class="legend-dot empty"></div> Belum
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" onclick="closeSubmitConfirmModal()">Kembali Periksa</button>
-          <button class="btn btn-primary" onclick="submitFinalExam()">Ya, Selesai & Kirim</button>
+
+        <div class="nav-grid-body">
+          <div class="grid-buttons" id="question-grid-container">
+            <!-- Buttons 1 to N generated by Javascript -->
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- SCREEN 4: HASIL / BUKTI SELESAI UJIAN -->
+  <main id="screen-student-finish" class="view-screen">
+    <div class="auth-wrapper">
+      <div class="card auth-card" style="max-width: 520px; text-align: center;">
+        <div class="card-body">
+          <div
+            style="width: 70px; height: 70px; background-color: #ecfdf5; color: var(--emerald-600); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+
+          <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900);">Ujian Telah Selesai</h2>
+          <p style="color: var(--slate-500); font-size: 0.9rem; margin-top: 0.35rem;">
+            Seluruh jawaban Anda telah berhasil tersimpan dengan aman di server sistem.
+          </p>
+
+          <div
+            style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem; margin: 1.5rem 0; text-align: left; font-size: 0.9rem;">
+            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem;">
+              <span style="color: var(--slate-500);">Nama:</span>
+              <strong id="finish-student-name">-</strong>
+              <span style="color: var(--slate-500);">Mata Pelajaran:</span>
+              <strong id="finish-subject-name">-</strong>
+              <span style="color: var(--slate-500);">Status:</span>
+              <span class="badge badge-success">BERHASIL DISUBMIT</span>
+              <span style="color: var(--slate-500);">Waktu Selesai:</span>
+              <strong id="finish-timestamp">-</strong>
+              <span style="color: var(--slate-500);">Pelanggaran Tab:</span>
+              <strong id="finish-warnings" style="color: var(--slate-700);">0x</strong>
+            </div>
+
+            <div id="finish-score-box"
+              style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed var(--slate-300); display: none;">
+              <div style="text-align: center;">
+                <span
+                  style="font-size: 0.8rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase;">NILAI
+                  UJIAN ANDA</span>
+                <div id="finish-score-value"
+                  style="font-size: 2.5rem; font-weight: 800; color: var(--primary-600); line-height: 1.2;">0</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-outline btn-lg" style="width: 100%;" onclick="showScreen('student-login')">
+            Kembali ke Halaman Awal
+          </button>
         </div>
       </div>
     </div>
+  </main>
 
-    <!-- MODAL: TAMBAH / EDIT SOAL (ADMIN) -->
-    <div id="modal-question-editor" class="modal-overlay" style="display: none;">
-      <div class="modal-content" style="max-width: 650px;">
-        <div class="modal-header">
-          <h3 id="modal-question-title" style="font-size: 1.15rem; font-weight: 700;">Tambah Soal Baru</h3>
+  <!-- SCREEN 5: ADMIN DASHBOARD PANEL -->
+  <main id="screen-admin-dashboard" class="view-screen">
+    <div class="admin-container">
+      <!-- Active Teacher Profile Banner -->
+      <div class="teacher-profile-banner">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div class="teacher-avatar-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+              <h2 id="teacher-profile-name" style="font-size: 1.15rem; font-weight: 800; color: var(--slate-900);">Nama
+                Guru</h2>
+              <span id="teacher-profile-badge" class="teacher-badge kelas">GURU KELAS</span>
+            </div>
+            <p id="teacher-profile-scope" style="font-size: 0.82rem; color: var(--slate-500); margin-top: 0.2rem;">
+              Kewenangan: Kelas 7A | Mata Pelajaran: Semua
+            </p>
+          </div>
         </div>
-        <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
-          <form id="form-question-editor" onsubmit="handleSaveQuestion(event)">
-            <input type="hidden" id="edit-question-id">
-            <input type="hidden" id="edit-question-type" value="pg">
 
-            <!-- 5 Tipe Soal Selector (Sesuai Gambar 3) -->
-            <label class="form-label" style="margin-bottom: 0.5rem;">Pilih Tipe Soal ANBK:</label>
-            <div class="qtype-selector-grid">
-              <button type="button" class="qtype-btn type-pg active" onclick="setEditorQuestionType('pg', this)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                1. Pilihan Ganda
-              </button>
-              <button type="button" class="qtype-btn type-kompleks" onclick="setEditorQuestionType('kompleks', this)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                2. PG Kompleks
-              </button>
-              <button type="button" class="qtype-btn type-jodoh" onclick="setEditorQuestionType('jodoh', this)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
-                3. Menjodohkan
-              </button>
-              <button type="button" class="qtype-btn type-esai" onclick="setEditorQuestionType('esai', this)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
-                4. Esai / Isian
-              </button>
-              <button type="button" class="qtype-btn type-bs" onclick="setEditorQuestionType('bs', this)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                5. Benar / Salah
-              </button>
-            </div>
+        <button class="btn btn-outline btn-sm" onclick="handleTeacherLogout()"
+          style="color: var(--rose-600); border-color: var(--rose-200);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Keluar / Ganti Akun
+        </button>
+      </div>
 
-            <div class="form-group">
-              <label class="form-label">Teks Pertanyaan Soal</label>
-              <textarea id="edit-question-text" class="form-control" rows="3" placeholder="Tulis teks pertanyaan..." required></textarea>
+      <!-- Isolation Notice Callout -->
+      <div class="isolation-callout" id="teacher-isolation-notice">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="flex-shrink: 0; margin-top: 2px;">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <div id="teacher-isolation-text">
+          <strong>Sistem Isolasi Aktif:</strong> Anda masuk sebagai Guru Kelas. Anda hanya dapat melihat dan mengelola
+          bank soal serta nilai ujian untuk kelas Anda sendiri.
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900);">Guru & Pengawas</h1>
+      </div>
+
+      <!-- Dashboard Metric Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon-box blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div class="metric-content">
+            <h4>Siswa Aktif Ujian</h4>
+            <div class="metric-value" id="metric-active-students">0</div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div class="metric-content">
+            <h4>Sudah Selesai</h4>
+            <div class="metric-value" id="metric-submitted-students">0</div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box amber">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <div class="metric-content">
+            <h4>Token Ujian Aktif</h4>
+            <div class="metric-value" id="metric-active-token">PAS26A</div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box rose">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <div class="metric-content">
+            <h4>Terdeteksi Keluar Tab</h4>
+            <div class="metric-value" id="metric-warning-students">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Token Proktor Dinamis (Auto-Refresh 3 Menit ala ANBK/UTBK) -->
+      <div class="token-proktor-card">
+        <div>
+          <div
+            style="font-size: 0.8rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 0.4rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            TOKEN UJIAN DINAMIS (OTOMATIS BERGANTI TIAP 3 MENIT)
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 0.35rem;">
+            <span class="token-digits" id="proctor-token-display">PAS26A</span>
+            <span style="font-size: 0.95rem; color: #38bdf8; font-weight: 700;" id="token-timer-countdown">03:00</span>
+          </div>
+          <div class="token-countdown-bar-wrapper">
+            <div class="token-countdown-bar" id="token-progress-bar"></div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.6rem; align-items: center;">
+          <button class="btn btn-outline btn-sm" onclick="forceRefreshToken()"
+            style="color: #ffffff; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1);">
+            🔄 Ganti Token Sekarang
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="admin-header-tabs">
+        <div class="tab-link active" onclick="switchAdminTab('live-monitor', this)">📅 Jadwal Ujian & Live</div>
+        <div class="tab-link" onclick="switchAdminTab('question-bank', this)">📝 Bank Soal (5 Tipe ANBK)</div>
+        <div class="tab-link" id="tab-link-students" onclick="switchAdminTab('manage-students', this)">🎓 Kelola Data
+          Siswa</div>
+        <div class="tab-link" onclick="switchAdminTab('results-analysis', this)">📊 Rekap Nilai</div>
+        <div class="tab-link" onclick="switchAdminTab('exam-cards', this)">🪪 Kartu Peserta Ujian</div>
+        <div class="tab-link" onclick="switchAdminTab('school-identity', this)">🏫 Identitas Sekolah</div>
+        <div class="tab-link" id="tab-link-teachers" onclick="switchAdminTab('manage-teachers', this)"
+          style="display: none;">👨‍🏫 Kelola Data Guru</div>
+        <div class="tab-link" id="tab-link-supabase" onclick="switchAdminTab('database-config', this)"
+          style="display: none;">☁️ Koneksi Supabase</div>
+      </div>
+
+      <!-- TAB 1: LIVE MONITOR -->
+      <div id="tab-live-monitor" class="admin-tab-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Daftar Siswa Sedang Mengerjakan</h3>
+              <p style="font-size: 0.8rem; color: var(--slate-500);">Auto-update realtime setiap 5 detik tanpa
+                me-refresh halaman</p>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="filter-search-student" class="form-control" placeholder="Cari nama / NISN..."
+                style="width: 220px; padding: 0.4rem 0.75rem; font-size: 0.85rem;"
+                oninput="renderLiveMonitoringTable()">
+              <button class="btn btn-outline btn-sm" onclick="renderLiveMonitoringTable()">Refresh</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>No Peserta</th>
+                  <th>Nama Lengkap</th>
+                  <th>Kelas</th>
+                  <th>Progress Jawaban</th>
+                  <th>Pelanggaran Tab</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-live-students-body">
+                <!-- Injected via Javascript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: BANK SOAL -->
+      <div id="tab-question-bank" class="admin-tab-content" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Daftar Bank Soal Pilihan Ganda</h3>
+              <p style="font-size: 0.8rem; color: var(--slate-500);">Total Soal Aktif: <strong
+                  id="admin-total-q-badge">0</strong> Soal</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-outline btn-sm" onclick="printExamQuestionsPdf()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9V2h12v7"></path>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                🖨️ Cetak Soal (PDF)
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="openAddQuestionModal()">+ Tambah Soal Baru</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">No</th>
+                  <th>Pertanyaan Soal</th>
+                  <th style="width: 120px;">Mata Pelajaran</th>
+                  <th style="width: 100px;">Target Kelas</th>
+                  <th style="width: 80px;">Kunci</th>
+                  <th style="width: 70px;">Bobot</th>
+                  <th style="width: 130px;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-questions-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: PENGATURAN SESI -->
+      <div id="tab-session-setting" class="admin-tab-content" style="display: none;">
+        <div class="card" style="max-width: 700px;">
+          <div class="card-header">
+            <h3 style="font-size: 1.05rem; font-weight: 700;">Atur Sesi Ujian Aktif</h3>
+          </div>
+          <div class="card-body">
+            <form onsubmit="handleSaveSessionSettings(event)">
+              <div class="form-group">
+                <label class="form-label">Judul Ujian</label>
+                <input type="text" id="setting-title" class="form-control" value="Penilaian Akhir Semester Ganjil 2026"
+                  required>
+              </div>
               <div class="form-group">
                 <label class="form-label">Mata Pelajaran</label>
-                <input type="text" id="edit-question-subject" class="form-control" placeholder="Contoh: Matematika" required>
+                <input type="text" id="setting-subject" class="form-control" value="Matematika Peminatan" required>
               </div>
-              <div class="form-group">
-                <label class="form-label">Target Kelas</label>
-                <input type="text" id="edit-question-class" class="form-control" placeholder="Contoh: 7A, 7B, atau UMUM" required>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">URL Gambar (Opsional jika ada diagram/foto)</label>
-              <input type="url" id="edit-question-image" class="form-control" placeholder="https://example.com/gambar-soal.jpg">
-            </div>
-
-            <!-- DYNAMIC INPUT FIELDS FOR 5 QUESTION TYPES -->
-            <div id="qtype-inputs-container">
-              <!-- 1. Pilihan Ganda & 2. PG Kompleks -->
-              <div id="qtype-panel-pg">
-                <div style="display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0;">
-                  <div class="form-group" style="margin-bottom: 0.5rem;">
-                    <label class="form-label">Pilihan A</label>
-                    <input type="text" id="edit-opt-a" class="form-control" placeholder="Jawaban A...">
-                  </div>
-                  <div class="form-group" style="margin-bottom: 0.5rem;">
-                    <label class="form-label">Pilihan B</label>
-                    <input type="text" id="edit-opt-b" class="form-control" placeholder="Jawaban B...">
-                  </div>
-                  <div class="form-group" style="margin-bottom: 0.5rem;">
-                    <label class="form-label">Pilihan C</label>
-                    <input type="text" id="edit-opt-c" class="form-control" placeholder="Jawaban C...">
-                  </div>
-                  <div class="form-group" style="margin-bottom: 0.5rem;">
-                    <label class="form-label">Pilihan D</label>
-                    <input type="text" id="edit-opt-d" class="form-control" placeholder="Jawaban D...">
-                  </div>
-                  <div class="form-group" style="margin-bottom: 0.5rem;">
-                    <label class="form-label">Pilihan E</label>
-                    <input type="text" id="edit-opt-e" class="form-control" placeholder="Jawaban E (opsional)...">
-                  </div>
-                </div>
-
-                <!-- Single Key for PG -->
-                <div class="form-group" id="group-single-key">
-                  <label class="form-label">Kunci Jawaban Benar (Pilihan Tunggal)</label>
-                  <select id="edit-correct-key" class="form-control">
-                    <option value="A">Opsi A</option>
-                    <option value="B">Opsi B</option>
-                    <option value="C">Opsi C</option>
-                    <option value="D">Opsi D</option>
-                    <option value="E">Opsi E</option>
-                  </select>
-                </div>
-
-                <!-- Multiple Keys for PG Kompleks -->
-                <div class="form-group" id="group-multi-key" style="display: none;">
-                  <label class="form-label">Kunci Jawaban Benar (Bisa Pilih Lebih dari Satu):</label>
-                  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <label><input type="checkbox" id="key-chk-a" value="A"> Opsi A</label>
-                    <label><input type="checkbox" id="key-chk-b" value="B"> Opsi B</label>
-                    <label><input type="checkbox" id="key-chk-c" value="C"> Opsi C</label>
-                    <label><input type="checkbox" id="key-chk-d" value="D"> Opsi D</label>
-                    <label><input type="checkbox" id="key-chk-e" value="E"> Opsi E</label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. Menjodohkan Panel -->
-              <div id="qtype-panel-jodoh" style="display: none; margin: 1rem 0;">
-                <label class="form-label">Pasangan Premis & Jawaban (Menjodohkan):</label>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                    <input type="text" id="jodoh-premis-1" class="form-control" placeholder="Pernyataan 1...">
-                    <input type="text" id="jodoh-jawab-1" class="form-control" placeholder="Pasangan Jawaban 1...">
-                  </div>
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                    <input type="text" id="jodoh-premis-2" class="form-control" placeholder="Pernyataan 2...">
-                    <input type="text" id="jodoh-jawab-2" class="form-control" placeholder="Pasangan Jawaban 2...">
-                  </div>
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                    <input type="text" id="jodoh-premis-3" class="form-control" placeholder="Pernyataan 3...">
-                    <input type="text" id="jodoh-jawab-3" class="form-control" placeholder="Pasangan Jawaban 3...">
-                  </div>
-                </div>
-              </div>
-
-              <!-- 4. Esai / Isian Panel -->
-              <div id="qtype-panel-esai" style="display: none; margin: 1rem 0;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                  <label class="form-label">Kunci Jawaban Singkat / Referensi Penilaian</label>
-                  <textarea id="esai-key-text" class="form-control" rows="2" placeholder="Tulis kata kunci jawaban yang diharapkan..."></textarea>
-                </div>
-              </div>
-
-              <!-- 5. Benar / Salah Panel -->
-              <div id="qtype-panel-bs" style="display: none; margin: 1rem 0;">
-                <label class="form-label">Daftar Pernyataan & Kunci:</label>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                  <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 0.5rem;">
-                    <input type="text" id="bs-text-1" class="form-control" placeholder="Pernyataan 1...">
-                    <select id="bs-key-1" class="form-control">
-                      <option value="B">Benar</option>
-                      <option value="S">Salah</option>
-                    </select>
-                  </div>
-                  <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 0.5rem;">
-                    <input type="text" id="bs-text-2" class="form-control" placeholder="Pernyataan 2...">
-                    <select id="bs-key-2" class="form-control">
-                      <option value="B">Benar</option>
-                      <option value="S">Salah</option>
-                    </select>
+                  <label class="form-label">Token Rilis Ujian</label>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="setting-token" class="form-control" value="PAS26A"
+                      style="font-weight: 700; text-transform: uppercase;" required>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="generateRandomToken()">Acak</button>
                   </div>
                 </div>
-              </div>
-            </div>
-              <div class="form-group">
-                <label class="form-label">Bobot Nilai</label>
-                <input type="number" id="edit-score-weight" class="form-control" value="10" min="1" required>
-              </div>
-            </div>
-
-            <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1rem;">
-              <button type="button" class="btn btn-outline" onclick="closeQuestionModal()">Batal</button>
-              <button type="submit" class="btn btn-primary">Simpan Butir Soal</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: TAMBAH / EDIT DATA GURU (OPERATOR SEKOLAH) -->
-    <div id="modal-teacher-editor" class="modal-overlay" style="display: none;">
-      <div class="modal-content" style="max-width: 580px;">
-        <div class="modal-header">
-          <h3 style="font-size: 1.15rem; font-weight: 700;" id="modal-teacher-title">Tambah Akun Guru Baru</h3>
-          <button class="btn btn-outline btn-sm" onclick="closeTeacherModal()" style="padding: 0.2rem 0.5rem;">✕</button>
-        </div>
-        <div class="modal-body">
-          <form id="form-teacher-editor" onsubmit="handleSaveTeacher(event)">
-            <input type="hidden" id="edit-teacher-id">
-
-            <div class="form-group">
-              <label class="form-label">Nama Lengkap & Gelar Pendidik</label>
-              <input type="text" id="edit-teacher-fullname" class="form-control" placeholder="Contoh: Budi Santoso, S.Pd" required>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label class="form-label">Username Login</label>
-                <input type="text" id="edit-teacher-username" class="form-control" placeholder="Contoh: guru7a" required autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Password Login</label>
-                <div style="position: relative;">
-                  <input type="password" id="edit-teacher-password" class="form-control" placeholder="Minimal 6 karakter" required autocomplete="off">
-                  <button type="button" onclick="toggleEditTeacherPasswordVisibility()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-400);">
-                    <svg id="eye-icon-teacher-edit" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                  </button>
+                <div class="form-group">
+                  <label class="form-label">Durasi (Menit)</label>
+                  <input type="number" id="setting-duration" class="form-control" value="90" min="5" max="300" required>
                 </div>
               </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Peran / Tugas Pendidik (Role)</label>
-              <select id="edit-teacher-role" class="form-control" onchange="handleTeacherRoleChange()" required>
-                <option value="guru_kelas">Guru Kelas (Wali Rombel)</option>
-                <option value="guru_mapel">Guru Mata Pelajaran</option>
-                <option value="admin_sekolah">Operator Sekolah (Super Admin)</option>
-              </select>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group" id="group-teacher-class">
-                <label class="form-label">Kelas Binaan</label>
-                <input type="text" id="edit-teacher-class" class="form-control" placeholder="Contoh: 7A, 7B, dsb">
-                <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Kelas</small>
+              <div style="margin: 1.25rem 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer;">
+                  <input type="checkbox" id="setting-random-q" checked>
+                  <span style="font-size: 0.9rem; font-weight: 600;">Acak Urutan Soal untuk Setiap Siswa</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer;">
+                  <input type="checkbox" id="setting-random-opt">
+                  <span style="font-size: 0.9rem; font-weight: 600;">Acak Pilihan Jawaban (A, B, C, D, E)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer;">
+                  <input type="checkbox" id="setting-show-score" checked>
+                  <span style="font-size: 0.9rem; font-weight: 600;">Tampilkan Nilai ke Siswa Saat Selesai Ujian</span>
+                </label>
               </div>
-              <div class="form-group" id="group-teacher-subject">
-                <label class="form-label">Mata Pelajaran Binaan</label>
-                <input type="text" id="edit-teacher-subject" class="form-control" placeholder="Contoh: Matematika, IPA, Tematik">
-                <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Mapel</small>
+
+              <!-- TAB 4: KARTU PESERTA UJIAN (SESUAI GAMBAR 4) -->
+              <div id="tab-exam-cards" class="admin-tab-content" style="display: none;">
+                <div class="card">
+                  <div class="card-header">
+                    <div>
+                      <h3 style="font-size: 1.05rem; font-weight: 700;">Kartu Peserta Ujian SD NEGERI 14 TOBOALI</h3>
+                      <p style="font-size: 0.8rem; color: var(--slate-500);">Kartu ujian resmi format ANBK/Ujian Sekolah
+                        siap cetak PDF per lembar A4</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="printExamCardsPdf()">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M6 9V2h12v7"></path>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                        <rect x="6" y="14" width="12" height="8"></rect>
+                      </svg>
+                      🖨️ Cetak Semua Kartu Ujian (PDF)
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="exam-card-grid" id="container-exam-cards">
+                      <!-- Injected by JavaScript -->
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
-              <button type="button" class="btn btn-outline" onclick="closeTeacherModal()">Batal</button>
-              <button type="submit" class="btn btn-primary">Simpan Akun Guru</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+              <!-- TAB 5: IDENTITAS SEKOLAH (SESUAI GAMBAR 4) -->
+              <div id="tab-school-identity" class="admin-tab-content" style="display: none;">
+                <div class="card" style="max-width: 800px;">
+                  <div class="card-header">
+                    <div>
+                      <h3 style="font-size: 1.05rem; font-weight: 700;">Identitas Sekolah & Kop Surat Resmi</h3>
+                      <p style="font-size: 0.8rem; color: var(--slate-500);">Informasi ini otomatis tercetak pada Kop
+                        Surat Naskah Soal, Kartu Ujian, dan Laporan Rekap Nilai.</p>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <form onsubmit="handleSaveSchoolIdentity(event)">
+                      <!-- Logo Sekolah Resmi -->
+                      <div class="form-group"
+                        style="background: var(--slate-50); border: 1px dashed var(--slate-300); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+                        <label class="form-label"
+                          style="font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                          <span>Logo Resmi Sekolah (Tercetak di Kop Surat & Kartu Ujian)</span>
+                          <span style="font-size: 0.75rem; color: var(--slate-400); font-weight: normal;">Format: PNG /
+                            JPG / SVG</span>
+                        </label>
+                        <div style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
+                          <div id="school-logo-preview-box"
+                            style="width: 75px; height: 75px; border: 1px solid var(--slate-200); border-radius: var(--radius-sm); background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                            <img id="school-logo-img" src="" alt="Logo"
+                              style="max-width: 100%; max-height: 100%; object-fit: contain; display: none;">
+                            <span id="school-logo-placeholder"
+                              style="font-size: 0.7rem; color: var(--slate-400); text-align: center; padding: 4px;">Belum
+                              Ada Logo</span>
+                          </div>
+                          <div style="flex: 1; min-width: 220px;">
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                              <label class="btn btn-outline btn-sm"
+                                style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                  stroke-width="2">
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                  <polyline points="17 8 12 3 7 8"></polyline>
+                                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                Upload File Logo
+                                <input type="file" id="school-logo-file-input" accept="image/*"
+                                  onchange="handleLogoFileUpload(event)" style="display: none;">
+                              </label>
+                              <button type="button" class="btn btn-outline btn-sm" onclick="removeSchoolLogo()"
+                                style="color: var(--rose-600);">Hapus Logo</button>
+                            </div>
+                            <input type="url" id="school-logo-url" class="form-control"
+                              placeholder="Atau masukkan URL logo: https://..."
+                              oninput="handleLogoUrlInput(this.value)">
+                          </div>
+                        </div>
+                      </div>
 
-    <!-- MODAL: TAMBAH / EDIT DATA SISWA (GURU & OPERATOR) -->
-    <div id="modal-student-editor" class="modal-overlay" style="display: none;">
-      <div class="modal-content" style="max-width: 520px;">
-        <div class="modal-header">
-          <h3 style="font-size: 1.15rem; font-weight: 700;" id="modal-student-title">Tambah Data Siswa Baru</h3>
-          <button class="btn btn-outline btn-sm" onclick="closeStudentModal()" style="padding: 0.2rem 0.5rem;">✕</button>
-        </div>
-        <div class="modal-body">
-          <form id="form-student-editor" onsubmit="handleSaveStudent(event)">
-            <input type="hidden" id="edit-student-original-nisn">
+                      <div class="form-group">
+                        <label class="form-label">Nama Sekolah / Lembaga</label>
+                        <input type="text" id="school-name" class="form-control" value="SD NEGERI 14 TOBOALI" required>
+                      </div>
 
-            <div class="form-group">
-              <label class="form-label">Nomor Peserta / NISN</label>
-              <input type="text" id="edit-student-nisn" class="form-control" placeholder="Contoh: 2026-001" required autocomplete="off">
-              <small style="font-size: 0.75rem; color: var(--slate-500);">*Digunakan siswa saat login ujian</small>
-            </div>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                          <label class="form-label">NPSN Sekolah</label>
+                          <input type="text" id="school-npsn" class="form-control" value="10901234" required>
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">Tahun Ajaran / Semester</label>
+                          <input type="text" id="school-academic-year" class="form-control" value="2026/2027 - Ganjil"
+                            required>
+                        </div>
+                      </div>
 
-            <div class="form-group">
-              <label class="form-label">Nama Lengkap Siswa</label>
-              <input type="text" id="edit-student-name" class="form-control" placeholder="Contoh: Ahmad Rizki" required autocomplete="off">
-            </div>
+                      <div class="form-group">
+                        <label class="form-label">Alamat Lengkap Sekolah</label>
+                        <input type="text" id="school-address" class="form-control"
+                          value="Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung"
+                          required>
+                      </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label class="form-label">Kelas / Rombel</label>
-                <input type="text" id="edit-student-class" class="form-control" placeholder="Contoh: 7A, 7B, UMUM" required>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                          <label class="form-label">Nama Kepala Sekolah</label>
+                          <input type="text" id="school-headmaster" class="form-control" value="H. Suhardi, S.Pd., M.Pd"
+                            required>
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">NIP Kepala Sekolah</label>
+                          <input type="text" id="school-headmaster-nip" class="form-control"
+                            value="19750312 199903 1 004" required>
+                        </div>
+                      </div>
+
+                      <!-- Data Guru / Pengawas Penandatangan Ujian -->
+                      <div
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--slate-200);">
+                        <div class="form-group">
+                          <label class="form-label">Nama Guru / Pengawas Penandatangan</label>
+                          <input type="text" id="school-teacher-signer" class="form-control"
+                            placeholder="Contoh: Siti Aminah, S.Pd" required>
+                          <small style="font-size: 0.75rem; color: var(--slate-500);">*Tercetak pada tanda tangan
+                            rekapitulasi nilai</small>
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label">NIP Guru / Pengawas (Opsional)</label>
+                          <input type="text" id="school-teacher-signer-nip" class="form-control"
+                            placeholder="Contoh: 19820514 200801 2 007 / -">
+                        </div>
+                      </div>
+
+                      <button type="submit" class="btn btn-primary" style="margin-top: 0.75rem;">
+                        Simpan Pengaturan Identitas Sekolah
+                      </button>
+                    </form>
+                  </div>
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Jenis Kelamin</label>
-                <select id="edit-student-gender" class="form-control" required>
-                  <option value="L">Laki-laki (L)</option>
-                  <option value="P">Perempuan (P)</option>
-                </select>
+
+              <!-- TAB 4: REKAP & ANALISIS NILAI -->
+              <div id="tab-results-analysis" class="admin-tab-content" style="display: none;">
+                <div class="card">
+                  <div class="card-header">
+                    <div>
+                      <h3 style="font-size: 1.05rem; font-weight: 700;">Rekap Hasil Ujian & Peringkat Siswa</h3>
+                      <p style="font-size: 0.8rem; color: var(--slate-500);">Daftar nilai seluruh peserta yang sudah
+                        selesai submit</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                      <button class="btn btn-outline btn-sm" onclick="printResultsPdf()">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2">
+                          <path d="M6 9V2h12v7"></path>
+                          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                          <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        🖨️ Cetak Rekap Nilai (PDF)
+                      </button>
+                      <button class="btn btn-success btn-sm" onclick="exportResultsToExcel()">
+                        Download Excel (.xlsx)
+                      </button>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>No</th>
+                          <th>No Peserta</th>
+                          <th>Nama Lengkap</th>
+                          <th>Kelas</th>
+                          <th>Jawaban Benar</th>
+                          <th>Total Nilai</th>
+                          <th>Waktu Submit</th>
+                        </tr>
+                      </thead>
+                      <tbody id="table-results-body">
+                        <!-- Injected via JS -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
-              <button type="button" class="btn btn-outline" onclick="closeStudentModal()">Batal</button>
-              <button type="submit" class="btn btn-primary">Simpan Data Siswa</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+              <!-- TAB 5: DATABASE CONFIG (SUPABASE) -->
+              <div id="tab-database-config" class="admin-tab-content" style="display: none;">
+                <div class="card" style="max-width: 800px;">
+                  <div class="card-header">
+                    <div>
+                      <h3 style="font-size: 1.05rem; font-weight: 700;">Koneksi Database Supabase Cloud (Produksi 300
+                        Siswa)</h3>
+                      <p style="font-size: 0.8rem; color: var(--slate-500);">Hubungkan dengan akun Supabase gratis Anda
+                        agar data 300 siswa tersimpan aman di cloud.</p>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div
+                      style="background-color: var(--primary-50); border: 1px solid var(--primary-100); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+                      <p style="font-size: 0.85rem; color: var(--primary-700); line-height: 1.5;">
+                        💡 <strong>Mode Saat Ini:</strong> Aplikasi dilengkapi dengan <em>Hybrid Cloud Storage</em>.
+                        Jika kredensial Supabase di bawah diisi, data otomatis tersinkron ke Cloud. Jika kosong, sistem
+                        menggunakan penyimpanan in-browser yang siap dicoba langsung.
+                      </p>
+                    </div>
 
-    <!-- MODAL: IMPOR DATA SISWA DARI EXCEL / CSV -->
-    <div id="modal-import-students" class="modal-overlay" style="display: none;">
-      <div class="modal-content" style="max-width: 640px;">
-        <div class="modal-header">
-          <h3 style="font-size: 1.15rem; font-weight: 700;">📥 Impor Data Siswa dari Excel / CSV</h3>
-          <button class="btn btn-outline btn-sm" onclick="closeImportStudentsModal()" style="padding: 0.2rem 0.5rem;">✕</button>
-        </div>
-        <div class="modal-body">
-          <div style="background-color: var(--primary-50); border: 1px solid var(--primary-100); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1rem; font-size: 0.82rem; color: var(--primary-800); line-height: 1.5;">
-            💡 <strong>Petunjuk Impor Massal:</strong><br>
-            Format kolom: <strong>NISN, Nama Lengkap, Kelas, Jenis Kelamin (L/P)</strong>.<br>
-            Anda dapat memilih file <code>.csv</code> atau <strong>langsung copy-paste baris tabel dari Microsoft Excel</strong> ke kotak di bawah.
+                    <form onsubmit="handleSaveDatabaseConfig(event)">
+                      <div class="form-group">
+                        <label class="form-label">Supabase Project URL</label>
+                        <input type="text" id="config-supabase-url" class="form-control"
+                          placeholder="https://xyzcompany.supabase.co">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Supabase Anon Public API Key</label>
+                        <input type="password" id="config-supabase-key" class="form-control"
+                          placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                      </div>
+                      <div style="display: flex; gap: 0.75rem;">
+                        <button type="submit" class="btn btn-primary">Simpan Kredensial Supabase</button>
+                        <button type="button" class="btn btn-outline" onclick="copySqlSchema()">Salin Kode SQL
+                          Schema</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: KELOLA DATA SISWA (MENU GURU & OPERATOR) -->
+              <div id="tab-manage-students" class="admin-tab-content" style="display: none;">
+                <div class="card">
+                  <div class="card-header">
+                    <div>
+                      <h3 style="font-size: 1.05rem; font-weight: 700;">Kelola Data Siswa Peserta Ujian</h3>
+                      <p style="font-size: 0.8rem; color: var(--slate-500);">Data siswa resmi sekolah yang berhak login
+                        ke ruang ujian online</p>
+                    </div>
+                    <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                      <select id="filter-manage-student-class" class="form-control"
+                        style="width: 140px; font-size: 0.85rem;" onchange="renderStudentsTable()">
+                        <option value="ALL">Semua Kelas</option>
+                        <option value="6">Kelas 6</option>
+                        <option value="5">Kelas 5</option>
+                        <option value="4">Kelas 4</option>
+                        <option value="3">Kelas 3</option>
+                        <option value="2">Kelas 2</option>
+                        <option value="1">Kelas 1</option>
+                        <option value="UMUM">Kelas UMUM</option>
+                      </select>
+                      <button class="btn btn-outline btn-sm" onclick="openImportStudentsModal()"
+                        style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        📥 Impor dari Excel / CSV
+                      </button>
+                      <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()"
+                        style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        + Tambah Siswa Baru
+                      </button>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 45px;">No</th>
+                          <th style="width: 140px;">No Peserta / NISN</th>
+                          <th>Nama Lengkap Siswa</th>
+                          <th style="width: 110px;">Kelas / Rombel</th>
+                          <th style="width: 100px;">Jenis Kelamin</th>
+                          <th style="width: 130px;">Status Akun</th>
+                          <th style="width: 130px;">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody id="table-students-body">
+                        <!-- Injected via Javascript -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: KELOLA DATA GURU (KHUSUS OPERATOR SEKOLAH) -->
+              <div id="tab-manage-teachers" class="admin-tab-content" style="display: none;">
+                <div class="card">
+                  <div class="card-header">
+                    <div>
+                      <h3 style="font-size: 1.05rem; font-weight: 700;">Manajemen Akun Guru & Pengawas Ujian</h3>
+                      <p style="font-size: 0.8rem; color: var(--slate-500);">Kelola akses pendidik, reset password
+                        login, dan atur hak kewenangan kelas/mapel</p>
+                    </div>
+                    <div>
+                      <button class="btn btn-primary btn-sm" onclick="openAddTeacherModal()"
+                        style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2.5">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        + Tambah Guru Baru
+                      </button>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 45px;">No</th>
+                          <th>Nama Lengkap Guru</th>
+                          <th style="width: 130px;">Username</th>
+                          <th style="width: 120px;">Password</th>
+                          <th style="width: 150px;">Peran (Role)</th>
+                          <th>Kewenangan Binaan</th>
+                          <th style="width: 130px;">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody id="table-teachers-body">
+                        <!-- Injected via Javascript -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
           </div>
+  </main>
 
-          <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
-            <label class="btn btn-primary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-              Pilih File Excel / CSV
-              <input type="file" id="import-student-file-input" accept=".csv, .txt, .tsv" onchange="handleStudentImportFile(event)" style="display: none;">
-            </label>
-            <button type="button" class="btn btn-outline btn-sm" onclick="downloadStudentTemplateCsv()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Unduh Format Contoh Excel (.CSV)
+  <!-- MODAL: ANTI-CURANG PERINGATAN KELUAR TAB -->
+  <div id="modal-cheat-alert" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="border: 2px solid var(--rose-600);">
+      <div class="modal-header" style="background-color: #fff1f2;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--rose-600); font-weight: 700;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          PERINGATAN PELANGGARAN UJIAN!
+        </div>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--slate-800);">
+          Anda terdeteksi **meninggalkan layar ujian** (membuka tab baru, meminimalkan browser, atau berpindah
+          aplikasi).
+        </p>
+        <div
+          style="margin-top: 1rem; padding: 0.85rem; background-color: var(--slate-100); border-radius: var(--radius-md); font-size: 0.88rem;">
+          Peringatan ke: <strong id="modal-warning-count" style="color: var(--rose-600); font-size: 1.1rem;">1</strong>
+          dari maksimal <strong>3x</strong>.<br>
+          <span style="color: var(--slate-500); font-size: 0.78rem;">Jika mencapai 3x, ujian akan dikunci dan
+            dikumpulkan otomatis ke pengawas.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="dismissCheatAlert()">Saya Mengerti & Kembali Ujian</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIRMASI SUBMIT FINAL -->
+  <div id="modal-submit-confirm" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">Konfirmasi Pengumpulan Ujian</h3>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.92rem; color: var(--slate-600); margin-bottom: 1.25rem;">
+          Apakah Anda yakin ingin menyelesaikan ujian ini? Jawaban yang telah dikirim tidak dapat diubah kembali.
+        </p>
+        <div
+          style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1rem; font-size: 0.9rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <span>Sudah Dijawab:</span>
+            <strong id="confirm-answered-count" style="color: var(--emerald-600);">0</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <span>Masih Ragu-ragu:</span>
+            <strong id="confirm-doubt-count" style="color: var(--amber-600);">0</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Belum Dijawab:</span>
+            <strong id="confirm-empty-count" style="color: var(--rose-600);">0</strong>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeSubmitConfirmModal()">Kembali Periksa</button>
+        <button class="btn btn-primary" onclick="submitFinalExam()">Ya, Selesai & Kirim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT SOAL (ADMIN) -->
+  <div id="modal-question-editor" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 id="modal-question-title" style="font-size: 1.15rem; font-weight: 700;">Tambah Soal Baru</h3>
+      </div>
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+        <form id="form-question-editor" onsubmit="handleSaveQuestion(event)">
+          <input type="hidden" id="edit-question-id">
+          <input type="hidden" id="edit-question-type" value="pg">
+
+          <!-- 5 Tipe Soal Selector (Sesuai Gambar 3) -->
+          <label class="form-label" style="margin-bottom: 0.5rem;">Pilih Tipe Soal ANBK:</label>
+          <div class="qtype-selector-grid">
+            <button type="button" class="qtype-btn type-pg active" onclick="setEditorQuestionType('pg', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              1. Pilihan Ganda
+            </button>
+            <button type="button" class="qtype-btn type-kompleks" onclick="setEditorQuestionType('kompleks', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+              2. PG Kompleks
+            </button>
+            <button type="button" class="qtype-btn type-jodoh" onclick="setEditorQuestionType('jodoh', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 3 21 3 21 8"></polyline>
+                <line x1="4" y1="20" x2="21" y2="3"></line>
+                <polyline points="21 16 21 21 16 21"></polyline>
+                <line x1="15" y1="15" x2="21" y2="21"></line>
+                <line x1="4" y1="4" x2="9" y2="9"></line>
+              </svg>
+              3. Menjodohkan
+            </button>
+            <button type="button" class="qtype-btn type-esai" onclick="setEditorQuestionType('esai', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+              </svg>
+              4. Esai / Isian
+            </button>
+            <button type="button" class="qtype-btn type-bs" onclick="setEditorQuestionType('bs', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              5. Benar / Salah
             </button>
           </div>
 
           <div class="form-group">
-            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
-              <span>Atau Salin & Tempel (Paste) Baris Excel ke Sini:</span>
-              <span id="import-preview-count" style="font-size: 0.8rem; font-weight: 700; color: var(--emerald-600);">Terdeteksi: 0 siswa</span>
-            </label>
-            <textarea id="import-students-raw-text" class="form-control" rows="6" placeholder="Contoh baris Excel:&#10;2026-001	Ahmad Rizki Pratama	6	L&#10;2026-002	Bella Anggraini Putri	6	P&#10;2026-003	Dimas Aditya Nugraha	5	L" oninput="updateImportTextPreview()"></textarea>
-            <small style="font-size: 0.75rem; color: var(--slate-500); display: block; margin-top: 0.25rem;">*Pemisah bisa menggunakan Koma (,), Titik Koma (;), atau Tab (hasil copy dari tabel Excel).</small>
+            <label class="form-label">Teks Pertanyaan Soal</label>
+            <textarea id="edit-question-text" class="form-control" rows="3" placeholder="Tulis teks pertanyaan..."
+              required></textarea>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Mata Pelajaran</label>
+              <input type="text" id="edit-question-subject" class="form-control" placeholder="Contoh: Matematika"
+                required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Kelas</label>
+              <input type="text" id="edit-question-class" class="form-control" placeholder="Contoh: 7A, 7B, atau UMUM"
+                required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">URL Gambar (Opsional jika ada diagram/foto)</label>
+            <input type="url" id="edit-question-image" class="form-control"
+              placeholder="https://example.com/gambar-soal.jpg">
+          </div>
+
+          <!-- DYNAMIC INPUT FIELDS FOR 5 QUESTION TYPES -->
+          <div id="qtype-inputs-container">
+            <!-- 1. Pilihan Ganda & 2. PG Kompleks -->
+            <div id="qtype-panel-pg">
+              <div style="display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0;">
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <label class="form-label">Pilihan A</label>
+                  <input type="text" id="edit-opt-a" class="form-control" placeholder="Jawaban A...">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <label class="form-label">Pilihan B</label>
+                  <input type="text" id="edit-opt-b" class="form-control" placeholder="Jawaban B...">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <label class="form-label">Pilihan C</label>
+                  <input type="text" id="edit-opt-c" class="form-control" placeholder="Jawaban C...">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <label class="form-label">Pilihan D</label>
+                  <input type="text" id="edit-opt-d" class="form-control" placeholder="Jawaban D...">
+                </div>
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <label class="form-label">Pilihan E</label>
+                  <input type="text" id="edit-opt-e" class="form-control" placeholder="Jawaban E (opsional)...">
+                </div>
+              </div>
+
+              <!-- Single Key for PG -->
+              <div class="form-group" id="group-single-key">
+                <label class="form-label">Kunci Jawaban Benar (Pilihan Tunggal)</label>
+                <select id="edit-correct-key" class="form-control">
+                  <option value="A">Opsi A</option>
+                  <option value="B">Opsi B</option>
+                  <option value="C">Opsi C</option>
+                  <option value="D">Opsi D</option>
+                  <option value="E">Opsi E</option>
+                </select>
+              </div>
+
+              <!-- Multiple Keys for PG Kompleks -->
+              <div class="form-group" id="group-multi-key" style="display: none;">
+                <label class="form-label">Kunci Jawaban Benar (Bisa Pilih Lebih dari Satu):</label>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                  <label><input type="checkbox" id="key-chk-a" value="A"> Opsi A</label>
+                  <label><input type="checkbox" id="key-chk-b" value="B"> Opsi B</label>
+                  <label><input type="checkbox" id="key-chk-c" value="C"> Opsi C</label>
+                  <label><input type="checkbox" id="key-chk-d" value="D"> Opsi D</label>
+                  <label><input type="checkbox" id="key-chk-e" value="E"> Opsi E</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Menjodohkan Panel -->
+            <div id="qtype-panel-jodoh" style="display: none; margin: 1rem 0;">
+              <label class="form-label">Pasangan Premis & Jawaban (Menjodohkan):</label>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                  <input type="text" id="jodoh-premis-1" class="form-control" placeholder="Pernyataan 1...">
+                  <input type="text" id="jodoh-jawab-1" class="form-control" placeholder="Pasangan Jawaban 1...">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                  <input type="text" id="jodoh-premis-2" class="form-control" placeholder="Pernyataan 2...">
+                  <input type="text" id="jodoh-jawab-2" class="form-control" placeholder="Pasangan Jawaban 2...">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                  <input type="text" id="jodoh-premis-3" class="form-control" placeholder="Pernyataan 3...">
+                  <input type="text" id="jodoh-jawab-3" class="form-control" placeholder="Pasangan Jawaban 3...">
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Esai / Isian Panel -->
+            <div id="qtype-panel-esai" style="display: none; margin: 1rem 0;">
+              <div class="form-group">
+                <label class="form-label">Kunci Jawaban Singkat / Referensi Penilaian</label>
+                <textarea id="esai-key-text" class="form-control" rows="2"
+                  placeholder="Tulis kata kunci jawaban yang diharapkan..."></textarea>
+              </div>
+            </div>
+
+            <!-- 5. Benar / Salah Panel -->
+            <div id="qtype-panel-bs" style="display: none; margin: 1rem 0;">
+              <label class="form-label">Daftar Pernyataan & Kunci:</label>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 0.5rem;">
+                  <input type="text" id="bs-text-1" class="form-control" placeholder="Pernyataan 1...">
+                  <select id="bs-key-1" class="form-control">
+                    <option value="B">Benar</option>
+                    <option value="S">Salah</option>
+                  </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 0.5rem;">
+                  <input type="text" id="bs-text-2" class="form-control" placeholder="Pernyataan 2...">
+                  <select id="bs-key-2" class="form-control">
+                    <option value="B">Benar</option>
+                    <option value="S">Salah</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bobot Nilai</label>
+            <input type="number" id="edit-score-weight" class="form-control" value="10" min="1" required>
+          </div>
+      </div>
+
+      <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1rem;">
+        <button type="button" class="btn btn-outline" onclick="closeQuestionModal()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Butir Soal</button>
+      </div>
+      </form>
+    </div>
+  </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT DATA GURU (OPERATOR SEKOLAH) -->
+  <div id="modal-teacher-editor" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;" id="modal-teacher-title">Tambah Akun Guru Baru</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeTeacherModal()" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-teacher-editor" onsubmit="handleSaveTeacher(event)">
+          <input type="hidden" id="edit-teacher-id">
+
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap & Gelar Pendidik</label>
+            <input type="text" id="edit-teacher-fullname" class="form-control" placeholder="Contoh: Budi Santoso, S.Pd"
+              required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Username Login</label>
+              <input type="text" id="edit-teacher-username" class="form-control" placeholder="Contoh: guru7a" required
+                autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password Login</label>
+              <div style="position: relative;">
+                <input type="password" id="edit-teacher-password" class="form-control" placeholder="Minimal 6 karakter"
+                  required autocomplete="off">
+                <button type="button" onclick="toggleEditTeacherPasswordVisibility()"
+                  style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-400);">
+                  <svg id="eye-icon-teacher-edit" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Peran / Tugas Pendidik (Role)</label>
+            <select id="edit-teacher-role" class="form-control" onchange="handleTeacherRoleChange()" required>
+              <option value="guru_kelas">Guru Kelas (Wali Rombel)</option>
+              <option value="guru_mapel">Guru Mata Pelajaran</option>
+              <option value="admin_sekolah">Operator Sekolah (Super Admin)</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group" id="group-teacher-class">
+              <label class="form-label">Kelas Binaan</label>
+              <input type="text" id="edit-teacher-class" class="form-control" placeholder="Contoh: 7A, 7B, dsb">
+              <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Kelas</small>
+            </div>
+            <div class="form-group" id="group-teacher-subject">
+              <label class="form-label">Mata Pelajaran Binaan</label>
+              <input type="text" id="edit-teacher-subject" class="form-control"
+                placeholder="Contoh: Matematika, IPA, Tematik">
+              <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Mapel</small>
+            </div>
           </div>
 
           <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
-            <button type="button" class="btn btn-outline" onclick="closeImportStudentsModal()">Batal</button>
-            <button type="button" class="btn btn-success" onclick="executeBatchImportStudents()">Proses & Simpan Semua Siswa</button>
+            <button type="button" class="btn btn-outline" onclick="closeTeacherModal()">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Akun Guru</button>
           </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH / EDIT DATA SISWA (GURU & OPERATOR) -->
+  <div id="modal-student-editor" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;" id="modal-student-title">Tambah Data Siswa Baru</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeStudentModal()" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-student-editor" onsubmit="handleSaveStudent(event)">
+          <input type="hidden" id="edit-student-original-nisn">
+
+          <div class="form-group">
+            <label class="form-label">Nomor Peserta / NISN</label>
+            <input type="text" id="edit-student-nisn" class="form-control" placeholder="Contoh: 2026-001" required
+              autocomplete="off">
+            <small style="font-size: 0.75rem; color: var(--slate-500);">*Digunakan siswa saat login ujian</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nama Lengkap Siswa</label>
+            <input type="text" id="edit-student-name" class="form-control" placeholder="Contoh: Ahmad Rizki" required
+              autocomplete="off">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Kelas / Rombel</label>
+              <input type="text" id="edit-student-class" class="form-control" placeholder="Contoh: 7A, 7B, UMUM"
+                required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Jenis Kelamin</label>
+              <select id="edit-student-gender" class="form-control" required>
+                <option value="L">Laki-laki (L)</option>
+                <option value="P">Perempuan (P)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
+            <button type="button" class="btn btn-outline" onclick="closeStudentModal()">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Data Siswa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: IMPOR DATA SISWA DARI EXCEL / CSV -->
+  <div id="modal-import-students" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">📥 Impor Data Siswa dari Excel / CSV</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeImportStudentsModal()"
+          style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div
+          style="background-color: var(--primary-50); border: 1px solid var(--primary-100); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1rem; font-size: 0.82rem; color: var(--primary-800); line-height: 1.5;">
+          💡 <strong>Petunjuk Impor Massal:</strong><br>
+          Format kolom: <strong>NISN, Nama Lengkap, Kelas, Jenis Kelamin (L/P)</strong>.<br>
+          Anda dapat memilih file <code>.csv</code> atau <strong>langsung copy-paste baris tabel dari Microsoft
+            Excel</strong> ke kotak di bawah.
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
+          <label class="btn btn-primary btn-sm"
+            style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Pilih File Excel / CSV
+            <input type="file" id="import-student-file-input" accept=".csv, .txt, .tsv"
+              onchange="handleStudentImportFile(event)" style="display: none;">
+          </label>
+          <button type="button" class="btn btn-outline btn-sm" onclick="downloadStudentTemplateCsv()"
+            style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Unduh Format Contoh Excel (.CSV)
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Atau Salin & Tempel (Paste) Baris Excel ke Sini:</span>
+            <span id="import-preview-count"
+              style="font-size: 0.8rem; font-weight: 700; color: var(--emerald-600);">Terdeteksi: 0 siswa</span>
+          </label>
+          <textarea id="import-students-raw-text" class="form-control" rows="6"
+            placeholder="Contoh baris Excel:&#10;2026-001	Ahmad Rizki Pratama	6	L&#10;2026-002	Bella Anggraini Putri	6	P&#10;2026-003	Dimas Aditya Nugraha	5	L"
+            oninput="updateImportTextPreview()"></textarea>
+          <small style="font-size: 0.75rem; color: var(--slate-500); display: block; margin-top: 0.25rem;">*Pemisah bisa
+            menggunakan Koma (,), Titik Koma (;), atau Tab (hasil copy dari tabel Excel).</small>
+        </div>
+
+        <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-outline" onclick="closeImportStudentsModal()">Batal</button>
+          <button type="button" class="btn btn-success" onclick="executeBatchImportStudents()">Proses & Simpan Semua
+            Siswa</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Toast Notification Container -->
-    <div class="toast-container" id="toast-container"></div>
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
 
-    <!-- Print Container for High Resolution PDF Generation -->
-    <div id="print-container"></div>
+  <!-- Print Container for High Resolution PDF Generation -->
+  <div id="print-container"></div>
 
-    <!-- App Core Engine -->
-    <script src="app.js"></script>
-  </body>
-  </html>
+  <!-- App Core Engine -->
+  <script src="app.js"></script>
+</body>
+
+</html>
