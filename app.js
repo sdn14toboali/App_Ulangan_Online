@@ -486,6 +486,9 @@ function applyTeacherIsolation() {
 
   if (elName) elName.textContent = t.fullName;
 
+  const elWelcome = document.getElementById('welcome-teacher-name');
+  if (elWelcome) elWelcome.textContent = t.fullName;
+
   if (elBadge) {
     if (t.role === 'guru_kelas') {
       elBadge.className = 'teacher-badge kelas';
