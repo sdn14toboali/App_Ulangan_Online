@@ -34,11 +34,11 @@
           </svg>
           Ruang Siswa
         </button>
-        <button id="nav-btn-admin" class="btn btn-primary btn-sm" onclick="showScreen('admin-dashboard')">
+        <button id="nav-btn-admin" class="btn btn-primary btn-sm" onclick="openTeacherPortal()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
           </svg>
-          Panel Guru / Admin
+          <span id="nav-teacher-label">Panel Guru / Admin</span>
         </button>
       </div>
     </div>
@@ -98,6 +98,96 @@
               </svg>
             </button>
           </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- SCREEN: LOGIN GURU & PENGAWAS (MULTI-TEACHER ISOLATION) -->
+  <main id="screen-teacher-login" class="view-screen">
+    <div class="auth-wrapper">
+      <div class="card auth-card" style="max-width: 520px;">
+        <div class="card-body">
+          <div class="auth-hero">
+            <div class="brand-icon" style="margin: 0 auto 1rem; width: 52px; height: 52px; background: linear-gradient(135deg, #059669, #047857);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <h2>Portal Masuk Guru & Pengawas</h2>
+            <p>Sistem Isolasi Bank Soal & Nilai per Kelas & Mata Pelajaran</p>
+          </div>
+
+          <form id="form-teacher-login" onsubmit="handleTeacherLogin(event)">
+            <div class="form-group">
+              <label class="form-label" for="teacher-login-username">Username / NIP Guru</label>
+              <input type="text" id="teacher-login-username" class="form-control" placeholder="Contoh: guru7a atau gurumtk" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="teacher-login-password">Kata Sandi (Password)</label>
+              <input type="password" id="teacher-login-password" class="form-control" placeholder="Masukkan password..." required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem; background-color: var(--emerald-600); border-color: var(--emerald-600);">
+              Masuk ke Panel Guru
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </form>
+
+          <!-- Quick Test Accounts -->
+          <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--slate-200);">
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600); margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+              <span>AKUN CEPAT UNTUK PENGUJIAN:</span>
+              <span style="font-size: 0.75rem; color: var(--slate-400); font-weight: normal;">(Klik untuk isi otomatis)</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="account-chip" onclick="quickFillTeacher('guru7a', 'guru123')">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: var(--slate-800);">Budi Santoso, S.Pd</div>
+                  <div style="font-size: 0.78rem; color: var(--slate-500);">Username: <code>guru7a</code> | Pass: <code>guru123</code></div>
+                </div>
+                <span class="teacher-badge kelas">Guru Kelas 7A</span>
+              </div>
+
+              <div class="account-chip" onclick="quickFillTeacher('guru7b', 'guru123')">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: var(--slate-800);">Siti Aminah, S.Pd</div>
+                  <div style="font-size: 0.78rem; color: var(--slate-500);">Username: <code>guru7b</code> | Pass: <code>guru123</code></div>
+                </div>
+                <span class="teacher-badge kelas">Guru Kelas 7B</span>
+              </div>
+
+              <div class="account-chip" onclick="quickFillTeacher('gurumtk', 'guru123')">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: var(--slate-800);">Hendra Wijaya, M.Pd</div>
+                  <div style="font-size: 0.78rem; color: var(--slate-500);">Username: <code>gurumtk</code> | Pass: <code>guru123</code></div>
+                </div>
+                <span class="teacher-badge mapel">Guru Mapel MTK</span>
+              </div>
+
+              <div class="account-chip" onclick="quickFillTeacher('guruipa', 'guru123')">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: var(--slate-800);">Dewi Lestari, S.Pd</div>
+                  <div style="font-size: 0.78rem; color: var(--slate-500);">Username: <code>guruipa</code> | Pass: <code>guru123</code></div>
+                </div>
+                <span class="teacher-badge mapel">Guru Mapel IPA</span>
+              </div>
+
+              <div class="account-chip" onclick="quickFillTeacher('admin', 'admin123')">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.88rem; color: var(--slate-800);">Waka Kurikulum / Kepsek</div>
+                  <div style="font-size: 0.78rem; color: var(--slate-500);">Username: <code>admin</code> | Pass: <code>admin123</code></div>
+                </div>
+                <span class="teacher-badge admin">Super Admin</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -322,6 +412,47 @@
   <!-- SCREEN 5: ADMIN DASHBOARD PANEL -->
   <main id="screen-admin-dashboard" class="view-screen">
     <div class="admin-container">
+      <!-- Active Teacher Profile Banner -->
+      <div class="teacher-profile-banner">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div class="teacher-avatar-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+              <h2 id="teacher-profile-name" style="font-size: 1.15rem; font-weight: 800; color: var(--slate-900);">Nama Guru</h2>
+              <span id="teacher-profile-badge" class="teacher-badge kelas">GURU KELAS</span>
+            </div>
+            <p id="teacher-profile-scope" style="font-size: 0.82rem; color: var(--slate-500); margin-top: 0.2rem;">
+              Kewenangan: Kelas 7A | Mata Pelajaran: Semua
+            </p>
+          </div>
+        </div>
+
+        <button class="btn btn-outline btn-sm" onclick="handleTeacherLogout()" style="color: var(--rose-600); border-color: var(--rose-200);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Keluar / Ganti Akun
+        </button>
+      </div>
+
+      <!-- Isolation Notice Callout -->
+      <div class="isolation-callout" id="teacher-isolation-notice">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <div id="teacher-isolation-text">
+          <strong>Sistem Isolasi Aktif:</strong> Anda masuk sebagai Guru Kelas. Anda hanya dapat melihat dan mengelola bank soal serta nilai ujian untuk kelas Anda sendiri.
+        </div>
+      </div>
+
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <div>
           <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900);">Panel Guru & Pengawas Ujian</h1>
@@ -465,11 +596,13 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th style="width: 60px;">No</th>
+                  <th style="width: 50px;">No</th>
                   <th>Pertanyaan Soal</th>
-                  <th style="width: 100px;">Kunci</th>
-                  <th style="width: 80px;">Bobot</th>
-                  <th style="width: 140px;">Aksi</th>
+                  <th style="width: 120px;">Mata Pelajaran</th>
+                  <th style="width: 100px;">Target Kelas</th>
+                  <th style="width: 80px;">Kunci</th>
+                  <th style="width: 70px;">Bobot</th>
+                  <th style="width: 130px;">Aksi</th>
                 </tr>
               </thead>
               <tbody id="table-questions-body">
@@ -674,6 +807,17 @@
             <label class="form-label">Teks Pertanyaan Soal</label>
             <textarea id="edit-question-text" class="form-control" rows="3" placeholder="Tulis teks pertanyaan..." required></textarea>
           </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Mata Pelajaran</label>
+              <input type="text" id="edit-question-subject" class="form-control" placeholder="Contoh: Matematika" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Kelas</label>
+              <input type="text" id="edit-question-class" class="form-control" placeholder="Contoh: 7A, 7B, atau UMUM" required>
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="form-label">URL Gambar (Opsional jika ada diagram/foto)</label>
             <input type="url" id="edit-question-image" class="form-control" placeholder="https://example.com/gambar-soal.jpg">
