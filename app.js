@@ -441,6 +441,17 @@ function toggleTeacherPasswordVisibility() {
 // PROCTOR TOKEN ENGINE & MULTI-MAPEL CONTROLS (REF: GAMBAR SCREENSHOT USER)
 // ==============================================================================
 
+function getShortSubjectName(name) {
+  if (!name) return 'Mapel';
+  if (name.includes('Bahasa Indonesia')) return 'B. Indonesia';
+  if (name.includes('Matematika')) return 'Matematika';
+  if (name.includes('IPAS')) return 'IPAS';
+  if (name.includes('Pancasila') || name.includes('PPKn')) return 'PPKn';
+  if (name.includes('Agama Islam') || name.includes('PAI')) return 'PAI';
+  if (name.includes('PJOK') || name.includes('Penjaskes')) return 'PJOK';
+  return name.length > 14 ? name.substring(0, 12) + '...' : name;
+}
+
 function renderProctorTokenBar() {
   const container = document.getElementById('token-subject-pills-bar');
   if (!container) return;
@@ -456,10 +467,20 @@ function renderProctorTokenBar() {
   let html = '';
   subjects.forEach(sub => {
     const isActive = sub.id === state.selectedTokenSubjectId;
+    const shortName = getShortSubjectName(sub.name);
     html += `
-      <button type="button" class="token-pill-btn ${isActive ? 'active' : ''}" onclick="selectTokenSubject('${sub.id}')">
-        <span>${escapeHtml(sub.name)}</span>
-        <span class="pill-token-code">${escapeHtml(sub.token || '-')}</span>
+      <button type="button" class="subject-token-card-btn ${isActive ? 'active' : ''}" onclick="selectTokenSubject('${sub.id}')" title="Klik untuk menampilkan token ${escapeHtml(sub.name)}">
+        <div class="token-card-top">
+          <span class="token-card-subject-name" title="${escapeHtml(sub.name)}">${escapeHtml(shortName)}</span>
+          <span class="token-card-code-badge">${escapeHtml(sub.code || 'CBT')}</span>
+        </div>
+        <div class="token-card-main">
+          <span class="token-card-token-text">${escapeHtml(sub.token || '-')}</span>
+        </div>
+        <div class="token-card-bottom">
+          <span>⏱️ ${sub.durationMinutes || 90}m</span>
+          <span class="token-card-active-indicator">✓ TERPILIH</span>
+        </div>
       </button>
     `;
   });
