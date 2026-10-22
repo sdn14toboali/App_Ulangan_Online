@@ -362,24 +362,37 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.split-hero-illustration {
-  text-align: center;
+.split-hero-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   margin-top: auto;
+  padding-top: 1rem;
 }
 
-.split-hero-img {
-  max-width: 100%;
-  height: auto;
-  max-height: 220px;
-  object-fit: cover;
-  border-radius: 18px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  transition: transform 0.3s ease;
+.split-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 0.65rem 0.95rem;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 500;
+  backdrop-filter: blur(6px);
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.split-hero-img:hover {
-  transform: translateY(-4px) scale(1.02);
+.split-feature-item:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.split-feature-item svg {
+  flex-shrink: 0;
+  color: #93c5fd;
 }
 
 .split-auth-form-side {
@@ -428,10 +441,11 @@ body {
     border-radius: 20px;
   }
   .split-auth-hero {
-    padding: 2rem 1.5rem 1.5rem;
+    padding: 2rem 1.5rem 1.75rem;
   }
-  .split-hero-img {
-    max-height: 160px;
+  .split-hero-features {
+    padding-top: 0.75rem;
+    gap: 0.5rem;
   }
   .split-auth-form-side {
     padding: 2rem 1.5rem;
@@ -1205,19 +1219,24 @@ body {
   color: #ffffff;
 }
 
-.welcome-mascot-img {
-  width: 135px;
-  height: 135px;
-  object-fit: cover;
-  border-radius: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+.welcome-vector-badge {
+  width: 105px;
+  height: 105px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
   flex-shrink: 0;
   transition: transform 0.3s ease;
 }
 
-.welcome-mascot-img:hover {
-  transform: scale(1.05) rotate(1deg);
+.welcome-vector-badge:hover {
+  transform: translateY(-4px) scale(1.05);
 }
 
 @media (max-width: 768px) {
@@ -1226,7 +1245,7 @@ body {
     align-items: flex-start;
     padding: 1.5rem 1.25rem;
   }
-  .welcome-mascot-img {
+  .welcome-vector-badge {
     display: none;
   }
 }
