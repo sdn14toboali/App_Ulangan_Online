@@ -931,3 +931,305 @@ body {
     padding-right: 1rem;
   }
 }
+
+/* ==============================================================================
+   TEACHER LOGIN & MULTI-TENANCY ISOLATION STYLES
+   ============================================================================== */
+
+.teacher-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.teacher-badge.kelas {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.teacher-badge.mapel {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.teacher-badge.admin {
+  background-color: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.teacher-profile-banner {
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.teacher-avatar-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--slate-100);
+  border: 1px solid var(--slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate-700);
+}
+
+.account-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  background-color: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+}
+
+.account-chip:hover {
+  background-color: var(--primary-50);
+  border-color: var(--primary-500);
+  transform: translateY(-1px);
+}
+
+.account-chip:active {
+  transform: translateY(0);
+}
+
+.isolation-callout {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #16a34a;
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.88rem;
+  color: #166534;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+/* ==============================================================================
+   5 TIPE SOAL ANBK (SESUAI GAMBAR 3)
+   ============================================================================== */
+
+.qtype-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.qtype-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--slate-200);
+  background: #ffffff;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  gap: 0.4rem;
+}
+
+.qtype-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 1. Pilihan Ganda (Biru Lembut) */
+.qtype-btn.type-pg {
+  background-color: #f0f7ff;
+  border-color: #bae6fd;
+  color: #0369a1;
+}
+.qtype-btn.type-pg.active {
+  border-color: #0284c7;
+  background-color: #e0f2fe;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.25);
+}
+
+/* 2. PG Kompleks (Hijau Mint Lembut) */
+.qtype-btn.type-kompleks {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+.qtype-btn.type-kompleks.active {
+  border-color: #16a34a;
+  background-color: #dcfce7;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.25);
+}
+
+/* 3. Menjodohkan (Kuning Amber Lembut) */
+.qtype-btn.type-jodoh {
+  background-color: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+}
+.qtype-btn.type-jodoh.active {
+  border-color: #d97706;
+  background-color: #fef3c7;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
+}
+
+/* 4. Esai / Isian (Ungu Lavender Lembut) */
+.qtype-btn.type-esai {
+  background-color: #faf5ff;
+  border-color: #e9d5ff;
+  color: #7e22ce;
+}
+.qtype-btn.type-esai.active {
+  border-color: #9333ea;
+  background-color: #f3e8ff;
+  box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.25);
+}
+
+/* 5. Benar / Salah (Cyan Teal Lembut) */
+.qtype-btn.type-bs {
+  background-color: #f0fdfa;
+  border-color: #99f6e4;
+  color: #0f766e;
+}
+.qtype-btn.type-bs.active {
+  border-color: #0d9488;
+  background-color: #ccfbf1;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25);
+}
+
+/* Dynamic Token Widget */
+.token-proktor-card {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.token-digits {
+  font-family: 'Courier New', monospace;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.token-countdown-bar-wrapper {
+  width: 100%;
+  max-width: 240px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 0.35rem;
+}
+
+.token-countdown-bar {
+  height: 100%;
+  width: 100%;
+  background: #38bdf8;
+  transition: width 1s linear;
+}
+
+/* Kartu Peserta Ujian Grid */
+.exam-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1.25rem;
+}
+
+.exam-student-card {
+  background: #ffffff;
+  border: 1.5px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  position: relative;
+  page-break-inside: avoid;
+}
+
+.kop-surat-box {
+  text-align: center;
+  border-bottom: 2.5px double #000000;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.kop-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #000000;
+  line-height: 1.2;
+}
+
+.kop-subtitle {
+  font-size: 0.8rem;
+  color: #333333;
+  margin-top: 0.2rem;
+}
+
+/* Print Specific Rules */
+#print-container {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #print-container, #print-container * {
+    visibility: visible;
+  }
+
+  #print-container {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 1.5cm;
+    background: #ffffff;
+    color: #000000;
+    font-family: 'Times New Roman', serif;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+
