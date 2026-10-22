@@ -3,6 +3,34 @@
  * Standard: Anti-AI Human Crafted Code, Zero-Deadlock, Auto-Save Realtime
  */
 
+// Generator Password Ujian Siswa per Mata Pelajaran (SD NEGERI 14 TOBOALI)
+function generateStudentSubjectPasswords(nisn) {
+  const map = {};
+  const subCodes = {
+    'Bahasa Indonesia': 'BIN',
+    'Matematika': 'MTK',
+    'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS',
+    'Pendidikan Pancasila (PPKn)': 'PKN',
+    'Pendidikan Agama Islam (PAI)': 'PAI',
+    'PJOK / Penjaskes': 'PJK'
+  };
+  const numPart = parseInt((nisn || '2026001').replace(/\D/g, '') || '101', 10);
+  Object.keys(subCodes).forEach((subName, idx) => {
+    const code = subCodes[subName];
+    const val = (numPart * 41 + idx * 233 + 1289) % 9000 + 1000;
+    map[subName] = `${code}-${val}`;
+  });
+  return map;
+}
+
+function getStudentPasswordForSubject(student, subjectName) {
+  if (!student) return '-';
+  if (!student.passwords || typeof student.passwords !== 'object') {
+    student.passwords = generateStudentSubjectPasswords(student.nisn);
+  }
+  return student.passwords[subjectName] || generateStudentSubjectPasswords(student.nisn)[subjectName] || 'CBT-1234';
+}
+
 // Global State
 const state = {
   currentView: 'student-login',
@@ -22,6 +50,7 @@ const state = {
 
   // Identitas Sekolah SD NEGERI 14 TOBOALI
   school: (() => {
+    const defaultSchoolLogo = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='47' fill='%232563eb' stroke='%23f59e0b' stroke-width='5'/><path d='M50 16 L78 34 L78 66 L50 84 L22 66 L22 34 Z' fill='%231e40af' stroke='%23ffffff' stroke-width='2.5'/><path d='M50 24 L64 38 L36 38 Z' fill='%23fbbf24'/><rect x='47' y='38' width='6' height='26' fill='%23f59e0b' rx='2'/><path d='M32 52 Q50 72 68 52 Q50 80 32 52 Z' fill='%23ffffff'/><circle cx='50' cy='51' r='8' fill='%23ef4444'/><text x='50' y='93' font-size='8.5' font-family='Arial,sans-serif' font-weight='900' fill='%23ffffff' text-anchor='middle' letter-spacing='0.5'>SDN 14 TOBOALI</text></svg>";
     const defaultSchool = {
       name: 'SD NEGERI 14 TOBOALI',
       npsn: '10901234',
@@ -30,16 +59,36 @@ const state = {
       address: 'Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung',
       headmaster: 'H. Suhardi, S.Pd., M.Pd',
       headmasterNip: '19750312 199903 1 004',
-      logoUrl: '',
+      logoUrl: defaultSchoolLogo,
       teacherSigner: 'Siti Aminah, S.Pd',
       teacherSignerNip: '-'
     };
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
-      return { ...defaultSchool, ...saved };
+      const merged = { ...defaultSchool, ...saved };
+      if (!merged.logoUrl) merged.logoUrl = defaultSchoolLogo;
+      return merged;
     } catch(e) {
       return defaultSchool;
     }
+  })(),
+
+  // Daftar Mata Pelajaran Resmi & Token per Mapel SD NEGERI 14 TOBOALI
+  subjects: (() => {
+    const defaultSubjects = [
+      { id: 'sub-bin', name: 'Bahasa Indonesia', code: 'BIN', token: 'BIN26A', durationMinutes: 90, isActive: true },
+      { id: 'sub-mtk', name: 'Matematika', code: 'MTK', token: 'MTK26B', durationMinutes: 90, isActive: true },
+      { id: 'sub-ipas', name: 'IPAS (Ilmu Pengetahuan Alam & Sosial)', code: 'IPS', token: 'IPS26C', durationMinutes: 90, isActive: true },
+      { id: 'sub-pkn', name: 'Pendidikan Pancasila (PPKn)', code: 'PKN', token: 'PKN26D', durationMinutes: 90, isActive: true },
+      { id: 'sub-pai', name: 'Pendidikan Agama Islam (PAI)', code: 'PAI', token: 'PAI26E', durationMinutes: 90, isActive: true },
+      { id: 'sub-pjok', name: 'PJOK / Penjaskes', code: 'PJK', token: 'PJK26F', durationMinutes: 90, isActive: true }
+    ];
+    try {
+      const saved = JSON.parse(localStorage.getItem('zettcbt_subjects') || 'null');
+      if (saved && Array.isArray(saved) && saved.length > 0) return saved;
+    } catch(e) {}
+    localStorage.setItem('zettcbt_subjects', JSON.stringify(defaultSubjects));
+    return defaultSubjects;
   })(),
 
   // Token Proktor Dinamis (Auto-Refresh 3 Menit = 180 Detik)
@@ -75,18 +124,48 @@ const state = {
   // Master Data Siswa Peserta Ujian SD NEGERI 14 TOBOALI (Kelas 4A - 6B)
   students: (() => {
     const defaultSdStudents = [
-      { id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active' },
-      { id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active' },
-      { id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active' },
-      { id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active' },
-      { id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active' },
-      { id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active' },
-      { id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active' }
+      { 
+        id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active',
+        passwords: { 'Bahasa Indonesia': 'BIN-4821', 'Matematika': 'MTK-9314', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-5720', 'Pendidikan Pancasila (PPKn)': 'PKN-1648', 'Pendidikan Agama Islam (PAI)': 'PAI-8293', 'PJOK / Penjaskes': 'PJK-3047' }
+      },
+      { 
+        id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active',
+        passwords: { 'Bahasa Indonesia': 'BIN-5192', 'Matematika': 'MTK-2840', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-6173', 'Pendidikan Pancasila (PPKn)': 'PKN-4921', 'Pendidikan Agama Islam (PAI)': 'PAI-3850', 'PJOK / Penjaskes': 'PJK-7419' }
+      },
+      { 
+        id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active',
+        passwords: { 'Bahasa Indonesia': 'BIN-6340', 'Matematika': 'MTK-1972', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-4829', 'Pendidikan Pancasila (PPKn)': 'PKN-3715', 'Pendidikan Agama Islam (PAI)': 'PAI-6204', 'PJOK / Penjaskes': 'PJK-8531' }
+      },
+      { 
+        id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active',
+        passwords: { 'Bahasa Indonesia': 'BIN-7815', 'Matematika': 'MTK-3406', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-7931', 'Pendidikan Pancasila (PPKn)': 'PKN-2580', 'Pendidikan Agama Islam (PAI)': 'PAI-9147', 'PJOK / Penjaskes': 'PJK-4628' }
+      },
+      { 
+        id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active',
+        passwords: { 'Bahasa Indonesia': 'BIN-2904', 'Matematika': 'MTK-8153', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-3694', 'Pendidikan Pancasila (PPKn)': 'PKN-6402', 'Pendidikan Agama Islam (PAI)': 'PAI-1758', 'PJOK / Penjaskes': 'PJK-5283' }
+      },
+      { 
+        id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active',
+        passwords: { 'Bahasa Indonesia': 'BIN-3481', 'Matematika': 'MTK-7629', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-8205', 'Pendidikan Pancasila (PPKn)': 'PKN-5137', 'Pendidikan Agama Islam (PAI)': 'PAI-4920', 'PJOK / Penjaskes': 'PJK-6371' }
+      },
+      { 
+        id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active',
+        passwords: { 'Bahasa Indonesia': 'BIN-4592', 'Matematika': 'MTK-6318', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-9451', 'Pendidikan Pancasila (PPKn)': 'PKN-7824', 'Pendidikan Agama Islam (PAI)': 'PAI-5039', 'PJOK / Penjaskes': 'PJK-2184' }
+      }
     ];
     try {
       const raw = localStorage.getItem('zettcbt_students');
       if (raw && !raw.includes('7A') && !raw.includes('7B')) {
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        let changed = false;
+        parsed.forEach((st, idx) => {
+          if (!st.passwords) {
+            st.passwords = generateStudentSubjectPasswords(st.nisn || ('2026-0' + (idx + 1)));
+            changed = true;
+          }
+        });
+        if (changed) localStorage.setItem('zettcbt_students', JSON.stringify(parsed));
+        return parsed;
       }
     } catch(e) {}
     localStorage.setItem('zettcbt_students', JSON.stringify(defaultSdStudents));
@@ -606,56 +685,148 @@ function getVisibleLiveStudents() {
   return state.liveStudents;
 }
 
-// SCREEN 1: Handle Student Login
+function toggleStudentPasswordVisibility() {
+  const pwdInput = document.getElementById('login-password');
+  const eyeIcon = document.getElementById('student-eye-icon');
+  if (!pwdInput) return;
+  if (pwdInput.type === 'password') {
+    pwdInput.type = 'text';
+    if (eyeIcon) {
+      eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    }
+  } else {
+    pwdInput.type = 'password';
+    if (eyeIcon) {
+      eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+  }
+}
+
+function autoFillStudentInfo(nisn) {
+  if (!nisn) return;
+  const st = (state.students || []).find(s => s.nisn.trim().toLowerCase() === nisn.trim().toLowerCase());
+  if (st) {
+    showToast(`Peserta ditemukan: ${st.name} (${st.className}). Silakan pilih mapel dan masukkan password kartu.`, 'info');
+  }
+}
+
+// SCREEN 1: Handle Student Login (Direct Exam Start with Subject Token & Password)
 function handleStudentLogin(event) {
   event.preventDefault();
 
   const nisn = document.getElementById('login-nisn').value.trim();
-  const name = document.getElementById('login-name').value.trim();
-  const className = document.getElementById('login-class').value;
+  const subjectSelect = document.getElementById('login-subject-select');
+  const subjectName = subjectSelect ? subjectSelect.value : '';
+  const password = document.getElementById('login-password').value.trim();
   const token = document.getElementById('login-token').value.trim().toUpperCase();
 
-  // Validate Token
-  if (token !== state.session.token) {
-    showToast('Token Ujian salah atau belum diaktifkan pengawas!', 'danger');
+  if (!nisn || !subjectName || !password || !token) {
+    showToast('Harap lengkapi Nomor Peserta, Mata Pelajaran, Password Siswa, dan Token Ujian!', 'warning');
     return;
   }
 
-  // Validasi Akun Siswa terhadap Master Data yang dikelola Guru
-  let activeName = name;
-  let activeClass = className;
-  if (state.students && state.students.length > 0) {
-    const matched = state.students.find(s => s.nisn.toLowerCase() === nisn.toLowerCase());
-    if (!matched) {
-      showToast('Nomor Peserta / NISN "' + nisn + '" belum didaftarkan oleh guru kelas! Hubungi pengawas.', 'danger');
-      return;
-    }
-    if (!activeName) activeName = matched.name;
-    if (!activeClass) activeClass = matched.className;
-  }
-
-  if (state.questions.length === 0) {
-    showToast('Bank soal belum dibuat oleh pengawas!', 'danger');
+  // 1. Validasi Keberadaan Siswa
+  const student = (state.students || []).find(s => s.nisn.toLowerCase() === nisn.toLowerCase());
+  if (!student) {
+    showToast('Nomor Peserta / NISN "' + nisn + '" belum terdaftar di sistem sekolah! Hubungi pengawas.', 'danger');
     return;
   }
 
-  // Set student state
-  state.student.nisn = nisn;
-  state.student.name = activeName;
-  state.student.className = activeClass;
+  // 2. Validasi Mata Pelajaran
+  const subj = (state.subjects || []).find(s => s.name === subjectName);
+  if (!subj) {
+    showToast('Mata pelajaran "' + subjectName + '" tidak valid!', 'danger');
+    return;
+  }
+  if (subj.isActive === false) {
+    showToast('Sesi ujian untuk ' + subjectName + ' sedang ditutup oleh pengawas!', 'danger');
+    return;
+  }
+
+  // 3. Validasi Password Siswa untuk Mata Pelajaran Ini
+  const expectedPassword = getStudentPasswordForSubject(student, subjectName);
+  if (password.toUpperCase() !== expectedPassword.toUpperCase()) {
+    showToast(`Password untuk mata pelajaran ${subjectName} salah! Periksa password di Kartu Ujian Anda.`, 'danger');
+    return;
+  }
+
+  // 4. Validasi Token Mata Pelajaran dari Pengawas
+  if (token !== (subj.token || '').toUpperCase()) {
+    showToast(`Token Ujian untuk mata pelajaran ${subjectName} salah! Minta token resmi dari pengawas ruang.`, 'danger');
+    return;
+  }
+
+  // 5. Status Ujian Langsung Dimulai (Poin 1 Permintaan Pengguna)
+  state.student.nisn = student.nisn;
+  state.student.name = student.name;
+  state.student.className = student.className;
+  state.student.subject = subjectName;
+  state.student.startTime = new Date();
   state.student.answers = {};
   state.warningCount = 0;
 
-  // Populate Confirmation Screen
-  document.getElementById('confirm-nisn').textContent = nisn;
-  document.getElementById('confirm-name').textContent = activeName;
-  document.getElementById('confirm-class').textContent = className;
-  document.getElementById('confirm-subject').textContent = state.session.subject + ' (' + state.session.title + ')';
-  document.getElementById('confirm-total-q').textContent = state.questions.length + ' Butir Soal (Pilihan Ganda)';
-  document.getElementById('confirm-duration').textContent = state.session.durationMinutes + ' Menit';
+  state.session.subject = subjectName;
+  state.session.durationMinutes = subj.durationMinutes || 90;
+  state.timeRemainingSeconds = state.session.durationMinutes * 60;
 
-  showScreen('student-confirm');
-  showToast('Identitas terverifikasi. Silakan baca petunjuk ujian.', 'success');
+  // Filter Soal Sesuai Mata Pelajaran & Kelas
+  const filteredQ = state.questions.filter(q => 
+    (!q.subject || q.subject.toLowerCase() === subjectName.toLowerCase() || q.subject.includes(subj.code)) &&
+    (!q.targetClass || q.targetClass === student.className || student.className.includes(q.targetClass))
+  );
+  if (filteredQ.length > 0) {
+    state.activeExamQuestions = filteredQ;
+  } else {
+    state.activeExamQuestions = state.questions;
+  }
+
+  if (state.activeExamQuestions.length === 0) {
+    showToast('Bank soal untuk mata pelajaran ini belum diinput oleh guru!', 'warning');
+    return;
+  }
+
+  // Populate UI Header Ujian Siswa
+  const elAvatar = document.getElementById('exam-avatar');
+  if (elAvatar) elAvatar.textContent = (student.name || 'S').charAt(0).toUpperCase();
+  const elName = document.getElementById('exam-student-name');
+  if (elName) elName.textContent = student.name;
+  const elSubj = document.getElementById('exam-subject-name');
+  if (elSubj) elSubj.textContent = subjectName;
+  const elClass = document.getElementById('exam-class-name');
+  if (elClass) elClass.textContent = student.className;
+
+  // Catat Langsung ke Live Monitoring (Status: in_progress)
+  const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+  const existingIdx = state.liveStudents.findIndex(s => s.nisn === student.nisn);
+  const liveEntry = {
+    nisn: student.nisn,
+    name: student.name,
+    className: student.className,
+    subject: subjectName,
+    answeredCount: 0,
+    totalQ: state.activeExamQuestions.length,
+    warningCount: 0,
+    status: 'in_progress',
+    score: 0,
+    time: nowStr
+  };
+  if (existingIdx >= 0) {
+    state.liveStudents[existingIdx] = liveEntry;
+  } else {
+    state.liveStudents.unshift(liveEntry);
+  }
+  updateAdminMetrics();
+  renderLiveMonitoringTable();
+
+  // Aktifkan Sesi Ujian & Timer Langsung
+  state.isExamRunning = true;
+  state.currentQuestionIndex = 0;
+  startTimer(state.timeRemainingSeconds);
+  renderQuestionGrid();
+  renderCurrentQuestion();
+  showScreen('exam');
+
+  showToast(`Token terverifikasi! Status ujian ${subjectName} resmi dimulai. Selamat mengerjakan!`, 'success');
 }
 
 // SCREEN 2 -> SCREEN 3: Start Exam
@@ -1257,7 +1428,10 @@ function switchAdminTab(tabId, element) {
 
   if (tabId === 'live-monitor') renderLiveMonitoringTable();
   if (tabId === 'question-bank') renderAdminQuestionBank();
-  if (tabId === 'session-setting') populateSessionSettings();
+  if (tabId === 'session-setting') {
+    populateSessionSettings();
+    renderSubjectTokensTable();
+  }
   if (tabId === 'manage-students') renderStudentsTable();
   if (tabId === 'manage-teachers') renderTeachersTable();
   if (tabId === 'results-analysis') renderResultsTable();
@@ -2149,11 +2323,12 @@ function printResultsPdf() {
   window.print();
 }
 
-// 3. Cetak Kartu Peserta Ujian ke PDF (Format ANBK Kotak A4)
+// 3. Cetak Kartu Peserta Ujian ke PDF (Format Kotak A4 dengan Password Mapel)
 function printExamCardsPdf() {
   const container = document.getElementById('print-container');
   const students = getVisibleStudents();
   const sch = state.school;
+  const subjects = state.subjects || [];
 
   if (!students || students.length === 0) {
     showToast('Tidak ada data siswa untuk dicetak kartu ujiannya!', 'warning');
@@ -2167,34 +2342,65 @@ function printExamCardsPdf() {
       ? `<img src="${sch.logoUrl}" style="height: 38px; width: 38px; object-fit: contain; margin-right: 8px;">` 
       : '';
 
+    let subRows = '';
+    subjects.forEach((sub, subIdx) => {
+      const pwd = getStudentPasswordForSubject(st, sub.name);
+      subRows += `
+        <tr>
+          <td style="border: 1px solid #333; padding: 2px 4px; text-align: center; font-size: 7pt;">${subIdx + 1}</td>
+          <td style="border: 1px solid #333; padding: 2px 4px; font-size: 7.5pt; font-weight: bold;">${escapeHtml(sub.name)}</td>
+          <td style="border: 1px solid #333; padding: 2px 4px; font-family: monospace; font-weight: bold; font-size: 8pt; text-align: center; color: #1e40af;">${pwd}</td>
+          <td style="border: 1px solid #333; padding: 2px 4px; font-size: 6.8pt; color: #555; text-align: center;">Dirilis Pengawas</td>
+        </tr>
+      `;
+    });
+
     cardsHtml += `
-      <div style="border: 2px solid #000; padding: 12px; border-radius: 6px; font-family: 'Times New Roman', serif; background: #fff; page-break-inside: avoid;">
-        <div style="display: flex; align-items: center; justify-content: center; border-bottom: 2px double #000; padding-bottom: 5px; margin-bottom: 8px;">
+      <div style="border: 2px solid #000; padding: 10px 12px; border-radius: 6px; font-family: 'Times New Roman', serif; background: #fff; page-break-inside: avoid; margin-bottom: 10px;">
+        <div style="display: flex; align-items: center; justify-content: center; border-bottom: 2px double #000; padding-bottom: 4px; margin-bottom: 6px;">
           ${cardLogoHtml}
           <div style="text-align: center; flex: 1;">
-            <div style="font-size: 8pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN KABUPATEN BANGKA SELATAN</div>
-            <div style="font-size: 9.5pt; font-weight: bold;">${sch.name}</div>
-            <div style="font-size: 8pt; font-weight: bold; color: #2563eb;">KARTU PESERTA UJIAN ONLINE</div>
+            <div style="font-size: 7.5pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN KABUPATEN BANGKA SELATAN</div>
+            <div style="font-size: 9pt; font-weight: bold;">${sch.name}</div>
+            <div style="font-size: 8pt; font-weight: bold; color: #2563eb;">KARTU PESERTA UJIAN ONLINE (${sch.examType || 'UTS'})</div>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; font-size: 8.5pt;">
-          <div style="width: 75px; height: 95px; border: 1px dashed #666; display: flex; align-items: center; justify-content: center; font-size: 7.5pt; color: #777; text-align: center; background: #fafafa;">
+        <div style="display: grid; grid-template-columns: 75px 1fr; gap: 8px; font-size: 8pt;">
+          <div style="width: 70px; height: 85px; border: 1px dashed #666; display: flex; align-items: center; justify-content: center; font-size: 7pt; color: #777; text-align: center; background: #fafafa;">
             PAS FOTO<br>2 x 3
           </div>
           <div>
-            <div style="margin-bottom: 3px;"><strong>No. Peserta:</strong> ${escapeHtml(st.nisn)}</div>
-            <div style="margin-bottom: 3px;"><strong>Nama:</strong> ${escapeHtml(st.name)}</div>
-            <div style="margin-bottom: 3px;"><strong>Kelas:</strong> ${escapeHtml(st.className)}</div>
-            <div style="margin-bottom: 3px;"><strong>Ruang / Sesi:</strong> Lab Komputer / Sesi 1</div>
-            <div style="margin-bottom: 3px;"><strong>Tahun Ajaran:</strong> ${sch.academicYear}</div>
+            <div style="margin-bottom: 2px;"><strong>No. Peserta / NISN:</strong> ${escapeHtml(st.nisn)}</div>
+            <div style="margin-bottom: 2px;"><strong>Nama Peserta:</strong> ${escapeHtml(st.name)}</div>
+            <div style="margin-bottom: 2px;"><strong>Kelas / Rombel:</strong> ${escapeHtml(st.className)}</div>
+            <div style="margin-bottom: 2px;"><strong>Tahun Pelajaran:</strong> ${sch.academicYear}</div>
+            <div style="margin-bottom: 2px;"><strong>Ruang / Sesi:</strong> Lab Komputer</div>
           </div>
         </div>
 
-        <div style="text-align: right; margin-top: 8px; font-size: 7.5pt;">
-          Kepala Sekolah,<br><br><br>
-          <strong>${sch.headmaster}</strong><br>
-          NIP. ${sch.headmasterNip}
+        <!-- Tabel Password Siswa per Mata Pelajaran -->
+        <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 6px;">
+          <thead>
+            <tr style="background: #f0f0f0;">
+              <th style="border: 1px solid #333; padding: 2px 4px; width: 20px; font-size: 7pt;">No</th>
+              <th style="border: 1px solid #333; padding: 2px 4px; text-align: left; font-size: 7pt;">Mata Pelajaran</th>
+              <th style="border: 1px solid #333; padding: 2px 4px; width: 90px; font-size: 7pt;">Password Siswa</th>
+              <th style="border: 1px solid #333; padding: 2px 4px; width: 85px; font-size: 7pt;">Token Ujian</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${subRows}
+          </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 7pt; margin-top: 4px;">
+          <div style="color: #555; font-style: italic;">*Password wajib dijaga kerahasiaannya</div>
+          <div style="text-align: right;">
+            Kepala Sekolah,<br><br>
+            <strong>${sch.headmaster}</strong><br>
+            NIP. ${sch.headmasterNip}
+          </div>
         </div>
       </div>
     `;
@@ -2213,6 +2419,7 @@ function renderExamCardsTab() {
 
   const students = getVisibleStudents();
   const sch = state.school;
+  const subjects = state.subjects || [];
   container.innerHTML = '';
 
   if (!students || students.length === 0) {
@@ -2221,27 +2428,148 @@ function renderExamCardsTab() {
   }
 
   students.forEach((st) => {
+    let subRows = '';
+    subjects.forEach((sub, subIdx) => {
+      const pwd = getStudentPasswordForSubject(st, sub.name);
+      subRows += `
+        <tr>
+          <td style="text-align: center;">${subIdx + 1}</td>
+          <td><strong>${escapeHtml(sub.name)}</strong></td>
+          <td><span class="pwd-badge">${pwd}</span></td>
+          <td style="color: var(--slate-500); font-size: 0.72rem;">Dirilis Pengawas</td>
+        </tr>
+      `;
+    });
+
     const card = document.createElement('div');
     card.className = 'exam-student-card';
     card.innerHTML = `
-      <div style="border-bottom: 1.5px double var(--slate-400); padding-bottom: 0.5rem; margin-bottom: 0.75rem; text-align: center;">
-        <div style="font-size: 0.75rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">KARTU PESERTA UJIAN CBT</div>
-        <div style="font-size: 0.95rem; font-weight: 800; color: var(--slate-900);">${sch.name}</div>
-      </div>
-      <div style="display: grid; grid-template-columns: 75px 1fr; gap: 0.75rem;">
-        <div style="width: 75px; height: 90px; border: 1px dashed var(--slate-300); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--slate-400); text-align: center; background: var(--slate-50);">
-          FOTO<br>SISWA
+      <div style="display: flex; align-items: center; gap: 0.6rem; border-bottom: 1.5px double var(--slate-300); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+        <img src="${sch.logoUrl}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 6px; background: #fff; padding: 2px;" alt="Logo">
+        <div>
+          <div style="font-size: 0.72rem; font-weight: 700; color: var(--primary-600); text-transform: uppercase;">KARTU PESERTA CBT (${sch.examType || 'UTS'})</div>
+          <div style="font-size: 0.92rem; font-weight: 800; color: var(--slate-900);">${sch.name}</div>
         </div>
-        <div style="font-size: 0.82rem; line-height: 1.5;">
-          <div><span style="color: var(--slate-500);">Nomor:</span> <strong>${escapeHtml(st.nisn)}</strong></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 65px 1fr; gap: 0.75rem;">
+        <div style="width: 65px; height: 80px; border: 1px dashed var(--slate-300); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; color: var(--slate-400); text-align: center; background: var(--slate-50);">
+          FOTO<br>2 x 3
+        </div>
+        <div style="font-size: 0.8rem; line-height: 1.5;">
+          <div><span style="color: var(--slate-500);">No. Peserta:</span> <strong>${escapeHtml(st.nisn)}</strong></div>
           <div><span style="color: var(--slate-500);">Nama:</span> <strong>${escapeHtml(st.name)}</strong></div>
-          <div><span style="color: var(--slate-500);">Kelas:</span> ${escapeHtml(st.className)}</div>
-          <div><span style="color: var(--slate-500);">Ruang:</span> Lab Komputer</div>
+          <div><span style="color: var(--slate-500);">Kelas:</span> <span class="badge" style="background: var(--slate-200); font-weight: 700;">${escapeHtml(st.className)}</span></div>
+          <div><span style="color: var(--slate-500);">Ruang / Sesi:</span> Lab Komputer</div>
         </div>
       </div>
+
+      <!-- Tabel Password per Mapel -->
+      <table class="exam-card-subject-table">
+        <thead>
+          <tr>
+            <th style="width: 25px;">No</th>
+            <th>Mata Pelajaran</th>
+            <th style="width: 100px;">Password Siswa</th>
+            <th style="width: 95px;">Token Mapel</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${subRows}
+        </tbody>
+      </table>
     `;
     container.appendChild(card);
   });
+}
+
+/**
+ * Manajemen Token Ujian per Mata Pelajaran (Admin Tab Pengaturan Sesi)
+ */
+function renderSubjectTokensTable() {
+  const tbody = document.getElementById('table-subject-tokens-body');
+  if (!tbody) return;
+
+  const subjects = state.subjects || [];
+  tbody.innerHTML = '';
+
+  if (subjects.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 1.5rem; color: var(--slate-400);">Belum ada mata pelajaran terdaftar.</td></tr>';
+    return;
+  }
+
+  subjects.forEach((sub, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td><strong>${escapeHtml(sub.name)}</strong></td>
+      <td><span class="badge" style="background: var(--slate-200); font-weight: 700;">${escapeHtml(sub.code)}</span></td>
+      <td>
+        <div style="display: flex; gap: 0.4rem; align-items: center;">
+          <input type="text" id="token-input-${sub.id}" value="${escapeHtml(sub.token)}" class="form-control" style="width: 110px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}')" title="Acak Token">🎲</button>
+        </div>
+      </td>
+      <td>
+        <input type="number" id="duration-input-${sub.id}" value="${sub.durationMinutes || 90}" min="10" max="300" class="form-control" style="width: 80px; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+      </td>
+      <td>
+        <select id="status-input-${sub.id}" class="form-control" style="padding: 0.3rem 0.5rem; font-size: 0.82rem;">
+          <option value="true" ${sub.isActive !== false ? 'selected' : ''}>🟢 Aktif</option>
+          <option value="false" ${sub.isActive === false ? 'selected' : ''}>🔴 Ditutup</option>
+        </select>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function randomizeSingleSubjectToken(subId) {
+  const sub = (state.subjects || []).find(s => s.id === subId);
+  if (!sub) return;
+  const input = document.getElementById('token-input-' + subId);
+  const randomNum = Math.floor(Math.random() * 89 + 10);
+  const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  const newToken = `${sub.code}${randomNum}${randomLetter}`;
+  if (input) input.value = newToken;
+  sub.token = newToken;
+  showToast(`Token baru untuk ${sub.name}: ${newToken}. Klik "Simpan Perubahan Token" untuk menetapkan.`, 'info');
+}
+
+function generateAllSubjectTokens() {
+  (state.subjects || []).forEach(sub => {
+    const input = document.getElementById('token-input-' + sub.id);
+    const randomNum = Math.floor(Math.random() * 89 + 10);
+    const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    const newToken = `${sub.code}${randomNum}${randomLetter}`;
+    if (input) input.value = newToken;
+    sub.token = newToken;
+  });
+  showToast('Seluruh token mata pelajaran berhasil diacak! Jangan lupa klik "Simpan Perubahan Token".', 'info');
+}
+
+function saveSubjectTokensSettings() {
+  (state.subjects || []).forEach(sub => {
+    const tokenInput = document.getElementById('token-input-' + sub.id);
+    const durationInput = document.getElementById('duration-input-' + sub.id);
+    const statusInput = document.getElementById('status-input-' + sub.id);
+    if (tokenInput) sub.token = tokenInput.value.trim().toUpperCase();
+    if (durationInput) sub.durationMinutes = parseInt(durationInput.value, 10) || 90;
+    if (statusInput) sub.isActive = statusInput.value === 'true';
+  });
+
+  localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+  applySchoolBrandingUI();
+  showToast('Pengaturan token dan durasi per mata pelajaran berhasil disimpan!', 'success');
+}
+
+function regenerateAllStudentPasswords() {
+  if (!confirm('Peringatan: Seluruh password siswa untuk semua mata pelajaran akan diacak ulang. Lanjutkan?')) return;
+  (state.students || []).forEach((st, idx) => {
+    st.passwords = generateStudentSubjectPasswords(st.nisn || ('2026-0' + (idx + 1)));
+  });
+  localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
+  renderExamCardsTab();
+  showToast('Seluruh password siswa per mata pelajaran berhasil digenerate ulang!', 'success');
 }
 
 function updateLogoPreviewUI(url) {
@@ -2421,6 +2749,30 @@ function applySchoolBrandingUI() {
   const welcomeDesc = document.querySelector('.welcome-desc');
   if (welcomeDesc) {
     welcomeDesc.textContent = `Kelola bank soal 5 tipe ${examType}, pantau live ujian siswa serentak, cetak kartu peserta, dan unduh rekap nilai ${schoolName}.`;
+  }
+
+  // 5. Logo Banner Khusus Form Login Siswa & Guru
+  const studentFormLogo = document.getElementById('student-form-school-logo');
+  if (studentFormLogo && logo) {
+    studentFormLogo.src = logo;
+    studentFormLogo.alt = schoolName;
+  }
+  const teacherFormLogo = document.getElementById('teacher-form-school-logo');
+  if (teacherFormLogo && logo) {
+    teacherFormLogo.src = logo;
+    teacherFormLogo.alt = schoolName;
+  }
+
+  // Sinkronisasi pilihan mata pelajaran pada form login siswa
+  const loginSubSelect = document.getElementById('login-subject-select');
+  if (loginSubSelect && Array.isArray(state.subjects) && state.subjects.length > 0) {
+    const currentVal = loginSubSelect.value;
+    let opts = '<option value="">-- Pilih Mata Pelajaran --</option>';
+    state.subjects.filter(s => s.isActive !== false).forEach(s => {
+      opts += `<option value="${s.name}">${s.name} (${s.code}) - ${s.durationMinutes || 90} Menit</option>`;
+    });
+    loginSubSelect.innerHTML = opts;
+    if (currentVal) loginSubSelect.value = currentVal;
   }
 }
 
