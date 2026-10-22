@@ -20,6 +20,18 @@ const state = {
     key: localStorage.getItem('zettcbt_sb_key') || '',
   },
 
+  // Active Teacher Session (Isolation State)
+  currentTeacher: JSON.parse(sessionStorage.getItem('zettcbt_current_teacher') || 'null'),
+
+  // Daftar Akun Guru (Mendukung Offline & Online Supabase)
+  teachers: [
+    { id: 't-admin', username: 'admin', password: 'admin123', fullName: 'Waka Kurikulum / Kepala Sekolah', role: 'admin_sekolah', assignedClass: null, assignedSubject: null },
+    { id: 't-7a', username: 'guru7a', password: 'guru123', fullName: 'Budi Santoso, S.Pd (Wali Kelas 7A)', role: 'guru_kelas', assignedClass: '7A', assignedSubject: 'Tematik 7A' },
+    { id: 't-7b', username: 'guru7b', password: 'guru123', fullName: 'Siti Aminah, S.Pd (Wali Kelas 7B)', role: 'guru_kelas', assignedClass: '7B', assignedSubject: 'Tematik 7B' },
+    { id: 't-mtk', username: 'gurumtk', password: 'guru123', fullName: 'Hendra Wijaya, M.Pd (Guru Matematika)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Matematika' },
+    { id: 't-ipa', username: 'guruipa', password: 'guru123', fullName: 'Dewi Lestari, S.Pd (Guru IPA)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'IPA' }
+  ],
+
   // Active Exam Session
   session: {
     id: 'sess-default-01',
@@ -45,12 +57,67 @@ const state = {
     answers: {} // { [questionId]: { selected: 'A', isDoubt: false } }
   },
 
-  // Bank Soal (Default seeded sample questions)
+  // Bank Soal Terisolasi (Dilengkapi Metadata Guru, Mapel, dan Target Kelas)
   questions: [
     {
       id: 'q-01',
       number: 1,
-      text: 'Jika f(x) = 2x³ - 4x² + 5x - 7, maka nilai turunan pertama f\'(2) adalah...',
+      teacherId: 't-7a',
+      teacherName: 'Budi Santoso, S.Pd',
+      subject: 'Tematik 7A',
+      targetClass: '7A',
+      text: '[SOAL KHUSUS KELAS 7A] Peristiwa mengembun adalah perubahan wujud benda dari...',
+      imageUrl: '',
+      optionA: 'Gas menjadi cair',
+      optionB: 'Cair menjadi padat',
+      optionC: 'Padat menjadi gas',
+      optionD: 'Cair menjadi gas',
+      optionE: 'Gas menjadi padat',
+      correctKey: 'A',
+      scoreWeight: 20
+    },
+    {
+      id: 'q-02',
+      number: 2,
+      teacherId: 't-7a',
+      teacherName: 'Budi Santoso, S.Pd',
+      subject: 'Tematik 7A',
+      targetClass: '7A',
+      text: '[SOAL KHUSUS KELAS 7A] Lambang sila ke-3 dalam perisai Garuda Pancasila adalah...',
+      imageUrl: '',
+      optionA: 'Bintang Tunggal',
+      optionB: 'Rantai Emas',
+      optionC: 'Pohon Beringin',
+      optionD: 'Kepala Banteng',
+      optionE: 'Padi dan Kapas',
+      correctKey: 'C',
+      scoreWeight: 20
+    },
+    {
+      id: 'q-03',
+      number: 3,
+      teacherId: 't-7b',
+      teacherName: 'Siti Aminah, S.Pd',
+      subject: 'Tematik 7B',
+      targetClass: '7B',
+      text: '[SOAL KHUSUS KELAS 7B] Ide pokok dalam sebuah paragraf deduktif terletak pada...',
+      imageUrl: '',
+      optionA: 'Akhir paragraf',
+      optionB: 'Tengah paragraf',
+      optionC: 'Awal dan akhir paragraf',
+      optionD: 'Awal paragraf',
+      optionE: 'Seluruh kalimat penjelas',
+      correctKey: 'D',
+      scoreWeight: 20
+    },
+    {
+      id: 'q-04',
+      number: 4,
+      teacherId: 't-mtk',
+      teacherName: 'Hendra Wijaya, M.Pd',
+      subject: 'Matematika',
+      targetClass: 'UMUM',
+      text: '[SOAL MAPEL MATEMATIKA] Jika f(x) = 2x³ - 4x² + 5x - 7, maka nilai turunan f\'(2) adalah...',
       imageUrl: '',
       optionA: '13',
       optionB: '15',
@@ -61,66 +128,31 @@ const state = {
       scoreWeight: 20
     },
     {
-      id: 'q-02',
-      number: 2,
-      text: 'Nilai dari limit lim(x → 0) [sin(6x) / tan(2x)] adalah...',
-      imageUrl: '',
-      optionA: '1',
-      optionB: '2',
-      optionC: '3',
-      optionD: '4',
-      optionE: '6',
-      correctKey: 'C',
-      scoreWeight: 20
-    },
-    {
-      id: 'q-03',
-      number: 3,
-      text: 'Perhatikan persamaan kuadrat x² - (k + 2)x + (k + 5) = 0. Jika persamaan tersebut memiliki dua akar real kembar, maka nilai k yang memenuhi adalah...',
-      imageUrl: '',
-      optionA: 'k = -4 atau k = 4',
-      optionB: 'k = -2 atau k = 6',
-      optionC: 'k = 4 atau k = -4',
-      optionD: 'k = -4 atau k = 6',
-      optionE: 'k = -6 atau k = 4',
-      correctKey: 'D',
-      scoreWeight: 20
-    },
-    {
-      id: 'q-04',
-      number: 4,
-      text: 'Diketahui vektor u = (2, -1, 3) dan v = (-3, 2, 1). Hasil kali skalar (dot product) antara vektor u dan v adalah...',
-      imageUrl: '',
-      optionA: '-5',
-      optionB: '-3',
-      optionC: '0',
-      optionD: '3',
-      optionE: '5',
-      correctKey: 'A',
-      scoreWeight: 20
-    },
-    {
       id: 'q-05',
       number: 5,
-      text: 'Peluang munculnya jumlah mata dadu sama dengan 7 atau 11 pada pelemparan dua buah dadu secara serentak adalah...',
+      teacherId: 't-ipa',
+      teacherName: 'Dewi Lestari, S.Pd',
+      subject: 'IPA',
+      targetClass: 'UMUM',
+      text: '[SOAL MAPEL IPA] Organel sel yang berfungsi sebagai tempat respirasi seluler dan penghasil energi ATP adalah...',
       imageUrl: '',
-      optionA: '1/6',
-      optionB: '2/9',
-      optionC: '5/18',
-      optionD: '1/4',
-      optionE: '1/3',
+      optionA: 'Ribosom',
+      optionB: 'Mitokondria',
+      optionC: 'Badan Golgi',
+      optionD: 'Retikulum Endoplasma',
+      optionE: 'Lisosom',
       correctKey: 'B',
       scoreWeight: 20
     }
   ],
 
-  // Mock Active Students for Live Monitoring (Demonstration of 300 capacity)
+  // Mock Active Students (Tersebar di Kelas 7A, 7B, dan Umum untuk Menguji Isolasi)
   liveStudents: [
-    { nisn: '2026-001', name: 'Ahmad Fauzi', className: 'XII IPA 1', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 80, time: '08:45 WIB' },
-    { nisn: '2026-002', name: 'Siti Rahmawati', className: 'XII IPA 1', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, time: '-' },
-    { nisn: '2026-003', name: 'Bambang Trianto', className: 'XII IPA 2', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, time: '08:50 WIB' },
-    { nisn: '2026-004', name: 'Dewi Lestari', className: 'XII IPA 1', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' },
-    { nisn: '2026-005', name: 'Eko Prasetyo', className: 'XII IPS 1', answeredCount: 2, totalQ: 5, warningCount: 2, status: 'in_progress', score: 0, time: '-' }
+    { nisn: '2026-001', name: 'Ahmad Fauzi', className: '7A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, time: '08:45 WIB' },
+    { nisn: '2026-002', name: 'Siti Rahmawati', className: '7A', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, time: '-' },
+    { nisn: '2026-003', name: 'Bambang Trianto', className: '7B', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 90, time: '08:50 WIB' },
+    { nisn: '2026-004', name: 'Dewi Lestari', className: '7B', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' },
+    { nisn: '2026-005', name: 'Eko Prasetyo', className: 'UMUM', answeredCount: 2, totalQ: 5, warningCount: 2, status: 'in_progress', score: 0, time: '-' }
   ]
 };
 
@@ -167,6 +199,13 @@ function loadSavedState() {
   if (setTitleInput) setTitleInput.value = state.session.title;
   const setSubjectInput = document.getElementById('setting-subject');
   if (setSubjectInput) setSubjectInput.value = state.session.subject;
+
+  // Restore teacher session state if active
+  if (state.currentTeacher) {
+    const navLabel = document.getElementById('nav-teacher-label');
+    if (navLabel) navLabel.textContent = state.currentTeacher.username;
+    applyTeacherIsolation();
+  }
 }
 
 // Navigation between Screen Views
@@ -191,6 +230,193 @@ function showScreen(screenId) {
     if (btnStudent) { btnStudent.className = 'btn btn-outline btn-sm'; }
     if (btnAdmin) { btnAdmin.className = 'btn btn-primary btn-sm'; }
   }
+}
+
+// ==============================================================================
+// TEACHER AUTHENTICATION & MULTI-TENANCY ISOLATION ENGINE
+// ==============================================================================
+
+function openTeacherPortal() {
+  if (state.currentTeacher) {
+    applyTeacherIsolation();
+    showScreen('admin-dashboard');
+  } else {
+    showScreen('teacher-login');
+  }
+}
+
+function quickFillTeacher(username, password) {
+  const uInput = document.getElementById('teacher-login-username');
+  const pInput = document.getElementById('teacher-login-password');
+  if (uInput) uInput.value = username;
+  if (pInput) pInput.value = password;
+  showToast('Akun ' + username + ' terisi! Silakan klik tombol Masuk.', 'info');
+}
+
+async function handleTeacherLogin(event) {
+  event.preventDefault();
+  const username = document.getElementById('teacher-login-username').value.trim().toLowerCase();
+  const password = document.getElementById('teacher-login-password').value.trim();
+
+  // 1. Cek Akun Lokal Bawaan
+  let matchedTeacher = state.teachers.find(t => t.username === username && t.password === password);
+
+  // 2. Cek Akun Database Supabase jika terkonfigurasi
+  if (!matchedTeacher && state.supabase.url && state.supabase.key) {
+    try {
+      const res = await fetch(state.supabase.url + '/rest/v1/teachers?username=eq.' + encodeURIComponent(username) + '&select=*', {
+        headers: {
+          'apikey': state.supabase.key,
+          'Authorization': 'Bearer ' + state.supabase.key
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0 && data[0].password_hash === password) {
+          const row = data[0];
+          matchedTeacher = {
+            id: row.id,
+            username: row.username,
+            password: row.password_hash,
+            fullName: row.full_name,
+            role: row.role,
+            assignedClass: row.assigned_class,
+            assignedSubject: row.assigned_subject
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('Gagal memverifikasi akun guru ke Supabase, fallback ke database lokal', e);
+    }
+  }
+
+  if (matchedTeacher) {
+    state.currentTeacher = matchedTeacher;
+    sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(matchedTeacher));
+    
+    // Update navbar label
+    const navLabel = document.getElementById('nav-teacher-label');
+    if (navLabel) navLabel.textContent = matchedTeacher.username;
+
+    applyTeacherIsolation();
+    showScreen('admin-dashboard');
+    showToast('Login berhasil! Selamat datang, ' + matchedTeacher.fullName, 'success');
+  } else {
+    showToast('Username atau password salah! Silakan coba lagi.', 'danger');
+  }
+}
+
+function handleTeacherLogout() {
+  sessionStorage.removeItem('zettcbt_current_teacher');
+  state.currentTeacher = null;
+
+  const navLabel = document.getElementById('nav-teacher-label');
+  if (navLabel) navLabel.textContent = 'Panel Guru / Admin';
+
+  showScreen('student-login');
+  showToast('Anda telah keluar dari Panel Guru.', 'info');
+}
+
+// Terapkan Isolasi Tampilan berdasarkan Akun Guru yang Aktif
+function applyTeacherIsolation() {
+  if (!state.currentTeacher) return;
+  const t = state.currentTeacher;
+
+  // 1. Update Profile Banner di Dashboard
+  const elName = document.getElementById('teacher-profile-name');
+  const elBadge = document.getElementById('teacher-profile-badge');
+  const elScope = document.getElementById('teacher-profile-scope');
+  const elNoticeText = document.getElementById('teacher-isolation-text');
+
+  if (elName) elName.textContent = t.fullName;
+
+  if (elBadge) {
+    if (t.role === 'guru_kelas') {
+      elBadge.className = 'teacher-badge kelas';
+      elBadge.textContent = 'GURU KELAS ' + (t.assignedClass || '');
+    } else if (t.role === 'guru_mapel') {
+      elBadge.className = 'teacher-badge mapel';
+      elBadge.textContent = 'GURU MAPEL ' + (t.assignedSubject || '');
+    } else {
+      elBadge.className = 'teacher-badge admin';
+      elBadge.textContent = 'SUPER ADMIN SEKOLAH';
+    }
+  }
+
+  if (elScope) {
+    if (t.role === 'guru_kelas') {
+      elScope.textContent = 'Kewenangan: Khusus Kelas ' + t.assignedClass + ' | Mapel: ' + (t.assignedSubject || 'Semua');
+    } else if (t.role === 'guru_mapel') {
+      elScope.textContent = 'Kewenangan: Seluruh Kelas | Khusus Mapel: ' + t.assignedSubject;
+    } else {
+      elScope.textContent = 'Kewenangan Penuh: Seluruh Kelas & Seluruh Mata Pelajaran Sekolah';
+    }
+  }
+
+  if (elNoticeText) {
+    if (t.role === 'guru_kelas') {
+      elNoticeText.innerHTML = '<strong>🔒 Sistem Isolasi Aktif:</strong> Anda masuk sebagai <strong>Wali/Guru Kelas ' + t.assignedClass + '</strong>. Anda hanya dapat melihat dan mengelola bank soal serta nilai siswa <strong>Kelas ' + t.assignedClass + '</strong>. Soal guru kelas lain atau mapel lain diisolasi secara aman.';
+    } else if (t.role === 'guru_mapel') {
+      elNoticeText.innerHTML = '<strong>🔒 Sistem Isolasi Aktif:</strong> Anda masuk sebagai <strong>Guru Mata Pelajaran ' + t.assignedSubject + '</strong>. Anda hanya dapat mengelola bank soal mata pelajaran <strong>' + t.assignedSubject + '</strong>. Soal guru kelas atau mapel lain tidak dapat Anda akses.';
+    } else {
+      elNoticeText.innerHTML = '<strong>👑 Mode Super Administrator:</strong> Anda memiliki akses pengawas penuh (Kepala Sekolah / Kurikulum). Anda dapat melihat bank soal dan rekapitulasi nilai seluruh guru, kelas, dan mata pelajaran.';
+    }
+  }
+
+  // 2. Render ulang data terisolasi
+  renderAdminQuestionBank();
+  renderLiveMonitoringTable();
+  updateAdminMetrics();
+  renderResultsTable();
+}
+
+// Filter Bank Soal Terisolasi
+function getVisibleQuestions() {
+  if (!state.currentTeacher) return state.questions;
+  const t = state.currentTeacher;
+
+  if (t.role === 'admin_sekolah') {
+    return state.questions; // Admin melihat semua
+  }
+
+  if (t.role === 'guru_kelas') {
+    // Guru kelas hanya melihat soal kelasnya sendiri atau yang dibuatnya sendiri
+    return state.questions.filter(q => 
+      (q.targetClass && (q.targetClass === t.assignedClass || q.targetClass === 'Kelas ' + t.assignedClass)) || 
+      q.teacherId === t.id
+    );
+  }
+
+  if (t.role === 'guru_mapel') {
+    // Guru mapel hanya melihat soal mapelnya sendiri atau yang dibuatnya sendiri
+    return state.questions.filter(q => 
+      (q.subject && q.subject.toLowerCase() === t.assignedSubject.toLowerCase()) || 
+      q.teacherId === t.id
+    );
+  }
+
+  return state.questions;
+}
+
+// Filter Siswa Aktif Terisolasi
+function getVisibleLiveStudents() {
+  if (!state.currentTeacher) return state.liveStudents;
+  const t = state.currentTeacher;
+
+  if (t.role === 'admin_sekolah' || t.role === 'guru_mapel') {
+    return state.liveStudents;
+  }
+
+  if (t.role === 'guru_kelas') {
+    // Hanya tampilkan siswa di kelasnya
+    return state.liveStudents.filter(s => 
+      s.className === t.assignedClass || 
+      s.className === 'Kelas ' + t.assignedClass ||
+      s.className.includes(t.assignedClass)
+    );
+  }
+
+  return state.liveStudents;
 }
 
 // SCREEN 1: Handle Student Login
@@ -706,12 +932,13 @@ function renderLiveMonitoringTable() {
   const search = (document.getElementById('filter-search-student')?.value || '').toLowerCase();
   tbody.innerHTML = '';
 
-  const filtered = state.liveStudents.filter(s => 
+  const visibleList = getVisibleLiveStudents();
+  const filtered = visibleList.filter(s => 
     s.name.toLowerCase().includes(search) || s.nisn.toLowerCase().includes(search)
   );
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--slate-400);">Tidak ada peserta aktif yang sesuai.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--slate-400);">Tidak ada peserta aktif di kelas kewenangan Anda.</td></tr>';
     return;
   }
 
@@ -753,16 +980,22 @@ function resetStudentLogin(nisn) {
   }
 }
 
-// Render Question Bank Table
+// Render Question Bank Table (Strict Teacher Isolation)
 function renderAdminQuestionBank() {
   const tbody = document.getElementById('table-questions-body');
   const countBadge = document.getElementById('admin-total-q-badge');
   if (!tbody) return;
 
-  if (countBadge) countBadge.textContent = state.questions.length;
+  const visibleQuestions = getVisibleQuestions();
+  if (countBadge) countBadge.textContent = visibleQuestions.length;
   tbody.innerHTML = '';
 
-  state.questions.forEach((q, idx) => {
+  if (visibleQuestions.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada bank soal untuk kelas / mapel kewenangan Anda. Klik "+ Tambah Soal Baru" di atas.</td></tr>';
+    return;
+  }
+
+  visibleQuestions.forEach((q, idx) => {
     const tr = document.createElement('tr');
     tr.innerHTML = 
       '<td>' + (idx + 1) + '</td>' +
@@ -772,6 +1005,8 @@ function renderAdminQuestionBank() {
           'A: ' + escapeHtml(q.optionA) + ' | B: ' + escapeHtml(q.optionB) + ' | C: ' + escapeHtml(q.optionC) + ' | D: ' + escapeHtml(q.optionD) +
         '</div>' +
       '</td>' +
+      '<td><span class="badge badge-info">' + escapeHtml(q.subject || 'Umum') + '</span></td>' +
+      '<td><span class="badge badge-success">' + escapeHtml(q.targetClass || 'UMUM') + '</span></td>' +
       '<td><span class="badge badge-info">Opsi ' + q.correctKey + '</span></td>' +
       '<td>' + (q.scoreWeight || 20) + '</td>' +
       '<td>' +
@@ -788,6 +1023,37 @@ function openAddQuestionModal() {
   document.getElementById('modal-question-title').textContent = 'Tambah Soal Baru';
   document.getElementById('edit-question-id').value = '';
   document.getElementById('form-question-editor').reset();
+
+  const subjInput = document.getElementById('edit-question-subject');
+  const classInput = document.getElementById('edit-question-class');
+
+  // Kunci otomatis field sesuai identitas guru yang login
+  if (state.currentTeacher) {
+    const t = state.currentTeacher;
+    if (t.role === 'guru_kelas') {
+      if (classInput) {
+        classInput.value = t.assignedClass;
+        classInput.readOnly = true;
+      }
+      if (subjInput) {
+        subjInput.value = t.assignedSubject !== 'Semua' ? t.assignedSubject : 'Tematik';
+        subjInput.readOnly = false;
+      }
+    } else if (t.role === 'guru_mapel') {
+      if (subjInput) {
+        subjInput.value = t.assignedSubject;
+        subjInput.readOnly = true;
+      }
+      if (classInput) {
+        classInput.value = 'UMUM';
+        classInput.readOnly = false;
+      }
+    } else {
+      if (subjInput) subjInput.readOnly = false;
+      if (classInput) classInput.readOnly = false;
+    }
+  }
+
   document.getElementById('modal-question-editor').style.display = 'flex';
 }
 
@@ -795,10 +1061,32 @@ function openEditQuestionModal(qId) {
   const q = state.questions.find(item => item.id === qId);
   if (!q) return;
 
+  // Proteksi Isolasi: Guru Kelas dilarang mengedit soal guru lain
+  if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
+    if (q.targetClass !== state.currentTeacher.assignedClass && q.teacherId !== state.currentTeacher.id) {
+      showToast('Akses ditolak: Anda tidak memiliki hak mengedit soal kelas lain!', 'danger');
+      return;
+    }
+  }
+
+  // Proteksi Isolasi: Guru Mapel dilarang mengedit soal mapel lain
+  if (state.currentTeacher && state.currentTeacher.role === 'guru_mapel') {
+    if (q.subject !== state.currentTeacher.assignedSubject && q.teacherId !== state.currentTeacher.id) {
+      showToast('Akses ditolak: Anda tidak memiliki hak mengedit soal mapel lain!', 'danger');
+      return;
+    }
+  }
+
   document.getElementById('modal-question-title').textContent = 'Edit Butir Soal';
   document.getElementById('edit-question-id').value = q.id;
   document.getElementById('edit-question-text').value = q.text;
   document.getElementById('edit-question-image').value = q.imageUrl || '';
+  
+  const subjInput = document.getElementById('edit-question-subject');
+  const classInput = document.getElementById('edit-question-class');
+  if (subjInput) subjInput.value = q.subject || 'Umum';
+  if (classInput) classInput.value = q.targetClass || 'UMUM';
+
   document.getElementById('edit-opt-a').value = q.optionA;
   document.getElementById('edit-opt-b').value = q.optionB;
   document.getElementById('edit-opt-c').value = q.optionC;
@@ -818,9 +1106,15 @@ function handleSaveQuestion(event) {
   event.preventDefault();
 
   const qId = document.getElementById('edit-question-id').value;
+  const teacher = state.currentTeacher;
+
   const newQuestion = {
     id: qId || 'q-' + Date.now(),
     number: state.questions.length + 1,
+    teacherId: teacher ? teacher.id : 't-admin',
+    teacherName: teacher ? teacher.fullName : 'Admin',
+    subject: document.getElementById('edit-question-subject')?.value.trim() || 'Matematika',
+    targetClass: document.getElementById('edit-question-class')?.value.trim().toUpperCase() || 'UMUM',
     text: document.getElementById('edit-question-text').value.trim(),
     imageUrl: document.getElementById('edit-question-image').value.trim(),
     optionA: document.getElementById('edit-opt-a').value.trim(),
@@ -842,12 +1136,23 @@ function handleSaveQuestion(event) {
   localStorage.setItem('zettcbt_questions', JSON.stringify(state.questions));
   renderAdminQuestionBank();
   closeQuestionModal();
-  showToast('Butir soal berhasil disimpan!', 'success');
+  showToast('Butir soal berhasil disimpan untuk ' + newQuestion.targetClass + ' (' + newQuestion.subject + ')!', 'success');
 }
 
 function deleteQuestion(qId) {
+  const q = state.questions.find(item => item.id === qId);
+  if (!q) return;
+
+  // Proteksi Hapus: Guru dilarang menghapus soal milik guru lain
+  if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
+    if (q.targetClass !== state.currentTeacher.assignedClass && q.teacherId !== state.currentTeacher.id) {
+      showToast('Akses ditolak: Anda tidak memiliki hak menghapus soal kelas lain!', 'danger');
+      return;
+    }
+  }
+
   if (confirm('Yakin ingin menghapus butir soal ini?')) {
-    state.questions = state.questions.filter(q => q.id !== qId);
+    state.questions = state.questions.filter(item => item.id !== qId);
     localStorage.setItem('zettcbt_questions', JSON.stringify(state.questions));
     renderAdminQuestionBank();
     showToast('Soal berhasil dihapus.', 'info');
