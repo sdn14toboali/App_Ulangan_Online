@@ -115,14 +115,13 @@
             <div class="form-group">
               <label class="form-label" for="login-class">Kelas / Rombel</label>
               <select id="login-class" class="form-control" required>
-                <option value="">-- Pilih Kelas --</option>
-                <option value="6">Kelas 6</option>
-                <option value="5">Kelas 5</option>
-                <option value="4">Kelas 4</option>
-                <option value="3">Kelas 3</option>
-                <option value="2">Kelas 2</option>
-                <option value="1">Kelas 1</option>
-                <option value="UMUM">Kelas Umum</option>
+                <option value="">-- Pilih Kelas / Rombel --</option>
+                <option value="6A">Kelas 6A</option>
+                <option value="6B">Kelas 6B</option>
+                <option value="5A">Kelas 5A</option>
+                <option value="5B">Kelas 5B</option>
+                <option value="4A">Kelas 4A</option>
+                <option value="4B">Kelas 4B</option>
               </select>
             </div>
 
@@ -924,7 +923,7 @@
                 <input type="text" id="school-name" class="form-control" value="SD NEGERI 14 TOBOALI" required>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                   <label class="form-label">NPSN Sekolah</label>
                   <input type="text" id="school-npsn" class="form-control" value="10901234" required>
@@ -932,6 +931,15 @@
                 <div class="form-group">
                   <label class="form-label">Tahun Ajaran / Semester</label>
                   <input type="text" id="school-academic-year" class="form-control" value="2026/2027 - Ganjil" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Jenis Ujian (Ganti ANBK)</label>
+                  <select id="school-exam-type" class="form-control" required>
+                    <option value="UTS">UTS (Ujian Tengah Semester)</option>
+                    <option value="UAS">UAS (Ujian Akhir Semester)</option>
+                    <option value="ANBK">ANBK (Asesmen Nasional)</option>
+                    <option value="SUMATIF">Asesmen Sumatif</option>
+                  </select>
                 </div>
               </div>
 
@@ -1056,13 +1064,12 @@
             <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
               <select id="filter-manage-student-class" class="form-control" style="width: 140px; font-size: 0.85rem;" onchange="renderStudentsTable()">
                 <option value="ALL">Semua Kelas</option>
-                <option value="6">Kelas 6</option>
-                <option value="5">Kelas 5</option>
-                <option value="4">Kelas 4</option>
-                <option value="3">Kelas 3</option>
-                <option value="2">Kelas 2</option>
-                <option value="1">Kelas 1</option>
-                <option value="UMUM">Kelas UMUM</option>
+                <option value="6A">Kelas 6A</option>
+                <option value="6B">Kelas 6B</option>
+                <option value="5A">Kelas 5A</option>
+                <option value="5B">Kelas 5B</option>
+                <option value="4A">Kelas 4A</option>
+                <option value="4B">Kelas 4B</option>
               </select>
               <button class="btn btn-outline btn-sm" onclick="openImportStudentsModal()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -1409,7 +1416,7 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group" id="group-teacher-class">
               <label class="form-label">Kelas Binaan</label>
-              <input type="text" id="edit-teacher-class" class="form-control" placeholder="Contoh: 7A, 7B, dsb">
+              <input type="text" id="edit-teacher-class" class="form-control" placeholder="Contoh: 4A, 4B, 5A, 5B, 6A, 6B">
               <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Kelas</small>
             </div>
             <div class="form-group" id="group-teacher-subject">
@@ -1453,7 +1460,7 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
               <label class="form-label">Kelas / Rombel</label>
-              <input type="text" id="edit-student-class" class="form-control" placeholder="Contoh: 7A, 7B, UMUM" required>
+              <input type="text" id="edit-student-class" class="form-control" placeholder="Contoh: 4A, 4B, 5A, 5B, 6A, 6B" required>
             </div>
             <div class="form-group">
               <label class="form-label">Jenis Kelamin</label>
