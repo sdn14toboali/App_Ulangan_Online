@@ -733,22 +733,274 @@ body {
   color: #9f1239;
 }
 
-/* Admin Dashboard Specific */
-.admin-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1.5rem 1.25rem 3rem;
-}
-
-.admin-header-tabs {
+/* ==============================================================================
+   ADMIN SIDEBAR & MODERN DASHBOARD LAYOUT
+   ============================================================================== */
+.admin-layout-wrapper {
   display: flex;
-  gap: 0.5rem;
-  border-bottom: 1px solid var(--slate-200);
-  margin-bottom: 1.75rem;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
+  min-height: calc(100vh - 65px);
+  background-color: var(--slate-100);
+  position: relative;
 }
 
+/* Sidebar Samping Kiri */
+.admin-sidebar {
+  width: 270px;
+  background-color: #0f172a; /* Slate 900 */
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-right: 1px solid #1e293b;
+  position: sticky;
+  top: 65px;
+  height: calc(100vh - 65px);
+  overflow-y: auto;
+  z-index: 100;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-brand-box {
+  padding: 1.25rem 1.25rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-brand-box .brand-icon {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.sidebar-brand-subtitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-close-mobile-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  margin-left: auto;
+  padding: 4px;
+}
+
+/* User Profile Snippet in Sidebar */
+.sidebar-user-card {
+  margin: 1rem 1rem 0.5rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sidebar-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1e293b;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-user-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 155px;
+}
+
+.sidebar-user-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  margin-top: 0.2rem;
+}
+
+/* Sidebar Nav */
+.sidebar-nav {
+  padding: 0.75rem 0.75rem 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.nav-section-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  padding: 0.9rem 0.75rem 0.35rem;
+}
+
+.sidebar-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+}
+
+.sidebar-nav-item svg {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: color 0.18s ease;
+}
+
+.sidebar-nav-item:hover {
+  color: #f8fafc;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-nav-item:hover svg {
+  color: #38bdf8;
+}
+
+.sidebar-nav-item.active {
+  color: #ffffff;
+  background-color: #0284c7;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.sidebar-nav-item.active svg {
+  color: #ffffff;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: 0.85rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #090d16;
+}
+
+.btn-sidebar-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-sidebar-logout:hover {
+  background: rgba(244, 63, 94, 0.2);
+  color: #ffffff;
+}
+
+/* Main Content Panel */
+.admin-main-panel {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 2rem 3rem;
+  background-color: var(--slate-100);
+}
+
+/* Top Toolbar */
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-topbar-breadcrumb {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+.admin-topbar-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  line-height: 1.2;
+}
+
+.admin-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-mobile-sidebar-toggle {
+  display: none;
+  background: #ffffff;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  padding: 0.45rem 0.6rem;
+  color: var(--slate-700);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Backdrop Mobile */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 99;
+}
+
+/* Backward compatibility for tab-link */
 .tab-link {
   padding: 0.65rem 1.15rem;
   font-size: 0.9rem;
@@ -769,6 +1021,42 @@ body {
   color: var(--primary-600);
   border-bottom-color: var(--primary-600);
   background-color: #ffffff;
+}
+
+/* Responsive Drawer Breakpoints */
+@media (max-width: 992px) {
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop.active {
+    display: block;
+  }
+
+  .sidebar-close-mobile-btn {
+    display: block;
+  }
+
+  .btn-mobile-sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-main-panel {
+    padding: 1.25rem 1rem 2.5rem;
+  }
 }
 
 /* Dashboard Metric Cards (Grid 3 Columns) */
