@@ -91,11 +91,40 @@ const state = {
     return defaultSubjects;
   })(),
 
+  // Sakelar Global Akses Login Siswa (Buka / Tutup)
+  isStudentLoginActive: localStorage.getItem('zettcbt_student_login_active') !== 'false',
+
+  // Pilihan Mapel Aktif pada Widget Token Proktor
+  selectedTokenSubjectId: 'sub-bin',
+
   // Token Proktor Dinamis (Auto-Refresh 3 Menit = 180 Detik)
   proctorToken: {
     remainingSeconds: 180,
     interval: null
   },
+
+  // Jadwal Pelaksanaan Ujian SD NEGERI 14 TOBOALI (Tersaring Peran Guru)
+  schedules: (() => {
+    const defaultSchedules = [
+      { id: 'sch-01', subjectName: 'Bahasa Indonesia', className: '6A', date: '2026-10-26', startTime: '07:30', endTime: '09:00', durationMinutes: 90, room: 'Lab Komputer 1', teacherName: 'Siti Aminah, S.Pd', token: 'BIN26A', status: 'active', isLoginOpen: true },
+      { id: 'sch-02', subjectName: 'Matematika', className: '6A', date: '2026-10-27', startTime: '07:30', endTime: '09:00', durationMinutes: 90, room: 'Lab Komputer 1', teacherName: 'Siti Aminah, S.Pd', token: 'MTK26B', status: 'upcoming', isLoginOpen: false },
+      { id: 'sch-03', subjectName: 'IPAS (Ilmu Pengetahuan Alam & Sosial)', className: '6A', date: '2026-10-28', startTime: '07:30', endTime: '09:00', durationMinutes: 90, room: 'Lab Komputer 1', teacherName: 'Siti Aminah, S.Pd', token: 'IPS26C', status: 'upcoming', isLoginOpen: false },
+      { id: 'sch-04', subjectName: 'Pendidikan Pancasila (PPKn)', className: '6A', date: '2026-10-29', startTime: '07:30', endTime: '09:00', durationMinutes: 90, room: 'Lab Komputer 1', teacherName: 'Siti Aminah, S.Pd', token: 'PKN26D', status: 'upcoming', isLoginOpen: false },
+      { id: 'sch-05', subjectName: 'Bahasa Indonesia', className: '5A', date: '2026-10-26', startTime: '09:30', endTime: '11:00', durationMinutes: 90, room: 'Lab Komputer 2', teacherName: 'Budi Santoso, S.Pd', token: 'BIN26A', status: 'active', isLoginOpen: true },
+      { id: 'sch-06', subjectName: 'Matematika', className: '5A', date: '2026-10-27', startTime: '09:30', endTime: '11:00', durationMinutes: 90, room: 'Lab Komputer 2', teacherName: 'Budi Santoso, S.Pd', token: 'MTK26B', status: 'upcoming', isLoginOpen: false },
+      { id: 'sch-07', subjectName: 'Pendidikan Agama Islam (PAI)', className: '6A', date: '2026-10-30', startTime: '07:30', endTime: '09:00', durationMinutes: 90, room: 'Lab Komputer 1', teacherName: 'Ahmad Zaki, S.Pd.I', token: 'PAI26E', status: 'upcoming', isLoginOpen: false },
+      { id: 'sch-08', subjectName: 'Pendidikan Agama Islam (PAI)', className: '5A', date: '2026-10-30', startTime: '09:30', endTime: '11:00', durationMinutes: 90, room: 'Lab Komputer 2', teacherName: 'Ahmad Zaki, S.Pd.I', token: 'PAI26E', status: 'upcoming', isLoginOpen: false },
+      { id: 'sch-09', subjectName: 'Pendidikan Agama Islam (PAI)', className: '4A', date: '2026-10-31', startTime: '07:30', endTime: '09:00', durationMinutes: 90, room: 'Lab Komputer 1', teacherName: 'Ahmad Zaki, S.Pd.I', token: 'PAI26E', status: 'upcoming', isLoginOpen: false },
+      { id: 'sch-10', subjectName: 'PJOK / Penjaskes', className: '6A', date: '2026-10-31', startTime: '09:30', endTime: '11:00', durationMinutes: 90, room: 'Lab Komputer 1', teacherName: 'Hendra Wijaya, S.Pd', token: 'PJK26F', status: 'upcoming', isLoginOpen: false },
+      { id: 'sch-11', subjectName: 'PJOK / Penjaskes', className: '5A', date: '2026-11-01', startTime: '07:30', endTime: '09:00', durationMinutes: 90, room: 'Lab Komputer 2', teacherName: 'Hendra Wijaya, S.Pd', token: 'PJK26F', status: 'upcoming', isLoginOpen: false }
+    ];
+    try {
+      const saved = JSON.parse(localStorage.getItem('zettcbt_schedules') || 'null');
+      if (saved && Array.isArray(saved) && saved.length > 0) return saved;
+    } catch(e) {}
+    localStorage.setItem('zettcbt_schedules', JSON.stringify(defaultSchedules));
+    return defaultSchedules;
+  })(),
 
   currentEditorQType: 'pg',
 
@@ -308,6 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
   applySchoolBrandingUI();
   renderAdminQuestionBank();
   renderLiveMonitoringTable();
+  renderTeacherExamSchedules();
+  renderProctorTokenBar();
+  updateGlobalLoginButtonUI();
   updateAdminMetrics();
   startProctorTokenTimer();
 });
@@ -405,22 +437,69 @@ function toggleTeacherPasswordVisibility() {
   }
 }
 
+// ==============================================================================
+// PROCTOR TOKEN ENGINE & MULTI-MAPEL CONTROLS (REF: GAMBAR SCREENSHOT USER)
+// ==============================================================================
+
+function renderProctorTokenBar() {
+  const container = document.getElementById('token-subject-pills-bar');
+  if (!container) return;
+
+  const subjects = state.subjects || [];
+  if (subjects.length === 0) return;
+
+  // Pastikan ada selectedTokenSubjectId yang valid
+  if (!state.selectedTokenSubjectId || !subjects.some(s => s.id === state.selectedTokenSubjectId)) {
+    state.selectedTokenSubjectId = subjects[0].id;
+  }
+
+  let html = '';
+  subjects.forEach(sub => {
+    const isActive = sub.id === state.selectedTokenSubjectId;
+    html += `
+      <button type="button" class="token-pill-btn ${isActive ? 'active' : ''}" onclick="selectTokenSubject('${sub.id}')">
+        <span>${escapeHtml(sub.name)}</span>
+        <span class="pill-token-code">${escapeHtml(sub.token || '-')}</span>
+      </button>
+    `;
+  });
+  container.innerHTML = html;
+
+  updateActiveSubjectTokenUI();
+  updateGlobalLoginButtonUI();
+}
+
+function selectTokenSubject(subId) {
+  state.selectedTokenSubjectId = subId;
+  renderProctorTokenBar();
+}
+
+function updateActiveSubjectTokenUI() {
+  const subjects = state.subjects || [];
+  const activeSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0];
+  if (!activeSub) return;
+
+  const displayToken = document.getElementById('proctor-token-display');
+  const displayTitle = document.getElementById('token-active-subject-title');
+  const metricToken = document.getElementById('metric-active-token');
+
+  if (displayToken) displayToken.textContent = activeSub.token || 'TOKEN1';
+  if (displayTitle) displayTitle.textContent = activeSub.name.toUpperCase();
+  if (metricToken) metricToken.textContent = `${activeSub.code}: ${activeSub.token}`;
+}
+
 // Mesin Token Dinamis 3 Menit (180 Detik)
 function startProctorTokenTimer() {
   if (state.proctorToken.interval) clearInterval(state.proctorToken.interval);
 
-  const displayToken = document.getElementById('proctor-token-display');
-  const displayTimer = document.getElementById('token-timer-countdown');
-  const progressBar = document.getElementById('token-progress-bar');
-
-  if (displayToken) displayToken.textContent = state.session.token;
+  renderProctorTokenBar();
 
   state.proctorToken.interval = setInterval(() => {
     state.proctorToken.remainingSeconds--;
 
     if (state.proctorToken.remainingSeconds <= 0) {
-      // Regenerate Token Baru Otomatis
-      generateNewProctorToken();
+      // Regenerate Token Baru Otomatis untuk Mapel Aktif
+      generateNewProctorToken(false);
       state.proctorToken.remainingSeconds = 180;
     }
 
@@ -428,7 +507,12 @@ function startProctorTokenTimer() {
     const secs = state.proctorToken.remainingSeconds % 60;
     const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
 
+    const displayTimer = document.getElementById('token-timer-countdown');
+    const modalTimer = document.getElementById('modal-all-tokens-countdown');
+    const progressBar = document.getElementById('token-progress-bar');
+
     if (displayTimer) displayTimer.textContent = timeStr;
+    if (modalTimer) modalTimer.textContent = timeStr;
     if (progressBar) {
       const pct = (state.proctorToken.remainingSeconds / 180) * 100;
       progressBar.style.width = pct + '%';
@@ -436,29 +520,319 @@ function startProctorTokenTimer() {
   }, 1000);
 }
 
-function generateNewProctorToken() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+function generateNewProctorToken(showToastMsg = true) {
+  const subjects = state.subjects || [];
+  const activeSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0];
+  if (!activeSub) return;
+
+  const randomNum = Math.floor(Math.random() * 89 + 10);
+  const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  const newToken = `${activeSub.code}${randomNum}${randomLetter}`;
+
+  activeSub.token = newToken;
+  localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+  // Sinkronkan juga ke schedules yang punya mapel ini
+  (state.schedules || []).forEach(sc => {
+    if (sc.subjectName === activeSub.name) sc.token = newToken;
+  });
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+
+  renderProctorTokenBar();
+  renderTeacherExamSchedules();
+
+  if (showToastMsg) {
+    showToast(`Token baru ${activeSub.name}: ${newToken}`, 'info');
   }
-  state.session.token = result;
-  localStorage.setItem('zettcbt_session', JSON.stringify(state.session));
-
-  const displayToken = document.getElementById('proctor-token-display');
-  const metricToken = document.getElementById('metric-active-token');
-  const settingToken = document.getElementById('setting-token');
-
-  if (displayToken) displayToken.textContent = result;
-  if (metricToken) metricToken.textContent = result;
-  if (settingToken) settingToken.value = result;
-
-  showToast('Token ujian diperbarui otomatis: ' + result, 'info');
 }
 
 function forceRefreshToken() {
   state.proctorToken.remainingSeconds = 180;
-  generateNewProctorToken();
+  generateNewProctorToken(true);
+}
+
+// ==============================================================================
+// MODAL TAMPILKAN SEMUA TOKEN MAPEL
+// ==============================================================================
+
+function openAllSubjectTokensModal() {
+  const modal = document.getElementById('modal-all-subject-tokens');
+  const grid = document.getElementById('modal-all-tokens-grid-body');
+  if (!modal || !grid) return;
+
+  const subjects = state.subjects || [];
+  let html = '';
+  subjects.forEach(sub => {
+    html += `
+      <div class="all-token-card">
+        <div class="all-token-card-header">
+          <div>
+            <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${escapeHtml(sub.code)} - ${sub.durationMinutes || 90} MENIT</div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff;">${escapeHtml(sub.name)}</div>
+          </div>
+          <span class="badge" style="background: ${sub.isActive !== false ? '#065f46' : '#881337'}; color: #ffffff; font-size: 0.68rem;">
+            ${sub.isActive !== false ? 'AKTIF' : 'DITUTUP'}
+          </span>
+        </div>
+        <div class="all-token-digits">${escapeHtml(sub.token || '-')}</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e293b;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="copySingleToken('${sub.token}', '${sub.name}')" style="font-size: 0.75rem; padding: 0.25rem 0.55rem; color: #38bdf8; border-color: #0284c7;">
+            📋 Salin Token
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}'); openAllSubjectTokensModal();" style="font-size: 0.75rem; padding: 0.25rem 0.55rem; color: #cbd5e1; border-color: #475569;">
+            🎲 Acak
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  grid.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function closeAllSubjectTokensModal() {
+  const modal = document.getElementById('modal-all-subject-tokens');
+  if (modal) modal.style.display = 'none';
+}
+
+function copySingleToken(token, subName) {
+  navigator.clipboard.writeText(token).then(() => {
+    showToast(`Token ${subName} (${token}) berhasil disalin ke clipboard!`, 'success');
+  }).catch(() => {
+    showToast(`Token: ${token}`, 'info');
+  });
+}
+
+function copyAllTokensToClipboard() {
+  const subjects = state.subjects || [];
+  let txt = `=== TOKEN UJIAN RESMI ${state.school.name} ===\n`;
+  subjects.forEach((s, idx) => {
+    txt += `${idx + 1}. ${s.name}: ${s.token} (${s.durationMinutes || 90} mnt)\n`;
+  });
+  navigator.clipboard.writeText(txt).then(() => {
+    showToast('Seluruh daftar token mata pelajaran berhasil disalin!', 'success');
+  }).catch(() => {
+    showToast('Gagal menyalin otomatis.', 'warning');
+  });
+}
+
+// ==============================================================================
+// SAKELAR KONTROL STATUS LOGIN SISWA
+// ==============================================================================
+
+function toggleGlobalStudentLogin() {
+  state.isStudentLoginActive = !state.isStudentLoginActive;
+  localStorage.setItem('zettcbt_student_login_active', state.isStudentLoginActive ? 'true' : 'false');
+  updateGlobalLoginButtonUI();
+
+  if (state.isStudentLoginActive) {
+    showToast('Pintu Login Siswa DIBUKA! Seluruh siswa dapat masuk mengerjakan ujian.', 'success');
+  } else {
+    showToast('Pintu Login Siswa DITUTUP! Siswa baru tidak dapat login hingga dibuka kembali.', 'warning');
+  }
+}
+
+function updateGlobalLoginButtonUI() {
+  const btn = document.getElementById('btn-global-login-toggle');
+  const ind = document.getElementById('login-toggle-indicator');
+  const txt = document.getElementById('login-toggle-text');
+  if (!btn) return;
+
+  if (state.isStudentLoginActive) {
+    btn.className = 'btn-student-login-toggle active';
+    if (ind) ind.textContent = '🟢';
+    if (txt) txt.textContent = 'Login Siswa: DIBUKA';
+    btn.title = 'Status: AKTIF (Siswa dapat login). Klik untuk menutup.';
+  } else {
+    btn.className = 'btn-student-login-toggle inactive';
+    if (ind) ind.textContent = '🔴';
+    if (txt) txt.textContent = 'Login Siswa: DITUTUP';
+    btn.title = 'Status: NONAKTIF (Siswa ditolak). Klik untuk membuka.';
+  }
+}
+
+// ==============================================================================
+// JADWAL PELAKSANAAN UJIAN GURU (ROLE-BASED ISOLATION)
+// ==============================================================================
+
+function getVisibleSchedules() {
+  const allSchedules = state.schedules || [];
+  const teacher = state.currentTeacher;
+
+  if (!teacher || teacher.role === 'admin_sekolah') {
+    return allSchedules;
+  }
+
+  if (teacher.role === 'guru_kelas') {
+    const cls = (teacher.assignedClass || '').trim();
+    return allSchedules.filter(sc => sc.className === cls || sc.className === 'SEMUA KELAS');
+  }
+
+  if (teacher.role === 'guru_mapel') {
+    const sub = (teacher.assignedSubject || '').toLowerCase();
+    return allSchedules.filter(sc => {
+      const scSub = (sc.subjectName || '').toLowerCase();
+      return scSub.includes(sub) || sub.includes(scSub);
+    });
+  }
+
+  return allSchedules;
+}
+
+function renderTeacherExamSchedules() {
+  const tbody = document.getElementById('table-teacher-schedules-body');
+  const roleHint = document.getElementById('schedule-role-hint');
+  const btnAdd = document.getElementById('btn-add-schedule-admin');
+  if (!tbody) return;
+
+  const teacher = state.currentTeacher;
+  const schedules = getVisibleSchedules();
+
+  // Atur visibilitas tombol tambah jadwal (khusus Operator Sekolah)
+  if (btnAdd) {
+    btnAdd.style.display = (!teacher || teacher.role === 'admin_sekolah') ? 'inline-flex' : 'none';
+  }
+
+  // Atur petunjuk peran
+  if (roleHint) {
+    if (!teacher || teacher.role === 'admin_sekolah') {
+      roleHint.textContent = 'Mode Operator Sekolah: Menampilkan seluruh sesi jadwal ujian SD Negeri 14 Toboali.';
+    } else if (teacher.role === 'guru_kelas') {
+      roleHint.textContent = `Mode Guru Kelas ${teacher.assignedClass}: Menampilkan jadwal khusus untuk rombel binaan Anda.`;
+    } else if (teacher.role === 'guru_mapel') {
+      roleHint.textContent = `Mode Guru Mapel ${teacher.assignedSubject}: Menampilkan jadwal mata pelajaran binaan Anda di semua kelas.`;
+    }
+  }
+
+  tbody.innerHTML = '';
+
+  if (schedules.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--slate-400);">Tidak ada jadwal ujian yang sesuai dengan kewenangan akun Anda saat ini.</td></tr>';
+    return;
+  }
+
+  schedules.forEach((sc, idx) => {
+    const isLoginOpen = sc.isLoginOpen !== false;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align: center;">${idx + 1}</td>
+      <td><strong>${escapeHtml(sc.subjectName)}</strong></td>
+      <td><span class="badge" style="background: var(--slate-200); color: var(--slate-800); font-weight: 700;">${escapeHtml(sc.className)}</span></td>
+      <td>${escapeHtml(sc.date || '-')}</td>
+      <td>${escapeHtml(sc.startTime || '07:30')} - ${escapeHtml(sc.endTime || '09:00')} (${sc.durationMinutes || 90}m)</td>
+      <td>${escapeHtml(sc.room || 'Lab Komputer')}</td>
+      <td>
+        <span class="pwd-badge" style="color: #1e40af; background: #eff6ff;">${escapeHtml(sc.token || '-')}</span>
+      </td>
+      <td>
+        <span class="badge" style="background: ${sc.status === 'active' ? '#dcfce7' : '#f1f5f9'}; color: ${sc.status === 'active' ? '#15803d' : '#475569'}; font-weight: 700;">
+          ${sc.status === 'active' ? '🟢 Sesi Aktif' : (sc.status === 'completed' ? '⚪ Selesai' : '⏳ Mendatang')}
+        </span>
+      </td>
+      <td>
+        <button type="button" class="btn btn-sm ${isLoginOpen ? 'btn-success' : 'btn-danger'}" onclick="toggleScheduleLoginStatus('${sc.id}')" style="font-size: 0.78rem; padding: 0.25rem 0.6rem;">
+          ${isLoginOpen ? '🟢 Login Dibuka' : '🔴 Login Ditutup'}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleScheduleLoginStatus(scheduleId) {
+  const sc = (state.schedules || []).find(s => s.id === scheduleId);
+  if (!sc) return;
+
+  sc.isLoginOpen = sc.isLoginOpen === false ? true : false;
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+  renderTeacherExamSchedules();
+
+  showToast(`Sesi login untuk ${sc.subjectName} (${sc.className}) ${sc.isLoginOpen ? 'DIBUKA' : 'DITUTUP'}!`, sc.isLoginOpen ? 'success' : 'warning');
+}
+
+function openAddScheduleModal() {
+  const modal = document.getElementById('modal-schedule-editor');
+  if (!modal) return;
+
+  document.getElementById('edit-schedule-id').value = '';
+  document.getElementById('modal-schedule-title').textContent = 'Tambah Sesi Jadwal Ujian';
+  document.getElementById('schedule-input-subject').value = '';
+  document.getElementById('schedule-input-class').value = '6A';
+  document.getElementById('schedule-input-room').value = 'Lab Komputer';
+  document.getElementById('schedule-input-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('schedule-input-token').value = 'BIN26A';
+  document.getElementById('schedule-input-start').value = '07:30';
+  document.getElementById('schedule-input-end').value = '09:00';
+  document.getElementById('schedule-input-login-status').value = 'true';
+
+  modal.style.display = 'flex';
+}
+
+function closeScheduleModal() {
+  const modal = document.getElementById('modal-schedule-editor');
+  if (modal) modal.style.display = 'none';
+}
+
+function handleScheduleSubjectSelect(subjectName) {
+  const subj = (state.subjects || []).find(s => s.name === subjectName);
+  const tokenInput = document.getElementById('schedule-input-token');
+  if (subj && tokenInput) {
+    tokenInput.value = subj.token || 'TOKEN1';
+  }
+}
+
+function handleSaveSchedule(event) {
+  event.preventDefault();
+
+  const id = document.getElementById('edit-schedule-id').value;
+  const subjectName = document.getElementById('schedule-input-subject').value;
+  const className = document.getElementById('schedule-input-class').value;
+  const room = document.getElementById('schedule-input-room').value.trim();
+  const date = document.getElementById('schedule-input-date').value;
+  const token = document.getElementById('schedule-input-token').value.trim().toUpperCase();
+  const startTime = document.getElementById('schedule-input-start').value;
+  const endTime = document.getElementById('schedule-input-end').value;
+  const isLoginOpen = document.getElementById('schedule-input-login-status').value === 'true';
+
+  const teacher = state.currentTeacher;
+  const teacherName = teacher ? teacher.fullName : 'Operator Sekolah';
+
+  if (!id) {
+    const newSchedule = {
+      id: 'sch-' + Date.now(),
+      subjectName,
+      className,
+      room,
+      date,
+      token,
+      startTime,
+      endTime,
+      durationMinutes: 90,
+      teacherName,
+      status: 'active',
+      isLoginOpen
+    };
+    state.schedules.push(newSchedule);
+    showToast('Jadwal ujian berhasil ditambahkan!', 'success');
+  } else {
+    const sc = state.schedules.find(s => s.id === id);
+    if (sc) {
+      sc.subjectName = subjectName;
+      sc.className = className;
+      sc.room = room;
+      sc.date = date;
+      sc.token = token;
+      sc.startTime = startTime;
+      sc.endTime = endTime;
+      sc.isLoginOpen = isLoginOpen;
+      showToast('Jadwal ujian berhasil diperbarui!', 'success');
+    }
+  }
+
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+  closeScheduleModal();
+  renderTeacherExamSchedules();
 }
 
 function openTeacherPortal() {
@@ -630,6 +1004,9 @@ function applyTeacherIsolation() {
   // 3. Render ulang data terisolasi
   renderAdminQuestionBank();
   renderLiveMonitoringTable();
+  renderTeacherExamSchedules();
+  renderProctorTokenBar();
+  updateGlobalLoginButtonUI();
   renderStudentsTable();
   if (t.role === 'admin_sekolah') renderTeachersTable();
   updateAdminMetrics();
@@ -725,10 +1102,26 @@ function handleStudentLogin(event) {
     return;
   }
 
+  // 0. Validasi Sakelar Global Login Siswa
+  if (state.isStudentLoginActive === false) {
+    showToast('Sesi login ujian saat ini sedang DITUTUP oleh pengawas ruang! Silakan tunggu instruksi pengawas.', 'danger');
+    return;
+  }
+
   // 1. Validasi Keberadaan Siswa
   const student = (state.students || []).find(s => s.nisn.toLowerCase() === nisn.toLowerCase());
   if (!student) {
     showToast('Nomor Peserta / NISN "' + nisn + '" belum terdaftar di sistem sekolah! Hubungi pengawas.', 'danger');
+    return;
+  }
+
+  // Cek apakah ada jadwal spesifik untuk rombel ini yang sedang ditutup
+  const matchingSchedule = (state.schedules || []).find(sc => 
+    sc.subjectName.toLowerCase() === subjectName.toLowerCase() && 
+    (sc.className === student.className || sc.className === 'SEMUA KELAS')
+  );
+  if (matchingSchedule && matchingSchedule.isLoginOpen === false) {
+    showToast(`Akses login untuk ${subjectName} di kelas ${student.className} sedang DITUTUP oleh pengawas!`, 'danger');
     return;
   }
 
@@ -1426,7 +1819,11 @@ function switchAdminTab(tabId, element) {
   // Close mobile drawer on selection
   toggleMobileSidebar(false);
 
-  if (tabId === 'live-monitor') renderLiveMonitoringTable();
+  if (tabId === 'live-monitor') {
+    renderLiveMonitoringTable();
+    renderTeacherExamSchedules();
+    renderProctorTokenBar();
+  }
   if (tabId === 'question-bank') renderAdminQuestionBank();
   if (tabId === 'session-setting') {
     populateSessionSettings();
@@ -1585,10 +1982,67 @@ function renderAdminQuestionBank() {
   });
 }
 
+function triggerQuestionImageUpload() {
+  const input = document.getElementById('edit-question-file-input');
+  if (input) input.click();
+}
+
+function handleQuestionImageUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast('File harus berupa gambar (PNG, JPG, SVG, WebP)!', 'warning');
+    return;
+  }
+
+  if (file.size > 3 * 1024 * 1024) {
+    showToast('Ukuran gambar maksimal 3MB!', 'warning');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    const urlInput = document.getElementById('edit-question-image');
+    if (urlInput) urlInput.value = dataUrl;
+    previewQuestionImage(dataUrl);
+    showToast('Foto / gambar soal berhasil dimuat!', 'info');
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewQuestionImage(url) {
+  const box = document.getElementById('edit-question-image-preview-box');
+  const img = document.getElementById('edit-question-image-preview');
+  if (!box || !img) return;
+
+  if (url && url.trim()) {
+    img.src = url.trim();
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+    img.src = '';
+  }
+}
+
+function removeQuestionImage() {
+  const urlInput = document.getElementById('edit-question-image');
+  const fileInput = document.getElementById('edit-question-file-input');
+  const box = document.getElementById('edit-question-image-preview-box');
+  const img = document.getElementById('edit-question-image-preview');
+
+  if (urlInput) urlInput.value = '';
+  if (fileInput) fileInput.value = '';
+  if (box) box.style.display = 'none';
+  if (img) img.src = '';
+}
+
 function openAddQuestionModal() {
   document.getElementById('modal-question-title').textContent = 'Tambah Soal Baru';
   document.getElementById('edit-question-id').value = '';
   document.getElementById('form-question-editor').reset();
+  removeQuestionImage();
 
   const subjInput = document.getElementById('edit-question-subject');
   const classInput = document.getElementById('edit-question-class');
@@ -1648,6 +2102,12 @@ function openEditQuestionModal(qId) {
   document.getElementById('edit-question-text').value = q.text;
   document.getElementById('edit-question-image').value = q.imageUrl || '';
   
+  if (q.imageUrl) {
+    previewQuestionImage(q.imageUrl);
+  } else {
+    removeQuestionImage();
+  }
+  
   const subjInput = document.getElementById('edit-question-subject');
   const classInput = document.getElementById('edit-question-class');
   if (subjInput) subjInput.value = q.subject || 'Umum';
@@ -1666,6 +2126,7 @@ function openEditQuestionModal(qId) {
 
 function closeQuestionModal() {
   document.getElementById('modal-question-editor').style.display = 'none';
+  removeQuestionImage();
 }
 
 // Helper untuk 5 Tipe Soal
