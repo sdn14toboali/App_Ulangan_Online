@@ -330,6 +330,17 @@ body {
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
+.split-auth-card.student-centered-auth {
+  max-width: 520px;
+  min-height: auto;
+  border-radius: 24px;
+}
+
+.split-auth-card.student-centered-auth .split-auth-form-side {
+  flex: 1 1 100%;
+  padding: 2.25rem 2.5rem;
+}
+
 .split-auth-hero {
   flex: 1 1 48%;
   background: linear-gradient(145deg, #4f46e5 0%, #3b82f6 50%, #2563eb 100%);
@@ -522,20 +533,15 @@ body {
     border-radius: 18px;
     margin: 0.5rem auto;
   }
+  .split-auth-card.student-centered-auth {
+    max-width: 100%;
+    margin: 0.25rem auto;
+  }
+  .split-auth-card.student-centered-auth .split-auth-form-side {
+    padding: 1.5rem 1.15rem;
+  }
   .split-auth-hero {
-    padding: 1.25rem 1.15rem 1rem;
-  }
-  .split-hero-headline {
-    font-size: 1.15rem;
-    margin-bottom: 0.25rem;
-  }
-  .split-hero-subtext {
-    font-size: 0.8rem;
-    line-height: 1.35;
-    margin-bottom: 0;
-  }
-  .split-hero-features {
-    display: none;
+    display: none !important;
   }
   .split-auth-form-side {
     padding: 1.25rem 1.15rem 1.5rem;
@@ -2360,11 +2366,25 @@ body {
 
 .srms-sidebar-toggle-btn {
   display: none;
-  background: none;
-  border: none;
-  color: #475569;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  color: #1d4ed8;
+  border-radius: 8px;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.srms-sidebar-toggle-btn:hover {
+  background: #dbeafe;
+}
+
+.srms-sidebar-toggle-btn .btn-toggle-label {
+  display: inline;
 }
 
 .srms-topbar-title {
@@ -3458,3 +3478,76 @@ body {
     font-size: 0.72rem;
   }
 }
+
+/* ==============================================================================
+   ADMIN MOBILE BOTTOM NAVIGATION BAR (PENYELARASAN FITUR HP = DESKTOP)
+   ============================================================================== */
+.admin-mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  .admin-mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1.5px solid #e2e8f0;
+    z-index: 900;
+    padding: 6px 8px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.08);
+  }
+
+  .admin-mob-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: transparent;
+    border: none;
+    padding: 6px 4px;
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.18s ease;
+  }
+
+  .admin-mob-nav-btn svg {
+    stroke-width: 2.2;
+    transition: transform 0.18s ease;
+  }
+
+  .admin-mob-nav-btn:hover {
+    color: #1d4ed8;
+  }
+
+  .admin-mob-nav-btn.active {
+    color: #2563eb;
+    font-weight: 800;
+    background: #eff6ff;
+  }
+
+  .admin-mob-nav-btn.active svg {
+    transform: scale(1.1);
+  }
+
+  /* Berikan padding bawah pada konten admin agar tidak tertutup bottom bar di HP */
+  .admin-main-panel {
+    padding-bottom: 75px !important;
+  }
+
+  .srms-sidebar-toggle-btn {
+    display: inline-flex !important;
+  }
+}
+
