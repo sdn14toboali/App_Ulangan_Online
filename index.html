@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SD NEGERI 14 TOBOALI - CBT Ujian Online</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2.0.5">
 </head>
 <body>
 
@@ -47,50 +47,11 @@
     </div>
   </header>
 
-  <!-- SCREEN 1: LOGIN SISWA (SPLIT 2-KOLOM MODERN ALA GAMBAR REFERENSI) -->
+  <!-- SCREEN 1: LOGIN SISWA (FORM TERPUSAT, BERSIH & FOKUS) -->
   <main id="screen-student-login" class="view-screen active">
     <div class="split-auth-container">
-      <div class="split-auth-card">
-        <!-- Kolom Kiri: Hero Visual Siswa (Sesuai Gambar Referensi) -->
-        <div class="split-auth-hero">
-          <div class="split-auth-hero-header">
-            <div class="split-hero-logo">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-            </div>
-            <div>
-              <div class="split-hero-school">SD NEGERI 14 TOBOALI</div>
-              <div class="split-hero-tag">CBT UAS RESMI</div>
-            </div>
-          </div>
-
-          <div class="split-hero-body">
-            <h2 class="split-hero-headline">Ruang Ujian Siswa Berstandar UAS</h2>
-            <p class="split-hero-subtext">Selamat datang peserta didik. Kerjakan soal dengan jujur, teliti, dan percaya pada kemampuan diri sendiri.</p>
-          </div>
-
-          <div class="split-hero-features">
-            <div class="split-feature-item">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-              <span>Ujian Aman & Terpantau</span>
-            </div>
-            <div class="split-feature-item">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>Auto-Save Jawaban Real-time</span>
-            </div>
-            <div class="split-feature-item">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              <span>Sinkronisasi Timer Server</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Kolom Kanan: Formulir Masuk Siswa -->
+      <div class="split-auth-card student-centered-auth">
+        <!-- Formulir Masuk Siswa (Tanpa Banner Hero yang Menutupi Layar) -->
         <div class="split-auth-form-side">
           <div class="split-form-header">
             <div class="login-school-brand-banner">
@@ -537,7 +498,7 @@
 
       <!-- SIDEBAR NAVIGASI SAMPING KIRI (SRMS STYLE ALA GAMBAR 1) -->
       <aside class="admin-sidebar srms-sidebar" id="admin-sidebar">
-        <!-- Brand Header di Sidebar SRMS -->
+        <!-- Brand Header di Sidebar Resmi SDN 14 Toboali -->
         <div class="srms-brand-box">
           <div class="srms-brand-logo-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -546,8 +507,8 @@
             </svg>
           </div>
           <div class="srms-brand-text">
-            <div class="srms-brand-title">SRMS</div>
-            <div class="srms-brand-subtitle">Student Result<br>Management System</div>
+            <div class="srms-brand-title">CBT UAS</div>
+            <div class="srms-brand-subtitle">Sistem Ujian &amp; Hasil Belajar<br>SD Negeri 14 Toboali</div>
           </div>
           <button class="sidebar-close-mobile-btn" onclick="toggleMobileSidebar(false)" title="Tutup Menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -557,14 +518,14 @@
           </button>
         </div>
 
-        <!-- Menu Navigasi Samping Persis Gambar 1 -->
+        <!-- 11 Menu Navigasi Resmi Bahasa Indonesia -->
         <nav class="srms-nav">
           <button class="srms-nav-item active" id="tab-nav-srms-dashboard" onclick="switchAdminTab('srms-dashboard', this)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-            <span>Dashboard</span>
+            <span>Dasbor Utama</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-profile" onclick="openTeacherProfileModal()">
@@ -572,7 +533,7 @@
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <span>Profile</span>
+            <span>Profil Pengguna</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-question-bank" onclick="switchAdminTab('question-bank', this)">
@@ -580,7 +541,7 @@
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
             </svg>
-            <span>Courses</span>
+            <span>Bank Soal &amp; Mapel</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-results-analysis" onclick="switchAdminTab('results-analysis', this)">
@@ -589,7 +550,7 @@
               <line x1="12" y1="20" x2="12" y2="4"></line>
               <line x1="6" y1="20" x2="6" y2="14"></line>
             </svg>
-            <span>Results</span>
+            <span>Hasil Nilai &amp; Rekap</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-manage-students" onclick="switchAdminTab('manage-students', this)">
@@ -599,7 +560,7 @@
               <line x1="8" y1="2" x2="8" y2="6"></line>
               <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span>Attendance</span>
+            <span>Data Siswa &amp; Presensi</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-live-monitor" onclick="switchAdminTab('live-monitor', this)">
@@ -609,7 +570,7 @@
               <line x1="16" y1="13" x2="8" y2="13"></line>
               <line x1="16" y1="17" x2="8" y2="17"></line>
             </svg>
-            <span>Exams</span>
+            <span>Monitor Ujian Langsung</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-session-setting" onclick="switchAdminTab('session-setting', this)">
@@ -618,7 +579,7 @@
               <path d="M3 9h18"></path>
               <path d="M9 21V9"></path>
             </svg>
-            <span>Timetable</span>
+            <span>Jadwal &amp; Sesi Ujian</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-notice-board" onclick="scrollToNoticeBoard()">
@@ -626,7 +587,7 @@
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span>Notice Board</span>
+            <span>Papan Pengumuman</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-academic-calendar" onclick="scrollToAcademicCalendar()">
@@ -636,7 +597,7 @@
               <line x1="8" y1="2" x2="8" y2="6"></line>
               <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span>Academic Calendar</span>
+            <span>Kalender Akademik</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-exam-cards" onclick="switchAdminTab('exam-cards', this)">
@@ -645,18 +606,18 @@
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>Downloads</span>
+            <span>Cetak Kartu &amp; Unduhan</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-school-identity" onclick="switchAdminTab('school-identity', this)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
             </svg>
-            <span>Feedback</span>
+            <span>Identitas &amp; Pengaturan</span>
           </button>
         </nav>
 
-        <!-- Sidebar Footer Logout Persis Gambar 1 -->
+        <!-- Sidebar Footer Keluar -->
         <div class="srms-sidebar-footer">
           <button class="srms-logout-btn" onclick="handleTeacherLogout()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -664,24 +625,25 @@
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
-            <span>Logout</span>
+            <span>Keluar</span>
           </button>
         </div>
       </aside>
 
       <!-- MAIN CONTENT PANEL DI SEBELAH KANAN -->
       <section class="admin-main-panel srms-main-panel">
-        <!-- Top Toolbar Header Persis Gambar 1 -->
+        <!-- Top Toolbar Header Resmi SDN 14 Toboali -->
         <header class="srms-topbar">
           <div class="srms-topbar-left">
-            <button class="srms-sidebar-toggle-btn" id="btn-sidebar-toggle" onclick="toggleMobileSidebar(true)" title="Menu">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <button class="srms-sidebar-toggle-btn" id="btn-sidebar-toggle" onclick="toggleMobileSidebar(true)" title="Buka Menu Fitur">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
                 <line x1="3" y1="18" x2="21" y2="18"></line>
               </svg>
+              <span class="btn-toggle-label">Menu Fitur</span>
             </button>
-            <h1 class="srms-topbar-title" id="admin-topbar-page-title">Dashboard</h1>
+            <h1 class="srms-topbar-title" id="admin-topbar-page-title">Dasbor Utama</h1>
           </div>
 
           <div class="srms-topbar-center">
@@ -690,7 +652,7 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="text" class="srms-search-input" id="srms-global-search" placeholder="Search anything..." oninput="handleGlobalSearch(this.value)">
+              <input type="text" class="srms-search-input" id="srms-global-search" placeholder="Cari menu, mapel, atau data siswa..." oninput="handleGlobalSearch(this.value)">
             </div>
           </div>
 
@@ -708,8 +670,8 @@
             <div class="srms-user-chip" onclick="openTeacherProfileModal()">
               <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80" alt="Avatar" class="srms-avatar-img" id="srms-user-avatar-img">
               <div class="srms-user-meta">
-                <div class="srms-user-greeting"><span id="srms-header-greeting">Hello, </span><strong id="srms-header-user-name">Abhishek Verma</strong></div>
-                <div class="srms-user-role" id="srms-header-user-role">B.Tech CSE - 3rd Year</div>
+                <div class="srms-user-greeting"><span id="srms-header-greeting">Selamat Datang, </span><strong id="srms-header-user-name">Bapak/Ibu Guru</strong></div>
+                <div class="srms-user-role" id="srms-header-user-role">SD Negeri 14 Toboali</div>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="srms-chevron-icon">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -725,7 +687,7 @@
             <span class="token-ribbon-label-text">TOKEN LOGIN SISWA:</span>
             <button type="button" class="btn-token-ribbon-reload" onclick="forceRefreshToken()" title="Segarkan dan Acak Token Baru">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-              <span>Reload</span>
+              <span>Acak Baru</span>
             </button>
           </div>
 
@@ -734,14 +696,14 @@
           </div>
         </div>
 
-        <!-- TAB 0: SRMS DASHBOARD UTAMA (PERSIS GAMBAR 1) -->
+        <!-- TAB 0: DASBOR UTAMA RESMI SDN 14 TOBOALI -->
         <div id="tab-srms-dashboard" class="admin-tab-content active">
-          <!-- 1. Good Morning Welcome Banner Hero -->
+          <!-- 1. Sambutan Hangat Guru & Pengawas -->
           <div class="srms-welcome-hero-card">
             <div class="srms-welcome-left">
-              <div class="srms-greeting-sub">Good Morning, 👋</div>
-              <h2 class="srms-greeting-name" id="srms-hero-name">Abhishek Verma!</h2>
-              <p class="srms-greeting-desc">Stay updated with your academic journey.</p>
+              <div class="srms-greeting-sub">Selamat Datang, 👋</div>
+              <h2 class="srms-greeting-name" id="srms-hero-name">Bapak/Ibu Guru &amp; Pengawas!</h2>
+              <p class="srms-greeting-desc">Pantau kelancaran ujian online dan perkembangan hasil belajar siswa secara real-time.</p>
             </div>
             <div class="srms-welcome-right">
               <!-- Book & Plant SVG Illustration -->
@@ -766,9 +728,9 @@
             </div>
           </div>
 
-          <!-- 2. Row of 5 Metric KPI Cards -->
+          <!-- 2. Baris Kartu Indikator Metrik (KPI) -->
           <div class="srms-kpi-row">
-            <!-- 1. CGPA -->
+            <!-- 1. Rata-rata Nilai -->
             <div class="srms-kpi-card">
               <div class="srms-kpi-icon-box blue">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -779,13 +741,13 @@
                 </svg>
               </div>
               <div class="srms-kpi-info">
-                <span class="srms-kpi-label">CGPA</span>
-                <div class="srms-kpi-value" id="srms-kpi-cgpa">8.45</div>
-                <span class="srms-kpi-subtext blue">Current CGPA</span>
+                <span class="srms-kpi-label">Rata-rata Nilai</span>
+                <div class="srms-kpi-value" id="srms-kpi-cgpa">88.5</div>
+                <span class="srms-kpi-subtext blue">Rata-rata Nilai UAS</span>
               </div>
             </div>
 
-            <!-- 2. Courses Enrolled -->
+            <!-- 2. Mata Pelajaran Aktif -->
             <div class="srms-kpi-card">
               <div class="srms-kpi-icon-box green">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -794,13 +756,13 @@
                 </svg>
               </div>
               <div class="srms-kpi-info">
-                <span class="srms-kpi-label">Courses Enrolled</span>
+                <span class="srms-kpi-label">Mata Pelajaran</span>
                 <div class="srms-kpi-value" id="srms-kpi-courses">6</div>
-                <span class="srms-kpi-subtext green">This Semester</span>
+                <span class="srms-kpi-subtext green">Mapel Ujian Aktif</span>
               </div>
             </div>
 
-            <!-- 3. Exams Completed -->
+            <!-- 3. Ujian Selesai -->
             <div class="srms-kpi-card">
               <div class="srms-kpi-icon-box purple">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -810,13 +772,13 @@
                 </svg>
               </div>
               <div class="srms-kpi-info">
-                <span class="srms-kpi-label">Exams Completed</span>
-                <div class="srms-kpi-value" id="srms-kpi-exams">4</div>
-                <span class="srms-kpi-subtext purple">This Semester</span>
+                <span class="srms-kpi-label">Ujian Selesai</span>
+                <div class="srms-kpi-value" id="srms-kpi-exams">18 / 24</div>
+                <span class="srms-kpi-subtext purple">Siswa Sudah Submit</span>
               </div>
             </div>
 
-            <!-- 4. Overall Rank -->
+            <!-- 4. Peringkat Sekolah -->
             <div class="srms-kpi-card">
               <div class="srms-kpi-icon-box orange">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -828,13 +790,13 @@
                 </svg>
               </div>
               <div class="srms-kpi-info">
-                <span class="srms-kpi-label">Overall Rank</span>
-                <div class="srms-kpi-value" id="srms-kpi-rank">12</div>
-                <span class="srms-kpi-subtext orange">out of 120</span>
+                <span class="srms-kpi-label">Peringkat Sekolah</span>
+                <div class="srms-kpi-value" id="srms-kpi-rank">#4</div>
+                <span class="srms-kpi-subtext orange">Tingkat Kecamatan</span>
               </div>
             </div>
 
-            <!-- 5. Attendance -->
+            <!-- 5. Kehadiran Siswa -->
             <div class="srms-kpi-card">
               <div class="srms-kpi-icon-box red">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -846,131 +808,137 @@
                 </svg>
               </div>
               <div class="srms-kpi-info">
-                <span class="srms-kpi-label">Attendance</span>
-                <div class="srms-kpi-value" id="srms-kpi-attendance">87%</div>
-                <span class="srms-kpi-subtext red">This Semester</span>
+                <span class="srms-kpi-label">Kehadiran Peserta</span>
+                <div class="srms-kpi-value" id="srms-kpi-attendance">94.2%</div>
+                <span class="srms-kpi-subtext red">Total Presensi Ujian</span>
               </div>
             </div>
           </div>
 
-          <!-- 3. Middle Grid: Recent Results (62%) & Notice Board (38%) -->
+          <!-- 3. Grid Tengah: Hasil Ujian Terbaru & Papan Pengumuman -->
           <div class="srms-mid-grid">
-            <!-- Left: Recent Results Table -->
+            <!-- Kiri: Tabel Hasil Nilai Siswa -->
             <div class="srms-card srms-recent-results-card">
               <div class="srms-card-header">
-                <h3 class="srms-card-title">Recent Results</h3>
-                <button type="button" class="srms-card-link" onclick="switchAdminTab('results-analysis')">View All Results</button>
+                <h3 class="srms-card-title">Hasil Ujian Terbaru</h3>
+                <button type="button" class="srms-card-link" onclick="switchAdminTab('results-analysis')">Lihat Semua Nilai</button>
               </div>
               <div class="table-responsive">
                 <table class="srms-table">
                   <thead>
                     <tr>
-                      <th>Subject</th>
-                      <th>Exam Type</th>
-                      <th>Grade</th>
-                      <th>Score</th>
-                      <th>Date</th>
+                      <th>Mata Pelajaran</th>
+                      <th>Peserta &amp; NISN</th>
+                      <th>Kelas</th>
+                      <th>Skor / 100</th>
+                      <th>Predikat</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
-                  <tbody id="srms-recent-results-body">
+                  <tbody id="srms-results-tbody">
                     <tr>
-                      <td><strong>Data Structures</strong></td>
-                      <td>Mid Sem</td>
+                      <td><strong>Bahasa Indonesia</strong></td>
+                      <td>Ahmad Fauzan (2026-001)</td>
+                      <td>Kelas 6</td>
+                      <td><strong>88 / 100</strong></td>
                       <td><span class="srms-grade-badge grade-a">A</span></td>
-                      <td><strong>86/100</strong></td>
-                      <td class="text-muted">12 May 2026</td>
+                      <td><span class="status-badge-srms badge-pass">Tuntas</span></td>
                     </tr>
                     <tr>
-                      <td><strong>Database Management Systems</strong></td>
-                      <td>Mid Sem</td>
+                      <td><strong>Matematika</strong></td>
+                      <td>Siti Nurhaliza (2026-002)</td>
+                      <td>Kelas 6</td>
+                      <td><strong>94 / 100</strong></td>
                       <td><span class="srms-grade-badge grade-aplus">A+</span></td>
-                      <td><strong>91/100</strong></td>
-                      <td class="text-muted">10 May 2026</td>
+                      <td><span class="status-badge-srms badge-pass">Tuntas</span></td>
                     </tr>
                     <tr>
-                      <td><strong>Operating Systems</strong></td>
-                      <td>Mid Sem</td>
+                      <td><strong>IPAS</strong></td>
+                      <td>Rian Pratama (2026-003)</td>
+                      <td>Kelas 6</td>
+                      <td><strong>82 / 100</strong></td>
                       <td><span class="srms-grade-badge grade-bplus">B+</span></td>
-                      <td><strong>78/100</strong></td>
-                      <td class="text-muted">08 May 2026</td>
+                      <td><span class="status-badge-srms badge-pass">Tuntas</span></td>
                     </tr>
                     <tr>
-                      <td><strong>Computer Networks</strong></td>
-                      <td>Mid Sem</td>
+                      <td><strong>Pendidikan Pancasila</strong></td>
+                      <td>Dewi Lestari (2026-004)</td>
+                      <td>Kelas 6</td>
+                      <td><strong>89 / 100</strong></td>
                       <td><span class="srms-grade-badge grade-a">A</span></td>
-                      <td><strong>85/100</strong></td>
-                      <td class="text-muted">06 May 2026</td>
+                      <td><span class="status-badge-srms badge-pass">Tuntas</span></td>
                     </tr>
                     <tr>
-                      <td><strong>Software Engineering</strong></td>
-                      <td>Mid Sem</td>
+                      <td><strong>Pendidikan Agama Islam</strong></td>
+                      <td>Budi Santoso (2026-005)</td>
+                      <td>Kelas 6</td>
+                      <td><strong>95 / 100</strong></td>
                       <td><span class="srms-grade-badge grade-aplus">A+</span></td>
-                      <td><strong>92/100</strong></td>
-                      <td class="text-muted">04 May 2026</td>
+                      <td><span class="status-badge-srms badge-pass">Tuntas</span></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
-            <!-- Right: Notice Board Feed -->
+            <!-- Kanan: Papan Pengumuman Sekolah -->
             <div class="srms-card srms-notice-board-card" id="srms-notice-board-section">
               <div class="srms-card-header">
-                <h3 class="srms-card-title">Notice Board</h3>
-                <button type="button" class="srms-card-link" onclick="openAllNoticesModal()">View All Notices</button>
+                <h3 class="srms-card-title">Papan Pengumuman</h3>
+                <button type="button" class="srms-card-link" onclick="openAllNoticesModal()">Semua Pengumuman</button>
               </div>
               <div class="srms-notices-feed" id="srms-notices-feed-container">
-                <!-- Notice 1 -->
+                <!-- Pengumuman 1 -->
                 <div class="srms-notice-item">
                   <div class="srms-notice-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                   </div>
                   <div class="srms-notice-content">
-                    <h4 class="srms-notice-title">End Semester Exam Schedule</h4>
-                    <p class="srms-notice-desc">The end semester exams will begin from 25th May 2026.</p>
-                    <span class="srms-notice-date">15 May 2026</span>
+                    <h4 class="srms-notice-title">Jadwal Ujian Akhir Semester (UAS)</h4>
+                    <p class="srms-notice-desc">Pelaksanaan UAS Semester Genap berlangsung tertib mulai 25 Mei 2026.</p>
+                    <span class="srms-notice-date">15 Mei 2026</span>
                   </div>
                 </div>
 
-                <!-- Notice 2 -->
+                <!-- Pengumuman 2 -->
                 <div class="srms-notice-item">
                   <div class="srms-notice-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                   </div>
                   <div class="srms-notice-content">
-                    <h4 class="srms-notice-title">Result Declaration Notice</h4>
-                    <p class="srms-notice-desc">Results for Mid Semester Exams has been declared.</p>
-                    <span class="srms-notice-date">12 May 2026</span>
+                    <h4 class="srms-notice-title">Pengumuman Rekap Nilai Ujian</h4>
+                    <p class="srms-notice-desc">Rekapitulasi nilai dan analisis butir soal telah diterbitkan untuk seluruh kelas.</p>
+                    <span class="srms-notice-date">12 Mei 2026</span>
                   </div>
                 </div>
 
-                <!-- Notice 3 -->
+                <!-- Pengumuman 3 -->
                 <div class="srms-notice-item">
                   <div class="srms-notice-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                   </div>
                   <div class="srms-notice-content">
-                    <h4 class="srms-notice-title">Project Submission Deadline</h4>
-                    <p class="srms-notice-desc">Final year project submission is due on 30th May 2026.</p>
-                    <span class="srms-notice-date">10 May 2026</span>
+                    <h4 class="srms-notice-title">Penyusunan Bank Soal Tambahan</h4>
+                    <p class="srms-notice-desc">Bapak/Ibu guru diharapkan menyelesaikan input kisi-kisi soal sebelum batas akhir.</p>
+                    <span class="srms-notice-date">10 Mei 2026</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 4. Bottom Grid: Academic Calendar (Col 1), Quick Access (Col 2), Performance Overview (Col 3) -->
+          <!-- 4. Grid Bawah: Kalender Akademik, Akses Cepat & Ketuntasan Siswa -->
           <div class="srms-bottom-grid">
-            <!-- Col 1: Academic Calendar -->
+            <!-- Kolom 1: Kalender Akademik -->
             <div class="srms-card srms-calendar-card" id="srms-calendar-section">
               <div class="srms-card-header">
-                <h3 class="srms-card-title">Academic Calendar</h3>
-                <button type="button" class="srms-card-link" onclick="openCalendarModal()">View Calendar</button>
+                <h3 class="srms-card-title">Kalender Akademik</h3>
+                <button type="button" class="srms-card-link" onclick="openCalendarModal()">Buka Kalender</button>
               </div>
-              <div class="srms-calendar-month-title" id="srms-calendar-header-title">May 2026</div>
+              <div class="srms-calendar-month-title" id="srms-calendar-header-title">Mei 2026</div>
               <div class="srms-mini-calendar">
                 <div class="srms-cal-row srms-cal-days">
-                  <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span class="weekend">Sat</span><span class="weekend">Sun</span>
+                  <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span class="weekend">Sab</span><span class="weekend">Min</span>
                 </div>
                 <div class="srms-cal-row srms-cal-grid" id="srms-cal-dates-grid">
                   <!-- Generated by JS -->
@@ -983,94 +951,94 @@
               </div>
             </div>
 
-            <!-- Col 2: Quick Access -->
+            <!-- Kolom 2: Akses Cepat Menu -->
             <div class="srms-card srms-quick-access-card">
               <div class="srms-card-header">
-                <h3 class="srms-card-title">Quick Access</h3>
+                <h3 class="srms-card-title">Akses Cepat Menu</h3>
               </div>
               <div class="srms-quick-grid">
                 <button type="button" class="srms-quick-btn" onclick="switchAdminTab('results-analysis')">
                   <div class="srms-quick-icon blue">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                   </div>
-                  <span>My Results</span>
+                  <span>Rekap Nilai</span>
                 </button>
 
                 <button type="button" class="srms-quick-btn" onclick="switchAdminTab('question-bank')">
                   <div class="srms-quick-icon green">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                   </div>
-                  <span>My Courses</span>
+                  <span>Bank Soal</span>
                 </button>
 
                 <button type="button" class="srms-quick-btn" onclick="switchAdminTab('session-setting')">
                   <div class="srms-quick-icon purple">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                   </div>
-                  <span>Timetable</span>
+                  <span>Jadwal Ujian</span>
                 </button>
 
                 <button type="button" class="srms-quick-btn" onclick="switchAdminTab('manage-students')">
                   <div class="srms-quick-icon orange">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                   </div>
-                  <span>Attendance</span>
+                  <span>Presensi Siswa</span>
                 </button>
 
                 <button type="button" class="srms-quick-btn" onclick="switchAdminTab('exam-cards')">
                   <div class="srms-quick-icon cyan">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                   </div>
-                  <span>Downloads</span>
+                  <span>Cetak Kartu</span>
                 </button>
 
                 <button type="button" class="srms-quick-btn" onclick="switchAdminTab('school-identity')">
                   <div class="srms-quick-icon pink">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                   </div>
-                  <span>Feedback</span>
+                  <span>Identitas Sekolah</span>
                 </button>
               </div>
             </div>
 
-            <!-- Col 3: Performance Overview (Donut Chart) -->
+            <!-- Kolom 3: Ringkasan Ketuntasan Siswa (Donut Chart) -->
             <div class="srms-card srms-performance-card">
               <div class="srms-card-header">
-                <h3 class="srms-card-title">Performance Overview</h3>
-                <button type="button" class="srms-card-link" onclick="switchAdminTab('results-analysis')">View Details</button>
+                <h3 class="srms-card-title">Ringkasan Ketuntasan Siswa</h3>
+                <button type="button" class="srms-card-link" onclick="switchAdminTab('results-analysis')">Detail Analisis</button>
               </div>
               <div class="srms-performance-body">
                 <!-- Circular Donut SVG -->
                 <div class="srms-donut-wrapper">
                   <svg width="130" height="130" viewBox="0 0 36 36" class="srms-donut-svg">
                     <path class="srms-donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#e2e8f0" stroke-width="3.5" fill="none"/>
-                    <!-- Segments: Excellent (green), Good (blue), Average (amber), Needs (rose) -->
+                    <!-- Segments: Sangat Baik (green), Baik (blue), Cukup (amber), Perlu Bimbingan (rose) -->
                     <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#22c55e" stroke-width="3.8" stroke-dasharray="60, 100" stroke-dashoffset="0" fill="none"/>
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#3b82f6" stroke-width="3.8" stroke-dasharray="20, 100" stroke-dashoffset="-60" fill="none"/>
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#f59e0b" stroke-width="3.8" stroke-dasharray="12, 100" stroke-dashoffset="-80" fill="none"/>
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#ef4444" stroke-width="3.8" stroke-dasharray="8, 100" stroke-dashoffset="-92" fill="none"/>
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#3b82f6" stroke-width="3.8" stroke-dasharray="25, 100" stroke-dashoffset="-60" fill="none"/>
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#f59e0b" stroke-width="3.8" stroke-dasharray="10, 100" stroke-dashoffset="-85" fill="none"/>
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#ef4444" stroke-width="3.8" stroke-dasharray="5, 100" stroke-dashoffset="-95" fill="none"/>
                   </svg>
                   <div class="srms-donut-center-text">
-                    <span class="srms-donut-percentage">84%</span>
-                    <span class="srms-donut-sub">Overall<br>Performance</span>
+                    <span class="srms-donut-percentage">88%</span>
+                    <span class="srms-donut-sub">Tingkat<br>Ketuntasan</span>
                   </div>
                 </div>
 
                 <!-- Legend -->
                 <div class="srms-donut-legend">
-                  <div class="srms-legend-row"><span class="legend-dot green"></span><span class="legend-text">Excellent</span><strong class="legend-pct">60%</strong></div>
-                  <div class="srms-legend-row"><span class="legend-dot blue"></span><span class="legend-text">Good</span><strong class="legend-pct">20%</strong></div>
-                  <div class="srms-legend-row"><span class="legend-dot orange"></span><span class="legend-text">Average</span><strong class="legend-pct">12%</strong></div>
-                  <div class="srms-legend-row"><span class="legend-dot red"></span><span class="legend-text">Needs Improvement</span><strong class="legend-pct">8%</strong></div>
+                  <div class="srms-legend-row"><span class="legend-dot green"></span><span class="legend-text">Sangat Baik (A)</span><strong class="legend-pct">60%</strong></div>
+                  <div class="srms-legend-row"><span class="legend-dot blue"></span><span class="legend-text">Baik (B)</span><strong class="legend-pct">25%</strong></div>
+                  <div class="srms-legend-row"><span class="legend-dot orange"></span><span class="legend-text">Cukup (C)</span><strong class="legend-pct">10%</strong></div>
+                  <div class="srms-legend-row"><span class="legend-dot red"></span><span class="legend-text">Perlu Bimbingan</span><strong class="legend-pct">5%</strong></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 5. SRMS Footer Persis Gambar 1 -->
+          <!-- 5. Footer Resmi SDN 14 Toboali -->
           <footer class="srms-dashboard-footer">
-            <div>© 2026 Student Result Management System. All rights reserved.</div>
-            <div class="srms-footer-love">Made with <span style="color: #ef4444;">❤️</span> for Students</div>
+            <div>© 2026 SD NEGERI 14 TOBOALI - CBT UAS Online. Hak Cipta Dilindungi.</div>
+            <div class="srms-footer-love">Dikembangkan dengan <span style="color: #ef4444;">❤️</span> untuk Pendidikan Indonesia</div>
           </footer>
         </div>
 
@@ -1531,6 +1499,30 @@
 
       </section>
     </div>
+
+    <!-- Mobile Quick Bottom Nav Bar (Khusus Layar HP agar Guru/Pengawas langsung mengakses fitur utama & 11 menu) -->
+    <nav class="admin-mobile-bottom-nav" id="admin-mobile-bottom-nav">
+      <button type="button" class="admin-mob-nav-btn active" id="mob-nav-btn-dashboard" onclick="switchAdminTab('srms-dashboard', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Dasbor</span>
+      </button>
+      <button type="button" class="admin-mob-nav-btn" id="mob-nav-btn-live-monitor" onclick="switchAdminTab('live-monitor', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>Monitor</span>
+      </button>
+      <button type="button" class="admin-mob-nav-btn" id="mob-nav-btn-question-bank" onclick="switchAdminTab('question-bank', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Bank Soal</span>
+      </button>
+      <button type="button" class="admin-mob-nav-btn" id="mob-nav-btn-results-analysis" onclick="switchAdminTab('results-analysis', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <span>Nilai</span>
+      </button>
+      <button type="button" class="admin-mob-nav-btn" id="mob-nav-btn-all" onclick="toggleMobileSidebar(true)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <span>11 Menu</span>
+      </button>
+    </nav>
   </main>
 
   <!-- MODAL: ANTI-CURANG PERINGATAN KELUAR TAB & SPLIT-SCREEN -->
