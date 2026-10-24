@@ -454,45 +454,76 @@ function getShortSubjectName(name) {
 
 function renderProctorTokenBar() {
   const container = document.getElementById('token-subject-pills-bar');
-  if (!container) return;
-
-  const subjects = state.subjects || [];
-  if (subjects.length === 0) return;
-
-  // Pastikan ada selectedTokenSubjectId yang valid
-  if (!state.selectedTokenSubjectId || !subjects.some(s => s.id === state.selectedTokenSubjectId)) {
-    state.selectedTokenSubjectId = subjects[0].id;
+  if (container) {
+    const subjects = state.subjects || [];
+    if (subjects.length > 0) {
+      if (!state.selectedTokenSubjectId || !subjects.some(s => s.id === state.selectedTokenSubjectId)) {
+        state.selectedTokenSubjectId = subjects[0].id;
+      }
+      let html = '';
+      subjects.forEach(sub => {
+        const isActive = sub.id === state.selectedTokenSubjectId;
+        const shortName = getShortSubjectName(sub.name);
+        html += `
+          <button type="button" class="subject-token-card-btn ${isActive ? 'active' : ''}" onclick="selectTokenSubject('${sub.id}')" title="Klik untuk menampilkan token ${escapeHtml(sub.name)}">
+            <div class="token-card-top">
+              <span class="token-card-subject-name" title="${escapeHtml(sub.name)}">${escapeHtml(shortName)}</span>
+              <span class="token-card-code-badge">${escapeHtml(sub.code || 'CBT')}</span>
+            </div>
+            <div class="token-card-main">
+              <span class="token-card-token-text">${escapeHtml(sub.token || '-')}</span>
+            </div>
+            <div class="token-card-bottom">
+              <span>⏱️ ${sub.durationMinutes || 90}m</span>
+              <span class="token-card-active-indicator">✓ TERPILIH</span>
+            </div>
+          </button>
+        `;
+      });
+      container.innerHTML = html;
+    }
   }
 
-  let html = '';
-  subjects.forEach(sub => {
-    const isActive = sub.id === state.selectedTokenSubjectId;
-    const shortName = getShortSubjectName(sub.name);
-    html += `
-      <button type="button" class="subject-token-card-btn ${isActive ? 'active' : ''}" onclick="selectTokenSubject('${sub.id}')" title="Klik untuk menampilkan token ${escapeHtml(sub.name)}">
-        <div class="token-card-top">
-          <span class="token-card-subject-name" title="${escapeHtml(sub.name)}">${escapeHtml(shortName)}</span>
-          <span class="token-card-code-badge">${escapeHtml(sub.code || 'CBT')}</span>
-        </div>
-        <div class="token-card-main">
-          <span class="token-card-token-text">${escapeHtml(sub.token || '-')}</span>
-        </div>
-        <div class="token-card-bottom">
-          <span>⏱️ ${sub.durationMinutes || 90}m</span>
-          <span class="token-card-active-indicator">✓ TERPILIH</span>
-        </div>
-      </button>
-    `;
-  });
-  container.innerHTML = html;
-
+  renderHorizontalTokenRibbon();
   updateActiveSubjectTokenUI();
   updateGlobalLoginButtonUI();
+}
+
+// Render Horizontal Token Ribbon Persis Gambar 2
+function renderHorizontalTokenRibbon() {
+  const wrapper = document.getElementById('token-ribbon-pills-wrapper');
+  if (!wrapper) return;
+
+  const subjects = state.subjects || [];
+  let html = '';
+  const mins = Math.floor(state.proctorToken.remainingSeconds / 60);
+  const secs = state.proctorToken.remainingSeconds % 60;
+  const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+  subjects.forEach(sub => {
+    const isSelected = sub.id === state.selectedTokenSubjectId;
+    html += `
+      <div class="token-pill-badge ${isSelected ? 'active' : ''}" onclick="selectTokenSubject('${sub.id}')" title="Klik untuk mengaktifkan ${escapeHtml(sub.name)}">
+        <span class="pill-subject">${escapeHtml(sub.name)}:</span>
+        <span class="pill-code">${escapeHtml(sub.token || '-')}</span>
+        <span class="pill-time">(${timeStr})</span>
+      </div>
+    `;
+  });
+  wrapper.innerHTML = html;
+}
+
+function scrollTokenPills(dir) {
+  const wrapper = document.getElementById('token-ribbon-pills-wrapper');
+  if (wrapper) {
+    wrapper.scrollBy({ left: dir * 200, behavior: 'smooth' });
+  }
 }
 
 function selectTokenSubject(subId) {
   state.selectedTokenSubjectId = subId;
   renderProctorTokenBar();
+  renderHorizontalTokenRibbon();
 }
 
 function updateActiveSubjectTokenUI() {
@@ -514,6 +545,7 @@ function startProctorTokenTimer() {
   if (state.proctorToken.interval) clearInterval(state.proctorToken.interval);
 
   renderProctorTokenBar();
+  renderHorizontalTokenRibbon();
 
   state.proctorToken.interval = setInterval(() => {
     state.proctorToken.remainingSeconds--;
@@ -538,6 +570,10 @@ function startProctorTokenTimer() {
       const pct = (state.proctorToken.remainingSeconds / 180) * 100;
       progressBar.style.width = pct + '%';
     }
+
+    // Update countdown di pil-pil horizontal ribbon (Gambar 2)
+    const timeBadges = document.querySelectorAll('.token-ribbon-pills-container .pill-time');
+    timeBadges.forEach(tb => tb.textContent = `(${timeStr})`);
   }, 1000);
 }
 
@@ -560,6 +596,7 @@ function generateNewProctorToken(showToastMsg = true) {
   localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
 
   renderProctorTokenBar();
+  renderHorizontalTokenRibbon();
   renderTeacherExamSchedules();
 
   if (showToastMsg) {
@@ -569,7 +606,18 @@ function generateNewProctorToken(showToastMsg = true) {
 
 function forceRefreshToken() {
   state.proctorToken.remainingSeconds = 180;
-  generateNewProctorToken(true);
+  // Acak seluruh token mapel serentak
+  const subjects = state.subjects || [];
+  subjects.forEach(sub => {
+    const randomNum = Math.floor(Math.random() * 89 + 10);
+    const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    sub.token = `${sub.code}${randomNum}${randomLetter}`;
+  });
+  localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+  renderProctorTokenBar();
+  renderHorizontalTokenRibbon();
+  renderTeacherExamSchedules();
+  showToast('Seluruh Token Ujian Siswa berhasil di-Reload & diperbarui!', 'success');
 }
 
 // ==============================================================================
@@ -1023,6 +1071,7 @@ function applyTeacherIsolation() {
   }
 
   // 3. Render ulang data terisolasi
+  renderSrmsDashboard();
   renderAdminQuestionBank();
   renderLiveMonitoringTable();
   renderTeacherExamSchedules();
@@ -1235,12 +1284,14 @@ function handleStudentLogin(event) {
   // Aktifkan Sesi Ujian & Timer Langsung
   state.isExamRunning = true;
   state.currentQuestionIndex = 0;
-  startTimer(state.timeRemainingSeconds);
+  state.initialExamHeight = window.innerHeight;
+  enterMobileFullscreen();
+  startTimerCountdown();
   renderQuestionGrid();
   renderCurrentQuestion();
-  showScreen('exam');
+  showScreen('student-exam');
 
-  showToast(`Token terverifikasi! Status ujian ${subjectName} resmi dimulai. Selamat mengerjakan!`, 'success');
+  showToast(`Token terverifikasi! Ujian ${subjectName} resmi dimulai dalam mode layar penuh. Selamat mengerjakan!`, 'success');
 }
 
 // SCREEN 2 -> SCREEN 3: Start Exam
@@ -1249,6 +1300,7 @@ function startExamSession() {
   state.student.startTime = new Date();
   state.timeRemainingSeconds = state.session.durationMinutes * 60;
   state.currentQuestionIndex = 0;
+  state.initialExamHeight = window.innerHeight;
 
   // Populate Banner
   document.getElementById('exam-avatar').textContent = (state.student.name || 'S').charAt(0).toUpperCase();
@@ -1256,12 +1308,8 @@ function startExamSession() {
   document.getElementById('exam-subject-name').textContent = state.session.subject;
   document.getElementById('exam-class-name').textContent = state.student.className;
 
-  // Try requesting Fullscreen for official exam experience
-  try {
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    }
-  } catch (e) {}
+  // Enter Fullscreen on Mobile/Desktop
+  enterMobileFullscreen();
 
   // Register in live students list
   const existingIndex = state.liveStudents.findIndex(s => s.nisn === state.student.nisn);
@@ -1293,7 +1341,7 @@ function startExamSession() {
   renderCurrentQuestion();
 
   showScreen('student-exam');
-  showToast('Ujian dimulai! Selamat mengerjakan.', 'info');
+  showToast('Ujian dimulai! Mode layar penuh aktif.', 'info');
 }
 
 // Timer Engine with Pulsating Warning
@@ -1666,42 +1714,177 @@ function syncLiveStudentProgress() {
   updateAdminMetrics();
 }
 
-// Anti-Cheat Engine (Tab Switching & Visibility Change Detector)
-function initAntiCheatProtection() {
-  document.addEventListener('visibilitychange', () => {
-    if (!state.isExamRunning) return;
+// ==============================================================================
+// MOBILE FULLSCREEN & DRAWER HELPERS (POIN 3 PERMINTAAN USER)
+// ==============================================================================
 
-    if (document.hidden) {
-      triggerCheatWarning();
+function enterMobileFullscreen() {
+  const el = document.documentElement;
+  try {
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    } else if (el.mozRequestFullScreen) {
+      el.mozRequestFullScreen();
+    } else if (el.msRequestFullscreen) {
+      el.msRequestFullscreen();
     }
-  });
+  } catch (e) {}
 
-  window.addEventListener('blur', () => {
-    if (!state.isExamRunning) return;
-    triggerCheatWarning();
+  const btnRe = document.getElementById('btn-re-fullscreen');
+  if (btnRe) btnRe.style.display = 'none';
+}
+
+function handleFullscreenStateChange() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  const btnRe = document.getElementById('btn-re-fullscreen');
+  if (btnRe) {
+    if (!isFs && state.isExamRunning && window.innerWidth <= 768) {
+      btnRe.style.display = 'flex';
+    } else {
+      btnRe.style.display = 'none';
+    }
+  }
+}
+
+function toggleMobileQuestionDrawer(open) {
+  const drawer = document.getElementById('mobile-question-drawer');
+  const backdrop = document.getElementById('mobile-drawer-backdrop');
+  if (!drawer || !backdrop) return;
+
+  if (open) {
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    renderMobileQuestionGrid();
+  } else {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+  }
+}
+
+function renderMobileQuestionGrid() {
+  const container = document.getElementById('mobile-question-grid-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  state.questions.forEach((q, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'grid-btn';
+    btn.textContent = idx + 1;
+
+    const ans = state.student.answers[q.id];
+    if (ans) {
+      if (ans.isDoubt) btn.classList.add('doubt');
+      else if (ans.selected) btn.classList.add('answered');
+    }
+    if (idx === state.currentQuestionIndex) btn.classList.add('current');
+
+    btn.onclick = () => {
+      jumpToQuestion(idx);
+      toggleMobileQuestionDrawer(false);
+    };
+    container.appendChild(btn);
   });
 }
 
-function triggerCheatWarning() {
-  state.warningCount++;
+function toggleDoubtAnswerMobile() {
+  const chkMobile = document.getElementById('checkbox-doubt-mobile');
+  const chkDesktop = document.getElementById('checkbox-doubt');
+  if (chkMobile && chkDesktop) {
+    chkDesktop.checked = chkMobile.checked;
+    toggleDoubtAnswer();
+  }
+}
+
+// ==============================================================================
+// ADVANCED ANTI-CHEAT ENGINE (TAB SWITCH & SMARTPHONE SPLIT-SCREEN DETECTOR - POIN 4)
+// ==============================================================================
+
+function initAntiCheatProtection() {
+  // 1. Deteksi Tab Keluar / Minimalkan Browser / Buka Aplikasi Lain
+  document.addEventListener('visibilitychange', () => {
+    if (!state.isExamRunning) return;
+    if (document.hidden) {
+      triggerCheatWarning('tab_switch', 'Terdeteksi meminimalkan browser, membuka tab lain, atau beralih ke aplikasi lain!');
+    }
+  });
+
+  // 2. Deteksi Kehilangan Fokus Jendela (Window Blur)
+  window.addEventListener('blur', () => {
+    if (!state.isExamRunning) return;
+    triggerCheatWarning('window_blur', 'Fokus layar ujian hilang! Dilarang membuka aplikasi lain di perangkat Anda.');
+  });
+
+  // 3. Deteksi Layar Belah (Split-Screen / Floating Window) di Smartphone
+  window.addEventListener('resize', () => {
+    if (!state.isExamRunning) return;
+    checkSmartphoneSplitScreen();
+  });
+
+  // 4. Deteksi Keluar Fullscreen
+  document.addEventListener('fullscreenchange', handleFullscreenStateChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenStateChange);
+}
+
+function checkSmartphoneSplitScreen() {
+  if (!state.isExamRunning) return;
+
+  // Jika siswa sedang mengetik pada input/textarea, abaikan (karena soft keyboard aktif)
+  const activeEl = document.activeElement;
+  const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+  if (isTyping) return;
+
+  const currentHeight = window.innerHeight;
+  const availHeight = window.screen.availHeight || window.screen.height || currentHeight;
+  const initialHeight = state.initialExamHeight || availHeight;
+
+  // Khusus Smartphone (lebar <= 768px): rasio tinggi anjlok > 30% menandakan split-screen
+  if (window.innerWidth <= 768) {
+    const heightRatio = currentHeight / initialHeight;
+    if (heightRatio < 0.70) {
+      triggerCheatWarning('split_screen', '⚠️ Terdeteksi menggunakan Layar Belah (Split Screen) atau Floating Window di Smartphone!');
+    }
+  }
+}
+
+function triggerCheatWarning(reasonType, message) {
+  if (!state.isExamRunning) return;
+
+  // Debounce 2.5 detik agar 1 aksi tidak memicu berkali-kali
+  const now = Date.now();
+  if (state.lastViolationTime && (now - state.lastViolationTime < 2500)) return;
+  state.lastViolationTime = now;
+
+  state.warningCount = (state.warningCount || 0) + 1;
   syncLiveStudentProgress();
 
   const countDisplay = document.getElementById('modal-warning-count');
-  if (countDisplay) countDisplay.textContent = state.warningCount;
-
+  const reasonDisplay = document.getElementById('modal-cheat-reason');
   const modal = document.getElementById('modal-cheat-alert');
+
+  if (countDisplay) countDisplay.textContent = state.warningCount;
+  if (reasonDisplay) {
+    reasonDisplay.textContent = message || 'Terdeteksi melakukan pelanggaran ujian (beralih tab / split screen)!';
+  }
   if (modal) modal.style.display = 'flex';
 
-  if (state.warningCount >= state.maxWarnings) {
-    showToast('Batas pelanggaran 3x terlewati! Ujian dikunci dan dikumpulkan otomatis.', 'danger');
-    dismissCheatAlert();
-    submitFinalExam(true);
+  if (state.warningCount >= (state.maxWarnings || 3)) {
+    showToast('Batas toleransi pelanggaran 3x terlewati! Ujian dikunci dan dikumpulkan otomatis.', 'danger');
+    setTimeout(() => {
+      dismissCheatAlert();
+      submitFinalExam(true);
+    }, 1500);
   }
 }
 
 function dismissCheatAlert() {
   const modal = document.getElementById('modal-cheat-alert');
   if (modal) modal.style.display = 'none';
+  // Jika di HP, tawarkan masuk kembali ke fullscreen
+  if (window.innerWidth <= 768) {
+    enterMobileFullscreen();
+  }
 }
 
 // Submit Final Confirmation Modal
@@ -1807,7 +1990,7 @@ function scaleFontSize(direction) {
 // ==============================================================================
 
 function switchAdminTab(tabId, element) {
-  document.querySelectorAll('.tab-link, .sidebar-nav-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-link, .sidebar-nav-item, .srms-nav-item').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
 
   if (element) {
@@ -1815,6 +1998,8 @@ function switchAdminTab(tabId, element) {
   } else {
     const el = document.getElementById('tab-nav-' + tabId);
     if (el) el.classList.add('active');
+    const srmsEl = document.querySelector(`.srms-nav-item[onclick*="${tabId}"]`);
+    if (srmsEl) srmsEl.classList.add('active');
   }
 
   const target = document.getElementById('tab-' + tabId);
@@ -1824,6 +2009,7 @@ function switchAdminTab(tabId, element) {
   const topbarTitle = document.getElementById('admin-topbar-page-title');
   if (topbarTitle) {
     const titles = {
+      'srms-dashboard': 'SRMS Teacher Dashboard',
       'live-monitor': 'Jadwal Ujian & Live Monitoring',
       'question-bank': 'Bank Soal (5 Tipe ANBK)',
       'session-setting': 'Pengaturan Sesi Ujian Aktif',
@@ -1840,6 +2026,7 @@ function switchAdminTab(tabId, element) {
   // Close mobile drawer on selection
   toggleMobileSidebar(false);
 
+  if (tabId === 'srms-dashboard') renderSrmsDashboard();
   if (tabId === 'live-monitor') {
     renderLiveMonitoringTable();
     renderTeacherExamSchedules();
@@ -1856,6 +2043,149 @@ function switchAdminTab(tabId, element) {
   if (tabId === 'exam-cards') renderExamCardsTab();
   if (tabId === 'school-identity') populateSchoolIdentityForm();
   if (tabId === 'database-config') populateDatabaseConfig();
+}
+
+// ==============================================================================
+// SRMS DASHBOARD ENGINE (REF: GAMBAR 1 & 2)
+// ==============================================================================
+
+function renderSrmsDashboard() {
+  const t = state.currentTeacher;
+  const teacherName = t ? t.fullName : 'Abhishek Verma';
+  const teacherRole = t 
+    ? (t.role === 'admin_sekolah' ? 'Operator Sekolah (Admin)' : (t.role === 'guru_kelas' ? 'Wali/Guru Kelas ' + t.assignedClass : 'Guru Mapel ' + t.assignedSubject)) 
+    : 'B.Tech - Computer Science (Sem 6)';
+
+  // 1. Update Profile & Greetings
+  const heroNameEl = document.getElementById('srms-hero-name');
+  if (heroNameEl) heroNameEl.textContent = teacherName;
+
+  const headerNameEl = document.getElementById('srms-header-user-name');
+  if (headerNameEl) headerNameEl.textContent = teacherName;
+
+  const headerRoleEl = document.getElementById('srms-header-user-role');
+  if (headerRoleEl) headerRoleEl.textContent = teacherRole;
+
+  // 2. Metrics & KPI Row (Gambar 1)
+  const submittedList = state.liveStudents.filter(s => s.status === 'submitted');
+  const avgScore = submittedList.length > 0 
+    ? (submittedList.reduce((acc, curr) => acc + (curr.score || 0), 0) / submittedList.length).toFixed(1)
+    : '88.5';
+  const cgpaValue = (parseFloat(avgScore) / 10).toFixed(2);
+
+  const cgpaEl = document.getElementById('srms-cgpa-val');
+  if (cgpaEl) cgpaEl.textContent = cgpaValue > 0 ? cgpaValue : '8.85';
+
+  const coursesEl = document.getElementById('srms-courses-count');
+  if (coursesEl) coursesEl.textContent = (state.subjects && state.subjects.length > 0) ? state.subjects.length : '6';
+
+  const examsEl = document.getElementById('srms-exams-completed');
+  if (examsEl) examsEl.textContent = submittedList.length > 0 ? `${submittedList.length} Selesai` : '18 / 24';
+
+  const rankEl = document.getElementById('srms-overall-rank');
+  if (rankEl) rankEl.textContent = '#4 / 120';
+
+  const attEl = document.getElementById('srms-attendance-pct');
+  if (attEl) attEl.textContent = '94.2%';
+
+  // 3. Render Recent Results Table (Gambar 1)
+  renderSrmsRecentResults();
+
+  // 4. Render Horizontal Token Ribbon (Gambar 2)
+  renderHorizontalTokenRibbon();
+}
+
+function renderSrmsRecentResults() {
+  const tbody = document.getElementById('srms-results-tbody');
+  if (!tbody) return;
+
+  const submittedList = state.liveStudents.filter(s => s.status === 'submitted');
+  
+  if (submittedList.length > 0) {
+    let rowsHtml = '';
+    submittedList.slice(0, 5).forEach(st => {
+      const score = st.score || 85;
+      const grade = score >= 90 ? 'A+' : (score >= 80 ? 'A' : (score >= 70 ? 'B' : 'C'));
+      const badgeCls = score >= 75 ? 'badge-pass' : 'badge-remedial';
+      const badgeText = score >= 75 ? 'Passed' : 'Remedial';
+
+      rowsHtml += `
+        <tr>
+          <td><span class="subject-code-tag">${escapeHtml(state.session.subject || 'CBT')}</span></td>
+          <td><strong>${escapeHtml(st.name)} (${escapeHtml(st.nisn)})</strong></td>
+          <td>4</td>
+          <td>${score} / 100</td>
+          <td><strong>${grade}</strong></td>
+          <td><span class="status-badge-srms ${badgeCls}">${badgeText}</span></td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = rowsHtml;
+  }
+}
+
+function scrollToNoticeBoard() {
+  switchAdminTab('srms-dashboard');
+  const section = document.getElementById('srms-notice-board-section');
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function scrollToAcademicCalendar() {
+  switchAdminTab('srms-dashboard');
+  const section = document.getElementById('srms-calendar-section');
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function openAllNoticesModal() {
+  showToast('Menampilkan seluruh arsip pengumuman akademik sekolah...', 'info');
+}
+
+function openCalendarModal() {
+  showToast('Kalender Akademik Semester Aktif 2026 dibuka.', 'info');
+}
+
+function openTeacherProfileModal() {
+  const t = state.currentTeacher;
+  const name = t ? t.fullName : 'Abhishek Verma';
+  showToast(`Profil Pengguna: ${name}`, 'info');
+}
+
+function handleGlobalSearch(query) {
+  if (!query || !query.trim()) return;
+  const q = query.trim().toLowerCase();
+  
+  // Cari di siswa, soal, jadwal
+  const matchedStudent = state.students.find(s => s.name.toLowerCase().includes(q) || s.nisn.toLowerCase().includes(q));
+  if (matchedStudent) {
+    switchAdminTab('manage-students');
+    const filterInput = document.getElementById('filter-search-student');
+    if (filterInput) filterInput.value = q;
+    renderStudentsTable();
+    showToast(`Ditemukan data siswa: ${matchedStudent.name}`, 'success');
+    return;
+  }
+
+  const matchedSub = (state.subjects || []).find(s => s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q));
+  if (matchedSub) {
+    selectTokenSubject(matchedSub.id);
+    showToast(`Menampilkan token mapel: ${matchedSub.name}`, 'info');
+    return;
+  }
+
+  showToast(`Hasil pencarian untuk "${query}" tidak ditemukan di database aktif.`, 'warning');
+}
+
+function filterNotices(category, btn) {
+  document.querySelectorAll('.notice-tag-filter').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const items = document.querySelectorAll('.notice-item');
+  items.forEach(item => {
+    if (category === 'all' || item.getAttribute('data-category') === category) {
+      item.style.display = 'flex';
+    } else {
+      item.style.display = 'none';
+    }
+  });
 }
 
 function toggleMobileSidebar(open) {
