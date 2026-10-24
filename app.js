@@ -1386,27 +1386,43 @@ function updateTimerDisplay() {
   }
 }
 
+// Helper: Ambil Bank Soal yang Sesuai Sesi Siswa Aktif
+function getActiveExamQuestions() {
+  if (Array.isArray(state.activeExamQuestions) && state.activeExamQuestions.length > 0) {
+    return state.activeExamQuestions;
+  }
+  return state.questions || [];
+}
+
 // Render Current Question (ANBK/UTBK Standard)
 function renderCurrentQuestion() {
-  const q = state.questions[state.currentQuestionIndex];
+  const qList = getActiveExamQuestions();
+  const q = qList[state.currentQuestionIndex];
   if (!q) return;
 
-  // Header Badge
+  const optionsContainer = document.getElementById('options-list-container');
+  if (optionsContainer) optionsContainer.innerHTML = '';
+
+  // Header Badge Desktop
   const badge = document.getElementById('exam-question-badge');
-  badge.textContent = 'Soal No. ' + (state.currentQuestionIndex + 1) + ' dari ' + state.questions.length;
+  if (badge) badge.textContent = 'Soal No. ' + (state.currentQuestionIndex + 1) + ' dari ' + qList.length;
+
+  // Label Nomor pada Bar Jempol Mobile
+  const mobileLabel = document.getElementById('mobile-current-q-label');
+  if (mobileLabel) mobileLabel.textContent = 'No. ' + (state.currentQuestionIndex + 1);
 
   // Content Text
   const content = document.getElementById('question-content-text');
-  content.textContent = q.text;
+  if (content) content.textContent = q.text;
 
   // Image Attachment if any
   const imgBox = document.getElementById('question-image-box');
   const imgTag = document.getElementById('question-image-tag');
   if (q.imageUrl && q.imageUrl.trim()) {
-    imgTag.src = q.imageUrl;
-    imgBox.style.display = 'block';
+    if (imgTag) imgTag.src = q.imageUrl;
+    if (imgBox) imgBox.style.display = 'block';
   } else {
-    imgBox.style.display = 'none';
+    if (imgBox) imgBox.style.display = 'none';
   }
 
   // Render Berdasarkan 5 Tipe Soal ANBK
@@ -1441,7 +1457,7 @@ function renderCurrentQuestion() {
 
       item.appendChild(keyCircle);
       item.appendChild(optText);
-      optionsContainer.appendChild(item);
+      if (optionsContainer) optionsContainer.appendChild(item);
     });
   } 
   // 2. Tipe: PG Kompleks (Multi Select Checkbox)
@@ -1449,7 +1465,7 @@ function renderCurrentQuestion() {
     const hint = document.createElement('div');
     hint.style.cssText = 'font-size: 0.85rem; color: #16a34a; font-weight: 700; margin-bottom: 0.75rem; background: #f0fdf4; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);';
     hint.textContent = 'ℹ️ Pilihan Ganda Kompleks: Anda dapat memilih LEBIH DARI SATU jawaban yang benar.';
-    optionsContainer.appendChild(hint);
+    if (optionsContainer) optionsContainer.appendChild(hint);
 
     const selectedKeys = Array.isArray(studentAns.selected) ? studentAns.selected : [];
     const optionsData = [
@@ -1477,7 +1493,7 @@ function renderCurrentQuestion() {
 
       item.appendChild(chkBox);
       item.appendChild(optText);
-      optionsContainer.appendChild(item);
+      if (optionsContainer) optionsContainer.appendChild(item);
     });
   }
   // 3. Tipe: Menjodohkan (Matching Pairs)
@@ -1485,7 +1501,7 @@ function renderCurrentQuestion() {
     const hint = document.createElement('div');
     hint.style.cssText = 'font-size: 0.85rem; color: #b45309; font-weight: 700; margin-bottom: 0.75rem; background: #fffbeb; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);';
     hint.textContent = 'ℹ️ Menjodohkan: Pasangkan pernyataan di kolom kiri dengan pilihan yang tepat di kolom kanan.';
-    optionsContainer.appendChild(hint);
+    if (optionsContainer) optionsContainer.appendChild(hint);
 
     const pairs = q.pairs || [
       { premis: 'Pernyataan A', jawab: 'Pasangan 1' },
@@ -1517,14 +1533,14 @@ function renderCurrentQuestion() {
         '</td>';
       tbody.appendChild(tr);
     });
-    optionsContainer.appendChild(table);
+    if (optionsContainer) optionsContainer.appendChild(table);
   }
   // 4. Tipe: Esai / Isian Singkat
   else if (qType === 'esai') {
     const hint = document.createElement('div');
     hint.style.cssText = 'font-size: 0.85rem; color: #7e22ce; font-weight: 700; margin-bottom: 0.75rem; background: #faf5ff; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);';
     hint.textContent = 'ℹ️ Soal Isian / Esai: Tuliskan jawaban Anda pada kolom di bawah ini secara jelas.';
-    optionsContainer.appendChild(hint);
+    if (optionsContainer) optionsContainer.appendChild(hint);
 
     const txt = document.createElement('textarea');
     txt.className = 'form-control';
@@ -1532,14 +1548,14 @@ function renderCurrentQuestion() {
     txt.placeholder = 'Ketik jawaban Anda di sini...';
     txt.value = typeof studentAns.selected === 'string' ? studentAns.selected : '';
     txt.oninput = (e) => selectOptionAnswer(q.id, e.target.value);
-    optionsContainer.appendChild(txt);
+    if (optionsContainer) optionsContainer.appendChild(txt);
   }
   // 5. Tipe: Benar / Salah (True / False Table)
   else if (qType === 'bs') {
     const hint = document.createElement('div');
     hint.style.cssText = 'font-size: 0.85rem; color: #0f766e; font-weight: 700; margin-bottom: 0.75rem; background: #f0fdfa; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);';
     hint.textContent = 'ℹ️ Benar / Salah: Tentukan status kebenaran dari setiap pernyataan di bawah ini.';
-    optionsContainer.appendChild(hint);
+    if (optionsContainer) optionsContainer.appendChild(hint);
 
     const statements = q.statements || [
       { text: 'Pernyataan 1', key: 'B' },
@@ -1567,21 +1583,22 @@ function renderCurrentQuestion() {
         '</td>';
       tbody.appendChild(tr);
     });
-    optionsContainer.appendChild(table);
+    if (optionsContainer) optionsContainer.appendChild(table);
   }
 
-  // Doubt Checkbox Status
+  // Doubt Checkbox Status (Desktop & Mobile)
+  const isDoubt = studentAns.isDoubt === true;
   const doubtBox = document.getElementById('checkbox-doubt');
-  if (doubtBox) {
-    doubtBox.checked = studentAns.isDoubt === true;
-  }
+  if (doubtBox) doubtBox.checked = isDoubt;
+  const doubtBoxMobile = document.getElementById('checkbox-doubt-mobile');
+  if (doubtBoxMobile) doubtBoxMobile.checked = isDoubt;
 
   // Disable / Enable Prev & Next Buttons
   const btnPrev = document.getElementById('btn-prev-q');
   const btnNext = document.getElementById('btn-next-q');
   if (btnPrev) btnPrev.disabled = state.currentQuestionIndex === 0;
   if (btnNext) {
-    if (state.currentQuestionIndex === state.questions.length - 1) {
+    if (state.currentQuestionIndex >= qList.length - 1) {
       btnNext.innerHTML = 'Soal Terakhir';
       btnNext.disabled = true;
     } else {
@@ -1612,7 +1629,8 @@ function selectOptionAnswer(questionId, selectedKey) {
 
 // Toggle Doubt Answer Checkbox
 function toggleDoubtAnswer() {
-  const q = state.questions[state.currentQuestionIndex];
+  const qList = getActiveExamQuestions();
+  const q = qList[state.currentQuestionIndex];
   if (!q) return;
 
   const doubtBox = document.getElementById('checkbox-doubt');
@@ -1624,33 +1642,39 @@ function toggleDoubtAnswer() {
     state.student.answers[q.id].isDoubt = isChecked;
   }
 
+  const doubtBoxMobile = document.getElementById('checkbox-doubt-mobile');
+  if (doubtBoxMobile) doubtBoxMobile.checked = isChecked;
+
   triggerAutoSaveIndicator();
   updateGridButtonStatus();
 }
 
 // Question Navigation
 function navigateQuestion(delta) {
+  const qList = getActiveExamQuestions();
   const targetIndex = state.currentQuestionIndex + delta;
-  if (targetIndex >= 0 && targetIndex < state.questions.length) {
+  if (targetIndex >= 0 && targetIndex < qList.length) {
     state.currentQuestionIndex = targetIndex;
     renderCurrentQuestion();
   }
 }
 
 function jumpToQuestion(index) {
-  if (index >= 0 && index < state.questions.length) {
+  const qList = getActiveExamQuestions();
+  if (index >= 0 && index < qList.length) {
     state.currentQuestionIndex = index;
     renderCurrentQuestion();
   }
 }
 
-// Grid Buttons Generator
+// Grid Buttons Generator (Desktop)
 function renderQuestionGrid() {
   const grid = document.getElementById('question-grid-container');
   if (!grid) return;
   grid.innerHTML = '';
 
-  state.questions.forEach((q, idx) => {
+  const qList = getActiveExamQuestions();
+  qList.forEach((q, idx) => {
     const btn = document.createElement('button');
     btn.id = 'grid-btn-' + idx;
     btn.className = 'grid-btn';
@@ -1664,23 +1688,27 @@ function renderQuestionGrid() {
 
 // Update Grid Status Colors
 function updateGridButtonStatus() {
-  state.questions.forEach((q, idx) => {
+  const qList = getActiveExamQuestions();
+  qList.forEach((q, idx) => {
     const btn = document.getElementById('grid-btn-' + idx);
-    if (!btn) return;
-
-    btn.className = 'grid-btn';
-    if (idx === state.currentQuestionIndex) {
-      btn.classList.add('current');
-    }
-
-    const ans = state.student.answers[q.id];
-    if (ans) {
-      if (ans.isDoubt) {
-        btn.classList.add('doubt');
-      } else if (ans.selected) {
-        btn.classList.add('answered');
+    const mBtn = document.getElementById('mobile-grid-btn-' + idx);
+    
+    [btn, mBtn].forEach(el => {
+      if (!el) return;
+      el.className = 'grid-btn';
+      if (idx === state.currentQuestionIndex) {
+        el.classList.add('current');
       }
-    }
+
+      const ans = state.student.answers[q.id];
+      if (ans) {
+        if (ans.isDoubt) {
+          el.classList.add('doubt');
+        } else if (ans.selected) {
+          el.classList.add('answered');
+        }
+      }
+    });
   });
 }
 
@@ -1768,8 +1796,10 @@ function renderMobileQuestionGrid() {
   if (!container) return;
   container.innerHTML = '';
 
-  state.questions.forEach((q, idx) => {
+  const qList = getActiveExamQuestions();
+  qList.forEach((q, idx) => {
     const btn = document.createElement('button');
+    btn.id = 'mobile-grid-btn-' + idx;
     btn.className = 'grid-btn';
     btn.textContent = idx + 1;
 
