@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SD NEGERI 14 TOBOALI - Ujian Online</title>
-  <link rel="stylesheet" href="style.css?v=2.1.4">
+  <link rel="stylesheet" href="style.css?v=2.1.6">
 </head>
 <body>
 
@@ -683,10 +683,14 @@
           </div>
 
           <div class="srms-topbar-right">
-            <!-- Dark Mode Toggle Button (Sleek Modern Anti-AI) -->
+            <!-- Dark Mode Toggle Button (Aesthetic SVG Capsule) -->
             <button type="button" class="srms-theme-toggle-btn" id="btn-theme-toggle" onclick="toggleDarkMode()" title="Ganti Mode Gelap / Terang">
-              <span id="theme-toggle-icon">🌙</span>
-              <span class="theme-toggle-label">Mode Gelap</span>
+              <div class="theme-icon-box" id="theme-icon-box">
+                <svg class="theme-svg-icon" id="theme-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </div>
+              <span class="theme-toggle-label" id="theme-toggle-label">Mode Gelap</span>
             </button>
 
             <!-- Notification Bell with Badge 3 -->
