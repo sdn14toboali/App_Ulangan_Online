@@ -546,10 +546,12 @@ body {
     gap: 0.65rem;
   }
   .school-login-logo-img {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    min-height: 42px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    flex-shrink: 0;
+    border-radius: 12px;
   }
   .form-control {
     font-size: 16px; /* Prevents auto-zoom in iOS Safari */
@@ -3433,10 +3435,12 @@ body {
   }
 
   .brand-icon {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-radius: 10px;
   }
 
   .brand-title {
