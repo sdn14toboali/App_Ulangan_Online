@@ -353,27 +353,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initTheme() {
   const saved = localStorage.getItem('zettcbt_theme');
-  if (saved === 'dark') {
-    document.body.classList.add('dark-mode');
-    updateThemeToggleUI(true);
-  } else {
-    document.body.classList.remove('dark-mode');
-    updateThemeToggleUI(false);
+  const isDark = (saved === 'dark');
+  if (document.documentElement) {
+    document.documentElement.classList.toggle('dark-mode', isDark);
   }
+  if (document.body) {
+    document.body.classList.toggle('dark-mode', isDark);
+  }
+  updateThemeToggleUI(isDark);
 }
 
 function toggleDarkMode() {
-  const isDark = document.body.classList.toggle('dark-mode');
+  const isDark = !document.body.classList.contains('dark-mode');
+  if (document.documentElement) {
+    document.documentElement.classList.toggle('dark-mode', isDark);
+  }
+  document.body.classList.toggle('dark-mode', isDark);
   localStorage.setItem('zettcbt_theme', isDark ? 'dark' : 'light');
   updateThemeToggleUI(isDark);
-  showToast(isDark ? 'Mode Gelap diaktifkan 🌙' : 'Mode Terang diaktifkan ☀️', 'info');
+  showToast(isDark ? 'Mode Gelap diaktifkan' : 'Mode Terang diaktifkan', 'info');
 }
 
 function updateThemeToggleUI(isDark) {
-  const icon = document.getElementById('theme-toggle-icon');
-  const label = document.querySelector('.theme-toggle-label');
-  if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-  if (label) label.textContent = isDark ? 'Mode Terang' : 'Mode Gelap';
+  const iconBox = document.getElementById('theme-icon-box');
+  const label = document.getElementById('theme-toggle-label') || document.querySelector('.theme-toggle-label');
+  if (label) {
+    label.textContent = isDark ? 'Mode Terang' : 'Mode Gelap';
+  }
+  if (iconBox) {
+    if (isDark) {
+      // Icon Matahari Elegan (Golden Amber) untuk Mode Gelap Aktif
+      iconBox.innerHTML = '<svg class="theme-svg-icon" id="theme-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<circle cx="12" cy="12" r="5"></circle>' +
+        '<line x1="12" y1="1" x2="12" y2="3"></line>' +
+        '<line x1="12" y1="21" x2="12" y2="23"></line>' +
+        '<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>' +
+        '<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>' +
+        '<line x1="1" y1="12" x2="3" y2="12"></line>' +
+        '<line x1="21" y1="12" x2="23" y2="12"></line>' +
+        '<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>' +
+        '<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>' +
+        '</svg>';
+    } else {
+      // Icon Bulan Sabit Modern (Vibrant Blue/Indigo) untuk Mode Terang Aktif
+      iconBox.innerHTML = '<svg class="theme-svg-icon" id="theme-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>' +
+        '</svg>';
+    }
+  }
 }
 
 // Load Persisted Storage
