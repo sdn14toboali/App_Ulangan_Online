@@ -334,6 +334,7 @@ const state = {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   loadSavedState();
   initAntiCheatProtection();
   applySchoolBrandingUI();
@@ -345,6 +346,35 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAdminMetrics();
   startProctorTokenTimer();
 });
+
+// ==============================================================================
+// THEME ENGINE: DARK MODE & LIGHT MODE (ZETTBOT ANTI-AI)
+// ==============================================================================
+
+function initTheme() {
+  const saved = localStorage.getItem('zettcbt_theme');
+  if (saved === 'dark') {
+    document.body.classList.add('dark-mode');
+    updateThemeToggleUI(true);
+  } else {
+    document.body.classList.remove('dark-mode');
+    updateThemeToggleUI(false);
+  }
+}
+
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('zettcbt_theme', isDark ? 'dark' : 'light');
+  updateThemeToggleUI(isDark);
+  showToast(isDark ? 'Mode Gelap diaktifkan 🌙' : 'Mode Terang diaktifkan ☀️', 'info');
+}
+
+function updateThemeToggleUI(isDark) {
+  const icon = document.getElementById('theme-toggle-icon');
+  const label = document.querySelector('.theme-toggle-label');
+  if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+  if (label) label.textContent = isDark ? 'Mode Terang' : 'Mode Gelap';
+}
 
 // Load Persisted Storage
 function loadSavedState() {
@@ -850,14 +880,29 @@ function renderTeacherExamSchedules() {
           ${isLoginOpen ? '🟢 Login Dibuka' : '🔴 Login Ditutup'}
         </button>
       </td>
-      <td style="text-align: center;">
-        <button type="button" class="btn btn-outline btn-sm" onclick="openEditScheduleModal('${sc.id}')" title="Atur Jadwal Hari, Tanggal & Jam" style="font-size: 0.78rem; padding: 0.25rem 0.55rem;">
-          ✏️ Atur
-        </button>
+      <td style="text-align: center; white-space: nowrap;">
+        <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="openEditScheduleModal('${sc.id}')" title="Atur Jadwal Hari, Tanggal & Jam" style="font-size: 0.78rem; padding: 0.25rem 0.55rem;">
+            ✏️ Atur
+          </button>
+          <button type="button" class="btn btn-sm" onclick="deleteExamSchedule('${sc.id}', '${escapeHtml(sc.subjectName)}', '${escapeHtml(sc.className)}')" title="Hapus Jadwal Ujian Ini" style="font-size: 0.78rem; padding: 0.25rem 0.55rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; cursor: pointer; border-radius: 6px;">
+            🗑️
+          </button>
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+function deleteExamSchedule(id, subjectName, className) {
+  const conf = confirm(`Apakah Anda yakin ingin menghapus jadwal ujian ${subjectName} untuk Kelas ${className}?`);
+  if (!conf) return;
+
+  state.schedules = (state.schedules || []).filter(s => s.id !== id);
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+  renderTeacherExamSchedules();
+  showToast(`Jadwal ujian ${subjectName} (${className}) berhasil dihapus!`, 'success');
 }
 
 function toggleScheduleLoginStatus(scheduleId) {
