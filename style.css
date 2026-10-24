@@ -2790,10 +2790,10 @@ body {
 .srms-kpi-subtext.orange { color: #ea580c; }
 .srms-kpi-subtext.red { color: #e11d48; }
 
-/* 3. Middle Grid: Recent Results & Notice Board */
+/* 3. Middle Grid: Recent Results Full Width */
 .srms-mid-grid {
   display: grid;
-  grid-template-columns: 1.65fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.25rem;
   margin-bottom: 1.5rem;
 }
@@ -2916,12 +2916,12 @@ body {
   color: #2563eb;
 }
 
-/* 4. Bottom Grid: Calendar & Ringkasan Ketuntasan Siswa */
+/* 4. Bottom Grid: Ringkasan Ketuntasan Siswa */
 .srms-bottom-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: 1fr;
+  max-width: 640px;
+  margin: 0 auto 1.5rem auto;
 }
 
 .srms-calendar-month-title {
@@ -3605,5 +3605,205 @@ body:has(#screen-admin-dashboard.active) #global-header,
     opacity: 1;
   }
 }
+
+/* ==============================================================================
+   DARK MODE ENGINE & SLEEK THEME (ZETTBOT ANTI-AI)
+   ============================================================================== */
+
+.srms-theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  padding: 0.42rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.srms-theme-toggle-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+#theme-toggle-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* KETIKA DARK MODE AKTIF */
+body.dark-mode {
+  background: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .srms-sidebar {
+  background: #111827 !important;
+  border-right-color: #1f2937 !important;
+}
+
+body.dark-mode .srms-brand-box {
+  border-bottom-color: #1f2937 !important;
+}
+
+body.dark-mode .srms-brand-title {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .srms-brand-subtitle {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .srms-brand-logo-wrapper {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .srms-nav-item {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .srms-nav-item:hover {
+  background: #1f2937 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .srms-nav-item.active {
+  background: #1e3a8a !important;
+  color: #93c5fd !important;
+}
+
+body.dark-mode .srms-topbar {
+  background: #111827 !important;
+  border-bottom-color: #1f2937 !important;
+}
+
+body.dark-mode .srms-topbar-title {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .srms-search-wrapper {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+body.dark-mode .srms-search-input {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .srms-theme-toggle-btn {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .srms-notification-btn {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .srms-user-chip {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+body.dark-mode .srms-user-greeting {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .srms-user-role {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .srms-card,
+body.dark-mode .card,
+body.dark-mode .schedule-section-card,
+body.dark-mode .srms-welcome-hero-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25) !important;
+}
+
+body.dark-mode .srms-card-title,
+body.dark-mode .schedule-title,
+body.dark-mode .card-header h3 {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .srms-table th,
+body.dark-mode .data-table th,
+body.dark-mode .schedule-table th {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-mode .srms-table td,
+body.dark-mode .data-table td,
+body.dark-mode .schedule-table td {
+  border-bottom-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode select.form-control,
+body.dark-mode input.form-control {
+  background: #0f172a !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .modal-content {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .srms-kpi-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .srms-kpi-title {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .srms-kpi-value {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .token-ribbon-horizontal-bar {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+body.dark-mode .token-ribbon-label-text {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .srms-dashboard-footer {
+  border-top-color: #1f2937 !important;
+  color: #64748b !important;
+}
+
+body.dark-mode .admin-mobile-bottom-nav {
+  background: #111827 !important;
+  border-top-color: #1f2937 !important;
+}
+
+body.dark-mode .admin-mob-nav-btn {
+  color: #94a3b8 !important;
+}
+
 
 
