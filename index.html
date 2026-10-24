@@ -597,6 +597,16 @@
             <span>Data Siswa &amp; Presensi</span>
           </button>
 
+          <button class="srms-nav-item" id="tab-nav-manage-teachers" onclick="switchAdminTab('manage-teachers', this)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Data Guru &amp; Pengawas</span>
+          </button>
+
           <button class="srms-nav-item" id="tab-nav-live-monitor" onclick="switchAdminTab('live-monitor', this)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -614,24 +624,6 @@
               <path d="M9 21V9"></path>
             </svg>
             <span>Jadwal &amp; Sesi Ujian</span>
-          </button>
-
-          <button class="srms-nav-item" id="tab-nav-notice-board" onclick="scrollToNoticeBoard()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-            <span>Papan Pengumuman</span>
-          </button>
-
-          <button class="srms-nav-item" id="tab-nav-academic-calendar" onclick="scrollToAcademicCalendar()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            <span>Kalender Akademik</span>
           </button>
 
           <button class="srms-nav-item" id="tab-nav-exam-cards" onclick="switchAdminTab('exam-cards', this)">
@@ -691,6 +683,12 @@
           </div>
 
           <div class="srms-topbar-right">
+            <!-- Dark Mode Toggle Button (Sleek Modern Anti-AI) -->
+            <button type="button" class="srms-theme-toggle-btn" id="btn-theme-toggle" onclick="toggleDarkMode()" title="Ganti Mode Gelap / Terang">
+              <span id="theme-toggle-icon">🌙</span>
+              <span class="theme-toggle-label">Mode Gelap</span>
+            </button>
+
             <!-- Notification Bell with Badge 3 -->
             <button type="button" class="srms-notification-btn" onclick="openNotificationsModal()" title="Notifikasi Ujian">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -914,78 +912,10 @@
                 </table>
               </div>
             </div>
-
-            <!-- Kanan: Papan Pengumuman Sekolah -->
-            <div class="srms-card srms-notice-board-card" id="srms-notice-board-section">
-              <div class="srms-card-header">
-                <h3 class="srms-card-title">Papan Pengumuman</h3>
-                <button type="button" class="srms-card-link" onclick="openAllNoticesModal()">Semua Pengumuman</button>
-              </div>
-              <div class="srms-notices-feed" id="srms-notices-feed-container">
-                <!-- Pengumuman 1 -->
-                <div class="srms-notice-item">
-                  <div class="srms-notice-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                  </div>
-                  <div class="srms-notice-content">
-                    <h4 class="srms-notice-title">Jadwal Ujian Akhir Semester (UAS)</h4>
-                    <p class="srms-notice-desc">Pelaksanaan UAS Semester Genap berlangsung tertib mulai 25 Mei 2026.</p>
-                    <span class="srms-notice-date">15 Mei 2026</span>
-                  </div>
-                </div>
-
-                <!-- Pengumuman 2 -->
-                <div class="srms-notice-item">
-                  <div class="srms-notice-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                  </div>
-                  <div class="srms-notice-content">
-                    <h4 class="srms-notice-title">Pengumuman Rekap Nilai Ujian</h4>
-                    <p class="srms-notice-desc">Rekapitulasi nilai dan analisis butir soal telah diterbitkan untuk seluruh kelas.</p>
-                    <span class="srms-notice-date">12 Mei 2026</span>
-                  </div>
-                </div>
-
-                <!-- Pengumuman 3 -->
-                <div class="srms-notice-item">
-                  <div class="srms-notice-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                  </div>
-                  <div class="srms-notice-content">
-                    <h4 class="srms-notice-title">Penyusunan Bank Soal Tambahan</h4>
-                    <p class="srms-notice-desc">Bapak/Ibu guru diharapkan menyelesaikan input kisi-kisi soal sebelum batas akhir.</p>
-                    <span class="srms-notice-date">10 Mei 2026</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <!-- 4. Grid Bawah: Kalender Akademik, Akses Cepat & Ketuntasan Siswa -->
+          <!-- 4. Ringkasan Ketuntasan Siswa (Donut Chart) -->
           <div class="srms-bottom-grid">
-            <!-- Kolom 1: Kalender Akademik -->
-            <div class="srms-card srms-calendar-card" id="srms-calendar-section">
-              <div class="srms-card-header">
-                <h3 class="srms-card-title">Kalender Akademik</h3>
-                <button type="button" class="srms-card-link" onclick="openCalendarModal()">Buka Kalender</button>
-              </div>
-              <div class="srms-calendar-month-title" id="srms-calendar-header-title">Mei 2026</div>
-              <div class="srms-mini-calendar">
-                <div class="srms-cal-row srms-cal-days">
-                  <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span class="weekend">Sab</span><span class="weekend">Min</span>
-                </div>
-                <div class="srms-cal-row srms-cal-grid" id="srms-cal-dates-grid">
-                  <!-- Generated by JS -->
-                  <span class="faded">29</span><span class="faded">30</span><span>1</span><span>2</span><span>3</span><span class="weekend">4</span><span class="weekend">5</span>
-                  <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span class="weekend">11</span><span class="weekend">12</span>
-                  <span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span class="weekend">18</span><span class="weekend">19</span>
-                  <span class="active-date">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span class="weekend">25</span><span class="weekend">26</span>
-                  <span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span class="faded">1</span><span class="faded">2</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Kolom 2: Ringkasan Ketuntasan Siswa (Donut Chart) -->
             <div class="srms-card srms-performance-card">
               <div class="srms-card-header">
                 <h3 class="srms-card-title">Ringkasan Ketuntasan Siswa</h3>
