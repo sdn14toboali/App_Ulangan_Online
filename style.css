@@ -3092,12 +3092,16 @@ body {
 
   /* Fullscreen Smartphone Layout */
   #screen-student-exam {
+    display: none;
+  }
+
+  #screen-student-exam.active {
     min-height: 100dvh;
     height: 100dvh;
     max-height: 100dvh;
     padding: 0;
     margin: 0;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     overflow: hidden;
     background: #f8fafc;
