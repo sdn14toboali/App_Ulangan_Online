@@ -55,7 +55,7 @@ const state = {
       name: 'SD NEGERI 14 TOBOALI',
       npsn: '10901234',
       academicYear: '2026/2027 - Ganjil',
-      examType: 'UTS',
+      examType: 'UAS',
       address: 'Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung',
       headmaster: 'H. Suhardi, S.Pd., M.Pd',
       headmasterNip: '19750312 199903 1 004',
@@ -65,8 +65,10 @@ const state = {
     };
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
+      if (saved.examType === 'UTS') saved.examType = 'UAS';
       const merged = { ...defaultSchool, ...saved };
       if (!merged.logoUrl) merged.logoUrl = defaultSchoolLogo;
+      merged.examType = 'UAS';
       return merged;
     } catch(e) {
       return defaultSchool;
@@ -3476,7 +3478,7 @@ function populateSchoolIdentityForm() {
   if (document.getElementById('school-name')) document.getElementById('school-name').value = sch.name || '';
   if (document.getElementById('school-npsn')) document.getElementById('school-npsn').value = sch.npsn || '';
   if (document.getElementById('school-academic-year')) document.getElementById('school-academic-year').value = sch.academicYear || '';
-  if (document.getElementById('school-exam-type')) document.getElementById('school-exam-type').value = sch.examType || 'UTS';
+  if (document.getElementById('school-exam-type')) document.getElementById('school-exam-type').value = sch.examType || 'UAS';
   if (document.getElementById('school-address')) document.getElementById('school-address').value = sch.address || '';
   if (document.getElementById('school-headmaster')) document.getElementById('school-headmaster').value = sch.headmaster || '';
   if (document.getElementById('school-headmaster-nip')) document.getElementById('school-headmaster-nip').value = sch.headmasterNip || '';
@@ -3492,7 +3494,7 @@ function handleSaveSchoolIdentity(event) {
     name: document.getElementById('school-name').value.trim(),
     npsn: document.getElementById('school-npsn').value.trim(),
     academicYear: document.getElementById('school-academic-year').value.trim(),
-    examType: document.getElementById('school-exam-type') ? document.getElementById('school-exam-type').value : (state.school.examType || 'UTS'),
+    examType: document.getElementById('school-exam-type') ? document.getElementById('school-exam-type').value : (state.school.examType || 'UAS'),
     address: document.getElementById('school-address').value.trim(),
     headmaster: document.getElementById('school-headmaster').value.trim(),
     headmasterNip: document.getElementById('school-headmaster-nip').value.trim(),
@@ -3514,7 +3516,7 @@ function applySchoolBrandingUI() {
   const sch = state.school || {};
   const logo = sch.logoUrl || '';
   const schoolName = sch.name || 'SD NEGERI 14 TOBOALI';
-  const examType = sch.examType || 'UTS';
+  const examType = sch.examType || 'UAS';
 
   // 1. Header Global
   const headerIcon = document.querySelector('.brand-icon');
