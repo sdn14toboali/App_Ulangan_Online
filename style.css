@@ -81,11 +81,15 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .brand-icon {
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  flex-shrink: 0;
   background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
   border-radius: var(--radius-md);
   display: flex;
@@ -93,6 +97,7 @@ body {
   justify-content: center;
   color: #ffffff;
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+  overflow: hidden;
 }
 
 .brand-icon img {
@@ -102,6 +107,14 @@ body {
   border-radius: var(--radius-md);
   padding: 2px;
   background: #ffffff;
+  display: block;
+}
+
+.brand-text-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  justify-content: center;
 }
 
 .brand-title {
@@ -109,6 +122,7 @@ body {
   font-weight: 800;
   color: var(--slate-900);
   letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
 .brand-badge {
@@ -119,12 +133,20 @@ body {
   padding: 0.15rem 0.5rem;
   border-radius: 9999px;
   border: 1px solid var(--primary-100);
+  width: fit-content;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
 .header-nav {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.nav-label-short {
+  display: none;
 }
 
 /* Common Buttons */
@@ -497,17 +519,40 @@ body {
   .split-auth-card {
     flex-direction: column;
     max-width: 480px;
-    border-radius: 20px;
+    border-radius: 18px;
+    margin: 0.5rem auto;
   }
   .split-auth-hero {
-    padding: 2rem 1.5rem 1.75rem;
+    padding: 1.25rem 1.15rem 1rem;
+  }
+  .split-hero-headline {
+    font-size: 1.15rem;
+    margin-bottom: 0.25rem;
+  }
+  .split-hero-subtext {
+    font-size: 0.8rem;
+    line-height: 1.35;
+    margin-bottom: 0;
   }
   .split-hero-features {
-    padding-top: 0.75rem;
-    gap: 0.5rem;
+    display: none;
   }
   .split-auth-form-side {
-    padding: 2rem 1.5rem;
+    padding: 1.25rem 1.15rem 1.5rem;
+  }
+  .login-school-brand-banner {
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.65rem;
+    gap: 0.65rem;
+  }
+  .school-login-logo-img {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+  }
+  .form-control {
+    font-size: 16px; /* Prevents auto-zoom in iOS Safari */
   }
 }
 
@@ -3028,6 +3073,74 @@ body {
 }
 
 @media (max-width: 768px) {
+  /* App Header Smartphone Styling */
+  .app-header {
+    padding: 0.5rem 0.85rem;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+
+  .header-container {
+    gap: 0.5rem;
+  }
+
+  .brand-wrapper {
+    gap: 0.55rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-radius: 10px;
+  }
+
+  .brand-icon img {
+    border-radius: 8px;
+    padding: 2px;
+  }
+
+  .brand-text-block {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .brand-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 175px;
+  }
+
+  .brand-badge {
+    font-size: 0.62rem;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+    display: inline-block;
+    width: fit-content;
+    margin-top: 1px;
+  }
+
+  .header-nav {
+    gap: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  .header-nav .btn {
+    padding: 0.38rem 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    gap: 0.3rem;
+    white-space: nowrap;
+  }
+
   /* Hide desktop sidebar unless toggled */
   .srms-topbar-left .srms-sidebar-toggle-btn {
     display: block;
@@ -3288,6 +3401,56 @@ body {
   }
 }
 
+@media (max-width: 540px) {
+  .brand-title {
+    font-size: 0.88rem;
+    max-width: 140px;
+  }
 
+  .nav-label-long {
+    display: none !important;
+  }
 
+  .nav-label-short {
+    display: inline !important;
+  }
 
+  .header-nav .btn {
+    padding: 0.35rem 0.52rem;
+    font-size: 0.76rem;
+    gap: 0.25rem;
+  }
+
+  .header-nav .btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-header {
+    padding: 0.45rem 0.6rem;
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .brand-title {
+    font-size: 0.82rem;
+    max-width: 105px;
+  }
+
+  .brand-badge {
+    font-size: 0.58rem;
+    padding: 0.08rem 0.35rem;
+  }
+
+  .header-nav .btn {
+    padding: 0.32rem 0.45rem;
+    font-size: 0.72rem;
+  }
+}
