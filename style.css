@@ -2251,17 +2251,26 @@ body {
   border-bottom: 1px solid #f1f5f9;
 }
 
-.srms-brand-logo-icon {
+.srms-brand-logo-icon,
+.srms-brand-logo-wrapper {
   width: 48px;
   height: 48px;
-  background: #2563eb;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
   flex-shrink: 0;
+  padding: 4px;
+}
+
+.srms-brand-school-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .srms-brand-title {
@@ -2898,10 +2907,10 @@ body {
   color: #2563eb;
 }
 
-/* 4. Bottom Grid: Calendar, Quick Access, Performance Overview */
+/* 4. Bottom Grid: Calendar & Ringkasan Ketuntasan Siswa */
 .srms-bottom-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
   margin-bottom: 1.5rem;
 }
@@ -3563,4 +3572,29 @@ body {
     display: inline-flex !important;
   }
 }
+
+/* Sembunyikan header global pada Admin Dashboard (Penyelesaian Gambar 2 Dihapus) */
+body:has(#screen-admin-dashboard.active) #global-header,
+#screen-admin-dashboard.active ~ #global-header {
+  display: none !important;
+}
+
+/* Modal Profil Pengguna */
+#modal-teacher-profile .modal-content {
+  border: none;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
+  animation: modalScaleUp 0.22s ease-out;
+}
+
+@keyframes modalScaleUp {
+  from {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 
