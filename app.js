@@ -2041,7 +2041,7 @@ function switchAdminTab(tabId, element) {
   const topbarTitle = document.getElementById('admin-topbar-page-title');
   if (topbarTitle) {
     const titles = {
-      'srms-dashboard': 'SRMS Teacher Dashboard',
+      'srms-dashboard': 'Dasbor Utama Guru & Pengawas',
       'live-monitor': 'Jadwal Ujian & Live Monitoring',
       'question-bank': 'Bank Soal (5 Tipe ANBK)',
       'session-setting': 'Pengaturan Sesi Ujian Aktif',
@@ -2054,6 +2054,11 @@ function switchAdminTab(tabId, element) {
     };
     if (titles[tabId]) topbarTitle.textContent = titles[tabId];
   }
+
+  // Update active state on mobile bottom nav bar
+  document.querySelectorAll('.admin-mob-nav-btn').forEach(b => b.classList.remove('active'));
+  const mobBtn = document.getElementById('mob-nav-btn-' + tabId);
+  if (mobBtn) mobBtn.classList.add('active');
 
   // Close mobile drawer on selection
   toggleMobileSidebar(false);
@@ -2083,10 +2088,10 @@ function switchAdminTab(tabId, element) {
 
 function renderSrmsDashboard() {
   const t = state.currentTeacher;
-  const teacherName = t ? t.fullName : 'Abhishek Verma';
+  const teacherName = t ? t.fullName : 'Bapak/Ibu Guru & Pengawas';
   const teacherRole = t 
     ? (t.role === 'admin_sekolah' ? 'Operator Sekolah (Admin)' : (t.role === 'guru_kelas' ? 'Wali/Guru Kelas ' + t.assignedClass : 'Guru Mapel ' + t.assignedSubject)) 
-    : 'B.Tech - Computer Science (Sem 6)';
+    : 'SD Negeri 14 Toboali';
 
   // 1. Update Profile & Greetings
   const heroNameEl = document.getElementById('srms-hero-name');
@@ -2103,10 +2108,10 @@ function renderSrmsDashboard() {
   const avgScore = submittedList.length > 0 
     ? (submittedList.reduce((acc, curr) => acc + (curr.score || 0), 0) / submittedList.length).toFixed(1)
     : '88.5';
-  const cgpaValue = (parseFloat(avgScore) / 10).toFixed(2);
+  const cgpaValue = avgScore;
 
   const cgpaEl = document.getElementById('srms-cgpa-val');
-  if (cgpaEl) cgpaEl.textContent = cgpaValue > 0 ? cgpaValue : '8.85';
+  if (cgpaEl) cgpaEl.textContent = cgpaValue > 0 ? cgpaValue : '88.5';
 
   const coursesEl = document.getElementById('srms-courses-count');
   if (coursesEl) coursesEl.textContent = (state.subjects && state.subjects.length > 0) ? state.subjects.length : '6';
@@ -2139,13 +2144,13 @@ function renderSrmsRecentResults() {
       const score = st.score || 85;
       const grade = score >= 90 ? 'A+' : (score >= 80 ? 'A' : (score >= 70 ? 'B' : 'C'));
       const badgeCls = score >= 75 ? 'badge-pass' : 'badge-remedial';
-      const badgeText = score >= 75 ? 'Passed' : 'Remedial';
+      const badgeText = score >= 75 ? 'Tuntas' : 'Remedial';
 
       rowsHtml += `
         <tr>
           <td><span class="subject-code-tag">${escapeHtml(state.session.subject || 'CBT')}</span></td>
           <td><strong>${escapeHtml(st.name)} (${escapeHtml(st.nisn)})</strong></td>
-          <td>4</td>
+          <td>${escapeHtml(st.assignedClass || 'Kelas 6')}</td>
           <td>${score} / 100</td>
           <td><strong>${grade}</strong></td>
           <td><span class="status-badge-srms ${badgeCls}">${badgeText}</span></td>
