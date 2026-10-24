@@ -401,6 +401,16 @@ function showScreen(screenId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // Sembunyikan header global pada Admin Dashboard (Penyelesaian Gambar 2 Dihapus)
+  const globalHeader = document.getElementById('global-header');
+  if (globalHeader) {
+    if (screenId === 'admin-dashboard') {
+      globalHeader.style.display = 'none';
+    } else {
+      globalHeader.style.display = '';
+    }
+  }
+
   // Update top button active states & sembunyikan pada Login Guru / Admin Dashboard
   const headerNav = document.querySelector('.header-nav');
   if (headerNav) {
@@ -751,6 +761,29 @@ function getVisibleSchedules() {
   return allSchedules;
 }
 
+function formatIndonesianDayDate(dateString) {
+  if (!dateString) return { day: 'Senin', dateText: '-' };
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const d = new Date(dateString + 'T00:00:00');
+  if (isNaN(d.getTime())) return { day: '-', dateText: dateString };
+  return {
+    day: days[d.getDay()],
+    dateText: `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+  };
+}
+
+function handleScheduleDateChange(dateVal) {
+  const hint = document.getElementById('schedule-day-hint');
+  if (!hint) return;
+  if (!dateVal) {
+    hint.textContent = 'Hari: -';
+    return;
+  }
+  const dayInfo = formatIndonesianDayDate(dateVal);
+  hint.textContent = `Hari: ${dayInfo.day} (${dayInfo.dateText})`;
+}
+
 function renderTeacherExamSchedules() {
   const tbody = document.getElementById('table-teacher-schedules-body');
   const roleHint = document.getElementById('schedule-role-hint');
@@ -779,19 +812,30 @@ function renderTeacherExamSchedules() {
   tbody.innerHTML = '';
 
   if (schedules.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--slate-400);">Tidak ada jadwal ujian yang sesuai dengan kewenangan akun Anda saat ini.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: var(--slate-400);">Tidak ada jadwal ujian yang sesuai dengan kewenangan akun Anda saat ini.</td></tr>';
     return;
   }
 
   schedules.forEach((sc, idx) => {
     const isLoginOpen = sc.isLoginOpen !== false;
+    const dayInfo = formatIndonesianDayDate(sc.date);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="text-align: center;">${idx + 1}</td>
       <td><strong>${escapeHtml(sc.subjectName)}</strong></td>
       <td><span class="badge" style="background: var(--slate-200); color: var(--slate-800); font-weight: 700;">${escapeHtml(sc.className)}</span></td>
-      <td>${escapeHtml(sc.date || '-')}</td>
-      <td>${escapeHtml(sc.startTime || '07:30')} - ${escapeHtml(sc.endTime || '09:00')} (${sc.durationMinutes || 90}m)</td>
+      <td>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span class="badge" style="background: #eff6ff; color: #1d4ed8; font-weight: 800; font-size: 0.74rem; width: fit-content; padding: 2px 7px; border: 1px solid #bfdbfe;">${escapeHtml(dayInfo.day)}</span>
+          <span style="font-size: 0.82rem; font-weight: 600; color: #1e293b;">${escapeHtml(dayInfo.dateText)}</span>
+        </div>
+      </td>
+      <td>
+        <div style="font-weight: 700; color: #0f172a; font-size: 0.85rem;">
+          ${escapeHtml(sc.startTime || '07:30')} - ${escapeHtml(sc.endTime || '09:00')} <span style="font-size: 0.72rem; color: #64748b;">WIB</span>
+        </div>
+        <div style="font-size: 0.74rem; color: #64748b;">(${sc.durationMinutes || 90} menit)</div>
+      </td>
       <td>${escapeHtml(sc.room || 'Lab Komputer')}</td>
       <td>
         <span class="pwd-badge" style="color: #1e40af; background: #eff6ff;">${escapeHtml(sc.token || '-')}</span>
@@ -804,6 +848,11 @@ function renderTeacherExamSchedules() {
       <td>
         <button type="button" class="btn btn-sm ${isLoginOpen ? 'btn-success' : 'btn-danger'}" onclick="toggleScheduleLoginStatus('${sc.id}')" style="font-size: 0.78rem; padding: 0.25rem 0.6rem;">
           ${isLoginOpen ? '🟢 Login Dibuka' : '🔴 Login Ditutup'}
+        </button>
+      </td>
+      <td style="text-align: center;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="openEditScheduleModal('${sc.id}')" title="Atur Jadwal Hari, Tanggal & Jam" style="font-size: 0.78rem; padding: 0.25rem 0.55rem;">
+          ✏️ Atur
         </button>
       </td>
     `;
@@ -831,11 +880,36 @@ function openAddScheduleModal() {
   document.getElementById('schedule-input-subject').value = '';
   document.getElementById('schedule-input-class').value = '6A';
   document.getElementById('schedule-input-room').value = 'Lab Komputer';
-  document.getElementById('schedule-input-date').value = new Date().toISOString().split('T')[0];
+  const defaultDate = new Date().toISOString().split('T')[0];
+  document.getElementById('schedule-input-date').value = defaultDate;
+  handleScheduleDateChange(defaultDate);
   document.getElementById('schedule-input-token').value = 'BIN26A';
   document.getElementById('schedule-input-start').value = '07:30';
   document.getElementById('schedule-input-end').value = '09:00';
   document.getElementById('schedule-input-login-status').value = 'true';
+
+  modal.style.display = 'flex';
+}
+
+function openEditScheduleModal(scheduleId) {
+  const sc = (state.schedules || []).find(s => s.id === scheduleId);
+  if (!sc) return;
+
+  const modal = document.getElementById('modal-schedule-editor');
+  if (!modal) return;
+
+  document.getElementById('edit-schedule-id').value = sc.id;
+  document.getElementById('modal-schedule-title').textContent = `Atur Sesi Jadwal (${sc.subjectName} - Kelas ${sc.className})`;
+  document.getElementById('schedule-input-subject').value = sc.subjectName || '';
+  document.getElementById('schedule-input-class').value = sc.className || '6A';
+  document.getElementById('schedule-input-room').value = sc.room || 'Lab Komputer';
+  const targetDate = sc.date || new Date().toISOString().split('T')[0];
+  document.getElementById('schedule-input-date').value = targetDate;
+  handleScheduleDateChange(targetDate);
+  document.getElementById('schedule-input-token').value = sc.token || '';
+  document.getElementById('schedule-input-start').value = sc.startTime || '07:30';
+  document.getElementById('schedule-input-end').value = sc.endTime || '09:00';
+  document.getElementById('schedule-input-login-status').value = (sc.isLoginOpen !== false) ? 'true' : 'false';
 
   modal.style.display = 'flex';
 }
@@ -2182,9 +2256,89 @@ function openCalendarModal() {
 }
 
 function openTeacherProfileModal() {
-  const t = state.currentTeacher;
-  const name = t ? t.fullName : 'Abhishek Verma';
-  showToast(`Profil Pengguna: ${name}`, 'info');
+  const modal = document.getElementById('modal-teacher-profile');
+  if (!modal) return;
+
+  const t = state.currentTeacher || {
+    fullName: 'Bapak/Ibu Guru',
+    nip: '198501012010011002',
+    role: 'guru_kelas',
+    assignedClass: '6A',
+    assignedSubject: 'Semua Mapel',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80'
+  };
+
+  const nameInput = document.getElementById('teacher-profile-input-name');
+  const nipInput = document.getElementById('teacher-profile-input-nip');
+  const roleInput = document.getElementById('teacher-profile-input-role');
+  const displayName = document.getElementById('teacher-profile-display-name');
+  const displayRole = document.getElementById('teacher-profile-display-role');
+  const avatarImg = document.getElementById('teacher-profile-avatar-img');
+
+  const roleLabels = {
+    'admin_sekolah': 'Operator Sekolah',
+    'guru_kelas': `Guru Kelas ${t.assignedClass || '6A'}`,
+    'guru_mapel': `Guru Mapel ${t.assignedSubject || 'Umum'}`
+  };
+  const roleText = roleLabels[t.role] || 'Pendidik & Pengawas';
+
+  if (nameInput) nameInput.value = t.fullName || 'Bapak/Ibu Guru';
+  if (nipInput) nipInput.value = t.nip || '';
+  if (roleInput) roleInput.value = roleText;
+  if (displayName) displayName.textContent = t.fullName || 'Bapak/Ibu Guru';
+  if (displayRole) displayRole.textContent = `${roleText} • SD NEGERI 14 TOBOALI`;
+  if (avatarImg) avatarImg.src = t.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
+
+  modal.style.display = 'flex';
+}
+
+function closeTeacherProfileModal() {
+  const modal = document.getElementById('modal-teacher-profile');
+  if (modal) modal.style.display = 'none';
+}
+
+function handleSaveTeacherProfile(event) {
+  event.preventDefault();
+  const nameInput = document.getElementById('teacher-profile-input-name');
+  const nipInput = document.getElementById('teacher-profile-input-nip');
+
+  const newName = nameInput ? nameInput.value.trim() : '';
+  const newNip = nipInput ? nipInput.value.trim() : '';
+
+  if (!newName) {
+    showToast('Nama pendidik tidak boleh kosong.', 'warning');
+    return;
+  }
+
+  if (!state.currentTeacher) {
+    state.currentTeacher = {
+      id: 'tc-active',
+      username: 'guru',
+      fullName: newName,
+      nip: newNip,
+      role: 'guru_kelas',
+      assignedClass: '6A',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80'
+    };
+  } else {
+    state.currentTeacher.fullName = newName;
+    state.currentTeacher.nip = newNip;
+  }
+
+  localStorage.setItem('zettcbt_current_teacher', JSON.stringify(state.currentTeacher));
+
+  // Perbarui tampilan Nama pada Topbar dan Salam secara realtime
+  const headerName = document.getElementById('srms-header-user-name');
+  if (headerName) headerName.textContent = newName;
+
+  const heroName = document.getElementById('srms-hero-name');
+  if (heroName) heroName.textContent = `${newName}!`;
+
+  const navLabel = document.getElementById('nav-teacher-label');
+  if (navLabel) navLabel.textContent = newName;
+
+  closeTeacherProfileModal();
+  showToast('Profil pengguna berhasil disimpan!', 'success');
 }
 
 function handleGlobalSearch(query) {
@@ -3533,7 +3687,16 @@ function applySchoolBrandingUI() {
     }
   }
   document.querySelectorAll('.brand-title').forEach(el => el.textContent = schoolName);
-  document.querySelectorAll('.brand-badge').forEach(el => el.textContent = `CBT ${examType} ONLINE`);
+  document.querySelectorAll('.brand-badge').forEach(el => el.textContent = 'UJIAN ONLINE');
+
+  // Brand Sidebar Dasbor Utama (Gambar 1)
+  const sidebarLogo = document.getElementById('sidebar-school-logo-img');
+  if (sidebarLogo && logo) {
+    sidebarLogo.src = logo;
+    sidebarLogo.alt = schoolName;
+  }
+  const srmsBrandTitle = document.querySelector('.srms-brand-title');
+  if (srmsBrandTitle) srmsBrandTitle.textContent = 'UJIAN ONLINE';
 
   // 2. Ruang Siswa (screen-student-login)
   const studentScreen = document.getElementById('screen-student-login');
@@ -3550,13 +3713,13 @@ function applySchoolBrandingUI() {
     if (heroSchool) heroSchool.textContent = schoolName;
 
     const heroTag = studentScreen.querySelector('.split-hero-tag');
-    if (heroTag) heroTag.textContent = `CBT ${examType} RESMI`;
+    if (heroTag) heroTag.textContent = 'UJIAN ONLINE RESMI';
 
     const heroHeadline = studentScreen.querySelector('.split-hero-headline');
     if (heroHeadline) heroHeadline.textContent = `Ruang Ujian Siswa Berstandar ${examType}`;
 
     const formSubtitle = studentScreen.querySelector('.split-form-subtitle');
-    if (formSubtitle) formSubtitle.textContent = `Masukkan data peserta dan token ${examType} dari pengawas`;
+    if (formSubtitle) formSubtitle.textContent = 'Masukkan data peserta dan token ujian dari pengawas';
   }
 
   // 3. Login Guru (screen-teacher-login)
@@ -3574,30 +3737,30 @@ function applySchoolBrandingUI() {
     if (heroSchool) heroSchool.textContent = schoolName;
 
     const heroTag = teacherScreen.querySelector('.split-hero-tag');
-    if (heroTag) heroTag.textContent = `CBT ${examType} RESMI`;
+    if (heroTag) heroTag.textContent = 'UJIAN ONLINE RESMI';
 
     const heroHeadline = teacherScreen.querySelector('.split-hero-headline');
-    if (heroHeadline) heroHeadline.textContent = `Portal Pendidik & Pengawas CBT ${examType}`;
+    if (heroHeadline) heroHeadline.textContent = `Portal Pendidik & Pengawas Ujian Online`;
 
     // Update label fitur 5 tipe soal
     const featureItems = teacherScreen.querySelectorAll('.split-feature-item span');
     featureItems.forEach(el => {
       if (el.textContent.includes('Tipe Soal Standar')) {
-        el.textContent = `5 Tipe Soal Standar ${examType}`;
+        el.textContent = `5 Tipe Soal Standar ANBK`;
       }
     });
   }
 
   // 4. Dashboard Admin Welcome Banner
   const welcomeBadge = document.querySelector('.welcome-badge');
-  if (welcomeBadge) welcomeBadge.textContent = `PANEL EVALUASI ${examType} RESMI`;
+  if (welcomeBadge) welcomeBadge.textContent = 'PANEL EVALUASI UJIAN ONLINE RESMI';
 
   const welcomeTitle = document.querySelector('.welcome-title');
-  if (welcomeTitle) welcomeTitle.textContent = `Selamat Datang di Portal CBT ${examType}!`;
+  if (welcomeTitle) welcomeTitle.textContent = 'Selamat Datang di Portal Ujian Online!';
 
   const welcomeDesc = document.querySelector('.welcome-desc');
   if (welcomeDesc) {
-    welcomeDesc.textContent = `Kelola bank soal 5 tipe ${examType}, pantau live ujian siswa serentak, cetak kartu peserta, dan unduh rekap nilai ${schoolName}.`;
+    welcomeDesc.textContent = `Kelola bank soal 5 tipe ujian, pantau live ujian siswa serentak, cetak kartu peserta, dan unduh rekap nilai ${schoolName}.`;
   }
 
   // 5. Logo Banner Khusus Form Login Siswa & Guru
