@@ -530,18 +530,31 @@ body {
   .split-auth-card {
     flex-direction: column;
     max-width: 480px;
-    border-radius: 18px;
+    border-radius: 20px;
     margin: 0.5rem auto;
   }
-  .split-auth-card.student-centered-auth {
-    max-width: 100%;
-    margin: 0.25rem auto;
-  }
-  .split-auth-card.student-centered-auth .split-auth-form-side {
-    padding: 1.5rem 1.15rem;
-  }
   .split-auth-hero {
-    display: none !important;
+    display: flex !important;
+    padding: 1.35rem 1.15rem 1.1rem;
+    border-radius: 20px 20px 0 0;
+  }
+  .split-hero-subtext {
+    font-size: 0.82rem;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+  }
+  .split-hero-features {
+    display: flex !important;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    margin-top: 0.6rem;
+  }
+  .split-feature-item {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 6px;
+    gap: 0.4rem;
   }
   .split-auth-form-side {
     padding: 1.25rem 1.15rem 1.5rem;
