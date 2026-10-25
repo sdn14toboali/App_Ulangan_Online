@@ -59,7 +59,7 @@ const state = {
 
   // Identitas Sekolah SD NEGERI 14 TOBOALI
   school: (() => {
-    const defaultSchoolLogo = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='47' fill='%232563eb' stroke='%23f59e0b' stroke-width='5'/><path d='M50 16 L78 34 L78 66 L50 84 L22 66 L22 34 Z' fill='%231e40af' stroke='%23ffffff' stroke-width='2.5'/><path d='M50 24 L64 38 L36 38 Z' fill='%23fbbf24'/><rect x='47' y='38' width='6' height='26' fill='%23f59e0b' rx='2'/><path d='M32 52 Q50 72 68 52 Q50 80 32 52 Z' fill='%23ffffff'/><circle cx='50' cy='51' r='8' fill='%23ef4444'/><text x='50' y='93' font-size='8.5' font-family='Arial,sans-serif' font-weight='900' fill='%23ffffff' text-anchor='middle' letter-spacing='0.5'>SDN 14 TOBOALI</text></svg>";
+    const defaultSchoolLogo = "assets/logo-sdn14.png";
     const defaultSchool = {
       name: 'SD NEGERI 14 TOBOALI',
       npsn: '10901234',
@@ -75,7 +75,10 @@ const state = {
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
       const merged = { ...defaultSchool, ...saved };
-      if (!merged.logoUrl) merged.logoUrl = defaultSchoolLogo;
+      // Migrasikan logo jika belum ada atau masih berupa logo sintetis SVG biru lama
+      if (!merged.logoUrl || (typeof merged.logoUrl === 'string' && merged.logoUrl.includes('data:image/svg+xml') && merged.logoUrl.includes('SDN 14 TOBOALI'))) {
+        merged.logoUrl = defaultSchoolLogo;
+      }
       return merged;
     } catch(e) {
       return defaultSchool;
