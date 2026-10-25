@@ -159,9 +159,9 @@ const state = {
     ];
     try {
       const raw = localStorage.getItem('zettcbt_teachers');
-      if (raw) {
+      if (raw !== null) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch(e) {}
     localStorage.setItem('zettcbt_teachers', JSON.stringify(defaultSdTeachers));
@@ -202,9 +202,9 @@ const state = {
     ];
     try {
       const raw = localStorage.getItem('zettcbt_students');
-      if (raw) {
+      if (raw !== null) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           let changed = false;
           parsed.forEach((st, idx) => {
             if (!st.passwords) {
@@ -456,6 +456,23 @@ function loadSavedState() {
     } catch (e) {
       console.error('Failed to parse saved session', e);
     }
+  }
+
+  const savedSchool = localStorage.getItem('zettcbt_school');
+  if (savedSchool) {
+    try {
+      state.school = Object.assign(state.school, JSON.parse(savedSchool));
+    } catch (e) {
+      console.error('Failed to parse saved school', e);
+    }
+  }
+
+  const savedSubjects = localStorage.getItem('zettcbt_subjects');
+  if (savedSubjects) {
+    try {
+      const parsedSubs = JSON.parse(savedSubjects);
+      if (Array.isArray(parsedSubs) && parsedSubs.length > 0) state.subjects = parsedSubs;
+    } catch(e) {}
   }
 
   // Restore and populate all settings forms
@@ -1211,6 +1228,21 @@ async function handleTeacherLogin(event) {
 }
 
 function handleTeacherLogout() {
+  if (!confirm('Apakah Anda yakin ingin keluar dari sesi Guru & Pengawas?')) return;
+
+  // Tutup semua modal yang mungkin sedang terbuka
+  try { closeTeacherProfileModal(); } catch(e){}
+  try { closeNotificationsModal(); } catch(e){}
+  const profileModal = document.getElementById('modal-teacher-profile');
+  if (profileModal) profileModal.style.display = 'none';
+
+  // Tutup sidebar mobile jika sedang terbuka
+  const sidebar = document.querySelector('.admin-sidebar');
+  if (sidebar) sidebar.classList.remove('open');
+  const backdrop = document.querySelector('.sidebar-backdrop');
+  if (backdrop) backdrop.classList.remove('active');
+
+  // Bersihkan data sesi
   sessionStorage.removeItem('zettcbt_current_teacher');
   localStorage.removeItem('zettcbt_current_teacher');
   localStorage.removeItem('zettcbt_current_view');
@@ -1232,8 +1264,16 @@ function handleTeacherLogout() {
   const navTeachers = document.getElementById('tab-nav-manage-teachers');
   if (navTeachers) navTeachers.style.display = 'none';
 
+  // Kembalikan teks topbar ke default
+  const elWelcome = document.getElementById('welcome-teacher-name');
+  if (elWelcome) elWelcome.textContent = 'Bapak/Ibu Guru';
+  const elHeaderName = document.getElementById('srms-header-user-name');
+  if (elHeaderName) elHeaderName.textContent = 'Bapak/Ibu Guru';
+  const elHeaderRole = document.getElementById('srms-header-user-role');
+  if (elHeaderRole) elHeaderRole.textContent = 'SD Negeri 14 Toboali';
+
   showScreen('student-login');
-  showToast('Anda telah keluar dari Panel Guru & Pengawas.', 'info');
+  showToast('Anda telah berhasil keluar dari akun.', 'info');
 }
 
 // Terapkan Isolasi Tampilan berdasarkan Akun Guru yang Aktif
@@ -3202,6 +3242,15 @@ async function deleteStudent(nisn) {
   state.students = state.students.filter(s => s.nisn !== nisn);
   localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
 
+  // Hapus dari Neon Cloud Database
+  if (state.neon.endpoint) {
+    try {
+      await executeNeonSql('DELETE FROM students WHERE nisn = $1;', [nisn]);
+    } catch (eNeon) {
+      console.warn('Gagal hapus siswa di Neon Cloud:', eNeon.message);
+    }
+  }
+
   if (state.supabase.url && state.supabase.key) {
     try {
       await fetch(state.supabase.url + '/rest/v1/students?nisn=eq.' + encodeURIComponent(nisn), {
@@ -3218,7 +3267,8 @@ async function deleteStudent(nisn) {
 
   renderStudentsTable();
   renderExamCardsTab();
-  showToast('Siswa berhasil dihapus!', 'info');
+  updateAdminMetrics();
+  showToast('Data siswa berhasil dihapus secara permanen!', 'info');
 }
 
 // ==============================================================================
@@ -3419,6 +3469,15 @@ async function deleteTeacher(id) {
   state.teachers = state.teachers.filter(t => t.id !== id);
   localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
 
+  // Hapus dari Neon Cloud Database
+  if (state.neon.endpoint && target.username) {
+    try {
+      await executeNeonSql('DELETE FROM teachers WHERE username = $1;', [target.username]);
+    } catch (eNeon) {
+      console.warn('Gagal hapus guru di Neon Cloud:', eNeon.message);
+    }
+  }
+
   if (state.supabase.url && state.supabase.key) {
     try {
       await fetch(state.supabase.url + '/rest/v1/teachers?username=eq.' + encodeURIComponent(target.username), {
@@ -3434,7 +3493,8 @@ async function deleteTeacher(id) {
   }
 
   renderTeachersTable();
-  showToast('Akun guru berhasil dihapus!', 'info');
+  updateAdminMetrics();
+  showToast('Akun guru berhasil dihapus secara permanen!', 'info');
 }
 
 // ==============================================================================
@@ -3782,6 +3842,9 @@ function saveSubjectTokensSettings() {
   });
 
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+  renderSubjectTokensTable();
+  renderProctorTokenBar();
+  renderTeacherExamSchedules();
   applySchoolBrandingUI();
   showToast('Pengaturan token dan durasi per mata pelajaran berhasil disimpan!', 'success');
 }
@@ -4232,8 +4295,16 @@ function handleSaveSessionSettings(event) {
   state.session.showScore = document.getElementById('setting-show-score').checked;
 
   localStorage.setItem('zettcbt_session', JSON.stringify(state.session));
+  populateSessionSettings();
+  renderTeacherExamSchedules();
   updateAdminMetrics();
-  showToast('Pengaturan sesi ujian berhasil diperbarui!', 'success');
+
+  // Jika database Neon cloud terhubung, sinkronkan ke cloud
+  if (state.neon.endpoint) {
+    exportLocalDataToNeonCloud({ silent: true }).catch(e => console.warn('Neon session auto-save deferred:', e.message));
+  }
+
+  showToast('Pengaturan sesi ujian berhasil diperbarui dan disimpan permanen!', 'success');
 }
 
 function generateRandomToken() {
@@ -4615,7 +4686,7 @@ function copyNeonSqlSchema() {
 }
 
 // Export local data to Neon cloud
-async function exportLocalDataToNeonCloud() {
+async function exportLocalDataToNeonCloud(options = {}) {
   const creds = parseNeonCredentials();
   if (!creds.host) {
     showToast('Harap masukkan Host / Endpoint Neon pada kolom di atas terlebih dahulu!', 'warning');
@@ -4797,18 +4868,23 @@ async function importDataFromNeonCloud(options = {}) {
       const rawSessions = await executeNeonSql('SELECT token, title, subject, target_class, duration_minutes, is_active, show_score, randomize_questions FROM exam_sessions WHERE is_active = true ORDER BY created_at DESC LIMIT 1;');
       const sessionRows = (rawSessions && rawSessions.rows) ? rawSessions.rows : (Array.isArray(rawSessions) ? rawSessions : []);
       if (sessionRows && sessionRows.length > 0) {
-        const sRow = sessionRows[0];
-        state.session = {
-          ...state.session,
-          token: sRow.token,
-          title: sRow.title,
-          subject: sRow.subject,
-          durationMinutes: parseInt(sRow.duration_minutes) || 90,
-          showScore: !!sRow.show_score,
-          randomizeQuestions: !!sRow.randomize_questions
-        };
-        localStorage.setItem('zettcbt_session', JSON.stringify(state.session));
-        renderTeacherExamSchedules();
+        // Hanya sinkronkan sesi dari Neon jika lokal belum pernah menyimpan kustomisasi sesi
+        const hasLocalCustomSession = localStorage.getItem('zettcbt_session');
+        if (!hasLocalCustomSession) {
+          const sRow = sessionRows[0];
+          state.session = {
+            ...state.session,
+            token: sRow.token,
+            title: sRow.title,
+            subject: sRow.subject,
+            durationMinutes: parseInt(sRow.duration_minutes) || 90,
+            showScore: !!sRow.show_score,
+            randomizeQuestions: !!sRow.randomize_questions
+          };
+          localStorage.setItem('zettcbt_session', JSON.stringify(state.session));
+          renderTeacherExamSchedules();
+          populateSessionSettings();
+        }
         sessionsCount = 1;
       }
     } catch (eSession) {
