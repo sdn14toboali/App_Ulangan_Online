@@ -2260,18 +2260,13 @@ body {
   overflow: hidden !important;
 }
 
-.srms-nav-list {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: 0.75rem 0.85rem;
-}
-
 .srms-brand-box {
-  padding: 1.5rem 1.25rem 1.25rem;
+  padding: 1.25rem 1.25rem 1rem;
   display: flex;
   align-items: center;
   gap: 0.85rem;
   border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
 }
 
 .srms-brand-logo-icon,
@@ -2321,12 +2316,36 @@ body {
   margin-top: 2px;
 }
 
-.srms-nav {
-  padding: 1rem 0.85rem;
+.srms-nav,
+.srms-nav-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 0.75rem 0.85rem;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  flex: 1;
+}
+
+.srms-nav::-webkit-scrollbar,
+.srms-nav-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.srms-nav::-webkit-scrollbar-track,
+.srms-nav-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.srms-nav::-webkit-scrollbar-thumb,
+.srms-nav-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.srms-nav::-webkit-scrollbar-thumb:hover,
+.srms-nav-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .srms-nav-item {
