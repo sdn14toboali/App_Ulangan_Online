@@ -1040,24 +1040,26 @@ body {
    ============================================================================== */
 .admin-layout-wrapper {
   display: flex;
-  min-height: calc(100vh - 65px);
+  min-height: 100vh;
   background-color: var(--slate-100);
   position: relative;
+  align-items: stretch;
 }
 
 /* Sidebar Samping Kiri */
 .admin-sidebar {
   width: 270px;
-  background-color: #0f172a; /* Slate 900 */
-  color: #f8fafc;
+  background-color: #ffffff;
+  color: #1e293b;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border-right: 1px solid #1e293b;
+  border-right: 1px solid #e2e8f0;
   position: sticky;
-  top: 65px;
-  height: calc(100vh - 65px);
-  overflow-y: auto;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   z-index: 100;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1416,6 +1418,14 @@ body {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(2px);
   z-index: 99;
+}
+
+/* Admin Tab Contents */
+.admin-tab-content {
+  display: none;
+}
+.admin-tab-content.active {
+  display: block;
 }
 
 /* Backward compatibility for tab-link */
@@ -2241,6 +2251,19 @@ body {
 .srms-sidebar {
   background: #ffffff !important;
   border-right: 1px solid #e2e8f0 !important;
+  position: sticky !important;
+  top: 0 !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.srms-nav-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0.75rem 0.85rem;
 }
 
 .srms-brand-box {
@@ -2351,6 +2374,8 @@ body {
 }
 
 .srms-sidebar-footer {
+  flex-shrink: 0;
+  margin-top: auto;
   padding: 1rem 1.25rem;
   border-top: 1px solid #f1f5f9;
   background: #ffffff;
