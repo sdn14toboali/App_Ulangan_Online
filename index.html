@@ -1798,12 +1798,29 @@
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
-              <label class="form-label">Mata Pelajaran</label>
-              <input type="text" id="edit-question-subject" class="form-control" placeholder="Contoh: Matematika" required>
+              <label class="form-label" for="edit-question-subject">Mata Pelajaran</label>
+              <select id="edit-question-subject" class="form-control" required>
+                <option value="">-- Pilih Mata Pelajaran --</option>
+                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                <option value="Matematika">Matematika</option>
+                <option value="IPAS (Ilmu Pengetahuan Alam & Sosial)">IPAS (Ilmu Pengetahuan Alam & Sosial)</option>
+                <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
+                <option value="Pendidikan Agama Islam (PAI)">Pendidikan Agama Islam (PAI)</option>
+                <option value="PJOK / Penjaskes">PJOK / Penjaskes</option>
+              </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Target Kelas</label>
-              <input type="text" id="edit-question-class" class="form-control" placeholder="Contoh: 7A, 7B, atau UMUM" required>
+              <label class="form-label" for="edit-question-class">Target Kelas</label>
+              <select id="edit-question-class" class="form-control" required>
+                <option value="">-- Pilih Kelas --</option>
+                <option value="4A">Kelas 4A</option>
+                <option value="4B">Kelas 4B</option>
+                <option value="5A">Kelas 5A</option>
+                <option value="5B">Kelas 5B</option>
+                <option value="6A">Kelas 6A</option>
+                <option value="6B">Kelas 6B</option>
+                <option value="UMUM">UMUM (Semua Kelas)</option>
+              </select>
             </div>
           </div>
 
