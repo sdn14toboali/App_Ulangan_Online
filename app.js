@@ -59,7 +59,7 @@ const state = {
 
   // Identitas Sekolah SD NEGERI 14 TOBOALI
   school: (() => {
-    const defaultSchoolLogo = "assets/logo-sdn14.png";
+    const defaultSchoolLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO) ? window.OFFICIAL_SDN14_LOGO : "assets/logo-sdn14.png";
     const defaultSchool = {
       name: 'SD NEGERI 14 TOBOALI',
       npsn: '10901234',
@@ -75,8 +75,8 @@ const state = {
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
       const merged = { ...defaultSchool, ...saved };
-      // Migrasikan logo jika belum ada atau masih berupa logo sintetis SVG biru lama
-      if (!merged.logoUrl || (typeof merged.logoUrl === 'string' && merged.logoUrl.includes('data:image/svg+xml') && merged.logoUrl.includes('SDN 14 TOBOALI'))) {
+      // Migrasikan logo jika belum ada, masih berupa SVG lama, atau berupa path lokal yang rentan 404 di ponsel
+      if (!merged.logoUrl || (typeof merged.logoUrl === 'string' && (merged.logoUrl.includes('data:image/svg+xml') || merged.logoUrl === 'assets/logo-sdn14.png' || merged.logoUrl.includes('SDN 14 TOBOALI')))) {
         merged.logoUrl = defaultSchoolLogo;
       }
       return merged;
@@ -1038,7 +1038,6 @@ function renderTeacherExamSchedules() {
   }
 
   schedules.forEach((sc, idx) => {
-    const isLoginOpen = sc.isLoginOpen !== false;
     const dayInfo = formatIndonesianDayDate(sc.date);
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -1059,17 +1058,7 @@ function renderTeacherExamSchedules() {
       </td>
       <td>${escapeHtml(sc.room || 'Lab Komputer')}</td>
       <td>
-        <span class="pwd-badge" style="color: #1e40af; background: #eff6ff;">${escapeHtml(sc.token || '-')}</span>
-      </td>
-      <td>
-        <span class="badge" style="background: ${sc.status === 'active' ? '#dcfce7' : '#f1f5f9'}; color: ${sc.status === 'active' ? '#15803d' : '#475569'}; font-weight: 700;">
-          ${sc.status === 'active' ? '🟢 Sesi Aktif' : (sc.status === 'completed' ? '⚪ Selesai' : '⏳ Mendatang')}
-        </span>
-      </td>
-      <td>
-        <button type="button" class="btn btn-sm ${isLoginOpen ? 'btn-success' : 'btn-danger'}" onclick="toggleScheduleLoginStatus('${sc.id}')" style="font-size: 0.78rem; padding: 0.25rem 0.6rem;">
-          ${isLoginOpen ? '🟢 Login Dibuka' : '🔴 Login Ditutup'}
-        </button>
+        <span class="pwd-badge" style="color: #1e40af; background: #eff6ff; font-weight: 800; font-size: 0.9rem;">${escapeHtml(sc.token || '-')}</span>
       </td>
       <td style="text-align: center; white-space: nowrap;">
         <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
@@ -1513,12 +1502,6 @@ function handleStudentLogin(event) {
     return;
   }
 
-  // 0. Validasi Sakelar Global Login Siswa
-  if (state.isStudentLoginActive === false) {
-    showToast('Sesi login ujian saat ini sedang DITUTUP oleh pengawas ruang! Silakan tunggu instruksi pengawas.', 'danger');
-    return;
-  }
-
   // 1. Validasi Keberadaan Siswa
   const student = (state.students || []).find(s => s.nisn.toLowerCase() === nisn.toLowerCase());
   if (!student) {
@@ -1526,24 +1509,10 @@ function handleStudentLogin(event) {
     return;
   }
 
-  // Cek apakah ada jadwal spesifik untuk rombel ini yang sedang ditutup
-  const matchingSchedule = (state.schedules || []).find(sc => 
-    sc.subjectName.toLowerCase() === subjectName.toLowerCase() && 
-    (sc.className === student.className || sc.className === 'SEMUA KELAS')
-  );
-  if (matchingSchedule && matchingSchedule.isLoginOpen === false) {
-    showToast(`Akses login untuk ${subjectName} di kelas ${student.className} sedang DITUTUP oleh pengawas!`, 'danger');
-    return;
-  }
-
   // 2. Validasi Mata Pelajaran
   const subj = (state.subjects || []).find(s => s.name === subjectName);
   if (!subj) {
     showToast('Mata pelajaran "' + subjectName + '" tidak valid!', 'danger');
-    return;
-  }
-  if (subj.isActive === false) {
-    showToast('Sesi ujian untuk ' + subjectName + ' sedang ditutup oleh pengawas!', 'danger');
     return;
   }
 
@@ -3837,16 +3806,16 @@ function printExamCardsPdf() {
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 75px 1fr; gap: 8px; font-size: 8pt;">
-          <div style="width: 70px; height: 85px; border: 1px dashed #666; display: flex; align-items: center; justify-content: center; font-size: 7pt; color: #777; text-align: center; background: #fafafa;">
+        <div style="display: grid; grid-template-columns: 58px 1fr; gap: 8px; font-size: 8pt;">
+          <div style="width: 55px; height: 68px; border: 1px dashed #666; display: flex; align-items: center; justify-content: center; font-size: 6.8pt; color: #777; text-align: center; background: #fafafa; border-radius: 4px;">
             PAS FOTO<br>2 x 3
           </div>
           <div>
-            <div style="margin-bottom: 2px;"><strong>No. Peserta / NISN:</strong> ${escapeHtml(st.nisn)}</div>
-            <div style="margin-bottom: 2px;"><strong>Nama Peserta:</strong> ${escapeHtml(st.name)}</div>
-            <div style="margin-bottom: 2px;"><strong>Kelas / Rombel:</strong> ${escapeHtml(st.className)}</div>
-            <div style="margin-bottom: 2px;"><strong>Tahun Pelajaran:</strong> ${sch.academicYear}</div>
-            <div style="margin-bottom: 2px;"><strong>Ruang / Sesi:</strong> Lab Komputer</div>
+            <div style="margin-bottom: 1.5px;"><strong>No. Peserta / NISN:</strong> ${escapeHtml(st.nisn)}</div>
+            <div style="margin-bottom: 1.5px;"><strong>Nama Peserta:</strong> ${escapeHtml(st.name)}</div>
+            <div style="margin-bottom: 1.5px;"><strong>Kelas / Rombel:</strong> ${escapeHtml(st.className)}</div>
+            <div style="margin-bottom: 1.5px;"><strong>Tahun Pelajaran:</strong> ${sch.academicYear}</div>
+            <div style="margin-bottom: 1.5px;"><strong>Ruang / Sesi:</strong> Lab Komputer</div>
           </div>
         </div>
 
@@ -3904,10 +3873,10 @@ function renderExamCardsTab() {
       const pwd = getStudentPasswordForSubject(st, sub.name);
       subRows += `
         <tr>
-          <td style="text-align: center;">${subIdx + 1}</td>
+          <td style="text-align: center; width: 22px;">${subIdx + 1}</td>
           <td><strong>${escapeHtml(sub.name)}</strong></td>
-          <td><span class="pwd-badge">${pwd}</span></td>
-          <td style="color: var(--slate-500); font-size: 0.72rem;">Dirilis Pengawas</td>
+          <td style="text-align: center; width: 85px;"><span class="pwd-badge">${pwd}</span></td>
+          <td style="color: var(--slate-500); font-size: 0.68rem; text-align: center; width: 80px;">Dirilis Pengawas</td>
         </tr>
       `;
     });
@@ -3915,22 +3884,22 @@ function renderExamCardsTab() {
     const card = document.createElement('div');
     card.className = 'exam-student-card';
     card.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 0.6rem; border-bottom: 1.5px double var(--slate-300); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
-        <img src="${sch.logoUrl}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 6px; background: #fff; padding: 2px;" alt="Logo">
-        <div>
-          <div style="font-size: 0.72rem; font-weight: 700; color: var(--primary-600); text-transform: uppercase;">KARTU PESERTA CBT (${sch.examType || 'UTS'})</div>
-          <div style="font-size: 0.92rem; font-weight: 800; color: var(--slate-900);">${sch.name}</div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; border-bottom: 1.5px solid var(--slate-200); padding-bottom: 0.35rem; margin-bottom: 0.5rem;">
+        <img src="${sch.logoUrl}" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px; background: #fff; padding: 1px;" alt="Logo">
+        <div style="line-height: 1.2;">
+          <div style="font-size: 0.64rem; font-weight: 700; color: var(--primary-600); text-transform: uppercase;">KARTU PESERTA CBT (${sch.examType || 'UAS'})</div>
+          <div style="font-size: 0.82rem; font-weight: 800; color: var(--slate-900);">${sch.name}</div>
         </div>
       </div>
-      <div style="display: grid; grid-template-columns: 65px 1fr; gap: 0.75rem;">
-        <div style="width: 65px; height: 80px; border: 1px dashed var(--slate-300); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; color: var(--slate-400); text-align: center; background: var(--slate-50);">
+      <div style="display: grid; grid-template-columns: 48px 1fr; gap: 0.65rem; align-items: center;">
+        <div style="width: 48px; height: 58px; border: 1px dashed var(--slate-300); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: var(--slate-400); text-align: center; background: var(--slate-50); line-height: 1.1;">
           FOTO<br>2 x 3
         </div>
-        <div style="font-size: 0.8rem; line-height: 1.5;">
+        <div style="font-size: 0.74rem; line-height: 1.35;">
           <div><span style="color: var(--slate-500);">No. Peserta:</span> <strong>${escapeHtml(st.nisn)}</strong></div>
           <div><span style="color: var(--slate-500);">Nama:</span> <strong>${escapeHtml(st.name)}</strong></div>
-          <div><span style="color: var(--slate-500);">Kelas:</span> <span class="badge" style="background: var(--slate-200); font-weight: 700;">${escapeHtml(st.className)}</span></div>
-          <div><span style="color: var(--slate-500);">Ruang / Sesi:</span> Lab Komputer</div>
+          <div><span style="color: var(--slate-500);">Kelas / Rombel:</span> <span class="badge" style="background: var(--slate-200); font-weight: 700; font-size: 0.68rem; padding: 1px 5px;">${escapeHtml(st.className)}</span></div>
+          <div><span style="color: var(--slate-500);">Ruang:</span> Lab Komputer</div>
         </div>
       </div>
 
@@ -3938,10 +3907,10 @@ function renderExamCardsTab() {
       <table class="exam-card-subject-table">
         <thead>
           <tr>
-            <th style="width: 25px;">No</th>
+            <th style="width: 22px;">No</th>
             <th>Mata Pelajaran</th>
-            <th style="width: 100px;">Password Siswa</th>
-            <th style="width: 95px;">Token Mapel</th>
+            <th style="width: 85px; text-align: center;">Password</th>
+            <th style="width: 80px; text-align: center;">Token Mapel</th>
           </tr>
         </thead>
         <tbody>
@@ -3983,12 +3952,6 @@ function renderSubjectTokensTable() {
       <td>
         <input type="number" id="duration-input-${sub.id}" value="${sub.durationMinutes || 90}" min="10" max="300" class="form-control" style="width: 80px; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
       </td>
-      <td>
-        <select id="status-input-${sub.id}" class="form-control" style="padding: 0.3rem 0.5rem; font-size: 0.82rem;">
-          <option value="true" ${sub.isActive !== false ? 'selected' : ''}>🟢 Aktif</option>
-          <option value="false" ${sub.isActive === false ? 'selected' : ''}>🔴 Ditutup</option>
-        </select>
-      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -4022,10 +3985,9 @@ function saveSubjectTokensSettings() {
   (state.subjects || []).forEach(sub => {
     const tokenInput = document.getElementById('token-input-' + sub.id);
     const durationInput = document.getElementById('duration-input-' + sub.id);
-    const statusInput = document.getElementById('status-input-' + sub.id);
     if (tokenInput) sub.token = tokenInput.value.trim().toUpperCase();
     if (durationInput) sub.durationMinutes = parseInt(durationInput.value, 10) || 90;
-    if (statusInput) sub.isActive = statusInput.value === 'true';
+    sub.isActive = true;
   });
 
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
