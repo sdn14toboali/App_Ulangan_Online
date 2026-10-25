@@ -59,7 +59,9 @@ const state = {
 
   // Identitas Sekolah SD NEGERI 14 TOBOALI
   school: (() => {
-    const defaultSchoolLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO) ? window.OFFICIAL_SDN14_LOGO : "assets/logo-sdn14.png";
+    const defaultSchoolLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 1000) 
+      ? window.OFFICIAL_SDN14_LOGO 
+      : "assets/logo-sdn14.png";
     const defaultSchool = {
       name: 'SD NEGERI 14 TOBOALI',
       npsn: '10901234',
@@ -75,9 +77,10 @@ const state = {
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
       const merged = { ...defaultSchool, ...saved };
-      // Migrasikan logo jika belum ada, masih berupa SVG lama, atau berupa path lokal yang rentan 404 di ponsel
-      if (!merged.logoUrl || (typeof merged.logoUrl === 'string' && (merged.logoUrl.includes('data:image/svg+xml') || merged.logoUrl === 'assets/logo-sdn14.png' || merged.logoUrl.includes('SDN 14 TOBOALI')))) {
+      // Migrasikan logo jika belum ada, corrupt, masih berupa SVG lama, atau berupa path lokal yang rentan 404 di ponsel
+      if (!merged.logoUrl || typeof merged.logoUrl !== 'string' || merged.logoUrl.length < 1000 || merged.logoUrl.includes('assets/') || merged.logoUrl.includes('$b') || merged.logoUrl.includes('data:image/svg+xml') || merged.logoUrl.includes('SDN 14 TOBOALI')) {
         merged.logoUrl = defaultSchoolLogo;
+        localStorage.setItem('zettcbt_school', JSON.stringify(merged));
       }
       return merged;
     } catch(e) {
@@ -4107,7 +4110,13 @@ function handleSaveSchoolIdentity(event) {
  */
 function applySchoolBrandingUI() {
   const sch = state.school || {};
-  const logo = sch.logoUrl || '';
+  const defaultLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 1000)
+    ? window.OFFICIAL_SDN14_LOGO
+    : "assets/logo-sdn14.png";
+  const logo = (sch.logoUrl && typeof sch.logoUrl === 'string' && sch.logoUrl.startsWith('data:image/') && sch.logoUrl.length > 1000)
+    ? sch.logoUrl
+    : defaultLogo;
+  sch.logoUrl = logo;
   const schoolName = sch.name || 'SD NEGERI 14 TOBOALI';
   const examType = sch.examType || 'UAS';
 
@@ -4115,7 +4124,7 @@ function applySchoolBrandingUI() {
   const headerIcon = document.querySelector('.brand-icon');
   if (headerIcon) {
     if (logo) {
-      headerIcon.innerHTML = `<img src="${logo}" alt="Logo Sekolah">`;
+      headerIcon.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
     } else {
       headerIcon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
     }
@@ -4133,9 +4142,14 @@ function applySchoolBrandingUI() {
 
   // Brand Sidebar Dasbor Utama (Gambar 1)
   const sidebarLogo = document.getElementById('sidebar-school-logo-img');
-  if (sidebarLogo && logo) {
+  if (sidebarLogo) {
     sidebarLogo.src = logo;
     sidebarLogo.alt = schoolName;
+    sidebarLogo.onerror = function() {
+      if (window.OFFICIAL_SDN14_LOGO && this.src !== window.OFFICIAL_SDN14_LOGO) {
+        this.src = window.OFFICIAL_SDN14_LOGO;
+      }
+    };
   }
   const srmsBrandTitle = document.querySelector('.srms-brand-title');
   if (srmsBrandTitle) srmsBrandTitle.textContent = 'UJIAN ONLINE';
@@ -4146,10 +4160,19 @@ function applySchoolBrandingUI() {
     const heroLogo = studentScreen.querySelector('.split-hero-logo');
     if (heroLogo) {
       if (logo) {
-        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah">`;
+        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
       } else {
         heroLogo.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
       }
+    }
+    const studentFormLogo = document.getElementById('student-form-school-logo');
+    if (studentFormLogo) {
+      studentFormLogo.src = logo;
+      studentFormLogo.onerror = function() {
+        if (window.OFFICIAL_SDN14_LOGO && this.src !== window.OFFICIAL_SDN14_LOGO) {
+          this.src = window.OFFICIAL_SDN14_LOGO;
+        }
+      };
     }
     const heroSchool = studentScreen.querySelector('.split-hero-school');
     if (heroSchool) heroSchool.textContent = schoolName;
@@ -4170,10 +4193,19 @@ function applySchoolBrandingUI() {
     const heroLogo = teacherScreen.querySelector('.split-hero-logo');
     if (heroLogo) {
       if (logo) {
-        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah">`;
+        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
       } else {
         heroLogo.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
       }
+    }
+    const teacherFormLogo = document.getElementById('teacher-form-school-logo');
+    if (teacherFormLogo) {
+      teacherFormLogo.src = logo;
+      teacherFormLogo.onerror = function() {
+        if (window.OFFICIAL_SDN14_LOGO && this.src !== window.OFFICIAL_SDN14_LOGO) {
+          this.src = window.OFFICIAL_SDN14_LOGO;
+        }
+      };
     }
     const heroSchool = teacherScreen.querySelector('.split-hero-school');
     if (heroSchool) heroSchool.textContent = schoolName;
