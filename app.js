@@ -65,10 +65,8 @@ const state = {
     };
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
-      if (saved.examType === 'UTS') saved.examType = 'UAS';
       const merged = { ...defaultSchool, ...saved };
       if (!merged.logoUrl) merged.logoUrl = defaultSchoolLogo;
-      merged.examType = 'UAS';
       return merged;
     } catch(e) {
       return defaultSchool;
@@ -122,7 +120,7 @@ const state = {
     ];
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_schedules') || 'null');
-      if (saved && Array.isArray(saved) && saved.length > 0) return saved;
+      if (saved && Array.isArray(saved)) return saved;
     } catch(e) {}
     localStorage.setItem('zettcbt_schedules', JSON.stringify(defaultSchedules));
     return defaultSchedules;
@@ -130,8 +128,16 @@ const state = {
 
   currentEditorQType: 'pg',
 
-  // Active Teacher Session (Isolation State)
-  currentTeacher: JSON.parse(sessionStorage.getItem('zettcbt_current_teacher') || 'null'),
+  // Active Teacher Session (Unified Storage)
+  currentTeacher: (() => {
+    try {
+      const local = localStorage.getItem('zettcbt_current_teacher');
+      const session = sessionStorage.getItem('zettcbt_current_teacher');
+      if (local) return JSON.parse(local);
+      if (session) return JSON.parse(session);
+    } catch(e) {}
+    return null;
+  })(),
 
   // Daftar Akun Guru Khusus SD NEGERI 14 TOBOALI (Guru Kelas, PAI, Penjaskes, Operator)
   teachers: (() => {
@@ -144,8 +150,9 @@ const state = {
     ];
     try {
       const raw = localStorage.getItem('zettcbt_teachers');
-      if (raw && !raw.includes('guru7a') && !raw.includes('guruipa')) {
-        return JSON.parse(raw);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch(e) {}
     localStorage.setItem('zettcbt_teachers', JSON.stringify(defaultSdTeachers));
@@ -186,17 +193,19 @@ const state = {
     ];
     try {
       const raw = localStorage.getItem('zettcbt_students');
-      if (raw && !raw.includes('7A') && !raw.includes('7B')) {
+      if (raw) {
         const parsed = JSON.parse(raw);
-        let changed = false;
-        parsed.forEach((st, idx) => {
-          if (!st.passwords) {
-            st.passwords = generateStudentSubjectPasswords(st.nisn || ('2026-0' + (idx + 1)));
-            changed = true;
-          }
-        });
-        if (changed) localStorage.setItem('zettcbt_students', JSON.stringify(parsed));
-        return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          let changed = false;
+          parsed.forEach((st, idx) => {
+            if (!st.passwords) {
+              st.passwords = generateStudentSubjectPasswords(st.nisn || ('2026-0' + (idx + 1)));
+              changed = true;
+            }
+          });
+          if (changed) localStorage.setItem('zettcbt_students', JSON.stringify(parsed));
+          return parsed;
+        }
       }
     } catch(e) {}
     localStorage.setItem('zettcbt_students', JSON.stringify(defaultSdStudents));
@@ -229,107 +238,123 @@ const state = {
   },
 
   // Bank Soal Terisolasi (Materi Resmi Sekolah Dasar)
-  questions: [
-    {
-      id: 'q-01',
-      number: 1,
-      type: 'pg',
-      teacherId: 't-kelas6',
-      teacherName: 'Siti Aminah, S.Pd',
-      subject: 'Tematik SD',
-      targetClass: '6',
-      text: 'Peristiwa mengembun adalah perubahan wujud benda dari...',
-      imageUrl: '',
-      optionA: 'Gas menjadi cair',
-      optionB: 'Cair menjadi padat',
-      optionC: 'Padat menjadi gas',
-      optionD: 'Cair menjadi gas',
-      optionE: 'Gas menjadi padat',
-      correctKey: 'A',
-      scoreWeight: 20
-    },
-    {
-      id: 'q-02',
-      number: 2,
-      type: 'pg',
-      teacherId: 't-kelas5',
-      teacherName: 'Budi Santoso, S.Pd',
-      subject: 'Tematik SD',
-      targetClass: '5',
-      text: 'Lambang sila ke-3 dalam perisai Garuda Pancasila adalah...',
-      imageUrl: '',
-      optionA: 'Bintang Tunggal',
-      optionB: 'Rantai Emas',
-      optionC: 'Pohon Beringin',
-      optionD: 'Kepala Banteng',
-      optionE: 'Padi dan Kapas',
-      correctKey: 'C',
-      scoreWeight: 20
-    },
-    {
-      id: 'q-03',
-      number: 3,
-      type: 'pg',
-      teacherId: 't-pai',
-      teacherName: 'Ahmad Zaki, S.Pd.I',
-      subject: 'Pendidikan Agama Islam (PAI)',
-      targetClass: '6',
-      text: 'Rukun iman yang ke-2 yang wajib diimani oleh setiap muslim adalah iman kepada...',
-      imageUrl: '',
-      optionA: 'Kitab-kitab Allah',
-      optionB: 'Malaikat-malaikat Allah',
-      optionC: 'Rasul-rasul Allah',
-      optionD: 'Hari Kiamat',
-      optionE: 'Qada dan Qadar',
-      correctKey: 'B',
-      scoreWeight: 20
-    },
-    {
-      id: 'q-04',
-      number: 4,
-      type: 'pg',
-      teacherId: 't-pjok',
-      teacherName: 'Hendra Wijaya, S.Pd',
-      subject: 'Penjaskes / PJOK',
-      targetClass: '6',
-      text: 'Gerakan berpindah tempat seperti berlari, melompat, dan berjalan dalam olahraga disebut gerak...',
-      imageUrl: '',
-      optionA: 'Lokomotor',
-      optionB: 'Non-lokomotor',
-      optionC: 'Manipulatif',
-      optionD: 'Statis',
-      optionE: 'Irama',
-      correctKey: 'A',
-      scoreWeight: 20
-    },
-    {
-      id: 'q-05',
-      number: 5,
-      type: 'pg',
-      teacherId: 't-kelas6',
-      teacherName: 'Siti Aminah, S.Pd',
-      subject: 'Tematik SD',
-      targetClass: '6',
-      text: 'Suku bangsa asli yang mendiami pulau Bangka Belitung dengan kearifan lokal rumah panggung adalah suku...',
-      imageUrl: '',
-      optionA: 'Jawa',
-      optionB: 'Melayu Bangka',
-      optionC: 'Sunda',
-      optionD: 'Bugis',
-      optionE: 'Batak',
-      correctKey: 'B',
-      scoreWeight: 20
-    }
-  ],
+  questions: (() => {
+    const defaultQuestions = [
+      {
+        id: 'q-01',
+        number: 1,
+        type: 'pg',
+        teacherId: 't-kelas6',
+        teacherName: 'Siti Aminah, S.Pd',
+        subject: 'Tematik SD',
+        targetClass: '6',
+        text: 'Peristiwa mengembun adalah perubahan wujud benda dari...',
+        imageUrl: '',
+        optionA: 'Gas menjadi cair',
+        optionB: 'Cair menjadi padat',
+        optionC: 'Padat menjadi gas',
+        optionD: 'Cair menjadi gas',
+        optionE: 'Gas menjadi padat',
+        correctKey: 'A',
+        scoreWeight: 20
+      },
+      {
+        id: 'q-02',
+        number: 2,
+        type: 'pg',
+        teacherId: 't-kelas5',
+        teacherName: 'Budi Santoso, S.Pd',
+        subject: 'Tematik SD',
+        targetClass: '5',
+        text: 'Lambang sila ke-3 dalam perisai Garuda Pancasila adalah...',
+        imageUrl: '',
+        optionA: 'Bintang Tunggal',
+        optionB: 'Rantai Emas',
+        optionC: 'Pohon Beringin',
+        optionD: 'Kepala Banteng',
+        optionE: 'Padi dan Kapas',
+        correctKey: 'C',
+        scoreWeight: 20
+      },
+      {
+        id: 'q-03',
+        number: 3,
+        type: 'pg',
+        teacherId: 't-pai',
+        teacherName: 'Ahmad Zaki, S.Pd.I',
+        subject: 'Pendidikan Agama Islam (PAI)',
+        targetClass: '6',
+        text: 'Rukun iman yang ke-2 yang wajib diimani oleh setiap muslim adalah iman kepada...',
+        imageUrl: '',
+        optionA: 'Kitab-kitab Allah',
+        optionB: 'Malaikat-malaikat Allah',
+        optionC: 'Rasul-rasul Allah',
+        optionD: 'Hari Kiamat',
+        optionE: 'Qada dan Qadar',
+        correctKey: 'B',
+        scoreWeight: 20
+      },
+      {
+        id: 'q-04',
+        number: 4,
+        type: 'pg',
+        teacherId: 't-pjok',
+        teacherName: 'Hendra Wijaya, S.Pd',
+        subject: 'Penjaskes / PJOK',
+        targetClass: '6',
+        text: 'Gerakan berpindah tempat seperti berlari, melompat, dan berjalan dalam olahraga disebut gerak...',
+        imageUrl: '',
+        optionA: 'Lokomotor',
+        optionB: 'Non-lokomotor',
+        optionC: 'Manipulatif',
+        optionD: 'Statis',
+        optionE: 'Irama',
+        correctKey: 'A',
+        scoreWeight: 20
+      },
+      {
+        id: 'q-05',
+        number: 5,
+        type: 'pg',
+        teacherId: 't-kelas6',
+        teacherName: 'Siti Aminah, S.Pd',
+        subject: 'Tematik SD',
+        targetClass: '6',
+        text: 'Suku bangsa asli yang mendiami pulau Bangka Belitung dengan kearifan lokal rumah panggung adalah suku...',
+        imageUrl: '',
+        optionA: 'Jawa',
+        optionB: 'Melayu Bangka',
+        optionC: 'Sunda',
+        optionD: 'Bugis',
+        optionE: 'Batak',
+        correctKey: 'B',
+        scoreWeight: 20
+      }
+    ];
+    try {
+      const saved = JSON.parse(localStorage.getItem('zettcbt_questions') || 'null');
+      if (saved && Array.isArray(saved) && saved.length > 0) return saved;
+    } catch(e) {}
+    localStorage.setItem('zettcbt_questions', JSON.stringify(defaultQuestions));
+    return defaultQuestions;
+  })(),
 
   // Mock Active Students (Tersebar di Kelas 6A, 6B, 5A, 5B, 4A untuk Menguji Isolasi)
-  liveStudents: [
-    { nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, time: '08:45 WIB' },
-    { nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, time: '-' },
-    { nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 90, time: '08:50 WIB' },
-    { nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' },
-    { nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', answeredCount: 2, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' }
-  ]
+  liveStudents: (() => {
+    const defaultLiveStudents = [
+      { nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, time: '08:45 WIB' },
+      { nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, time: '-' },
+      { nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 90, time: '08:50 WIB' },
+      { nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' },
+      { nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', answeredCount: 2, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' }
+    ];
+    try {
+      const saved = JSON.parse(localStorage.getItem('zettcbt_live_students') || 'null');
+      if (saved && Array.isArray(saved)) return saved;
+    } catch(e) {}
+    localStorage.setItem('zettcbt_live_students', JSON.stringify(defaultLiveStudents));
+    return defaultLiveStudents;
+  })()
 };
 
 // Initialize Application
@@ -429,20 +454,74 @@ function loadSavedState() {
   if (sbUrlInput && state.supabase.url) sbUrlInput.value = state.supabase.url;
   if (sbKeyInput && state.supabase.key) sbKeyInput.value = state.supabase.key;
 
-  const setTokenInput = document.getElementById('setting-token');
-  if (setTokenInput) setTokenInput.value = state.session.token;
-  const setDurationInput = document.getElementById('setting-duration');
-  if (setDurationInput) setDurationInput.value = state.session.durationMinutes;
-  const setTitleInput = document.getElementById('setting-title');
-  if (setTitleInput) setTitleInput.value = state.session.title;
-  const setSubjectInput = document.getElementById('setting-subject');
-  if (setSubjectInput) setSubjectInput.value = state.session.subject;
+  // Restore and populate all settings forms
+  populateSessionSettings();
+  populateSchoolIdentityForm();
+  renderSubjectTokensTable();
 
   // Restore teacher session state if active
   if (state.currentTeacher) {
     const navLabel = document.getElementById('nav-teacher-label');
-    if (navLabel) navLabel.textContent = state.currentTeacher.username;
+    if (navLabel) navLabel.textContent = state.currentTeacher.fullName || state.currentTeacher.username;
     applyTeacherIsolation();
+  }
+
+  // Restore active screen & tab on refresh
+  const savedView = localStorage.getItem('zettcbt_current_view');
+  const savedTab = localStorage.getItem('zettcbt_current_admin_tab');
+
+  if (state.currentTeacher) {
+    if (savedView === 'admin-dashboard' || !savedView) {
+      showScreen('admin-dashboard');
+      if (savedTab) {
+        switchAdminTab(savedTab);
+      } else {
+        switchAdminTab('srms-dashboard');
+      }
+    } else if (savedView === 'teacher-login') {
+      showScreen('admin-dashboard');
+      switchAdminTab('srms-dashboard');
+    } else {
+      showScreen(savedView);
+    }
+  } else if (savedView && savedView !== 'admin-dashboard' && savedView !== 'student-exam') {
+    showScreen(savedView);
+  }
+
+  // Restore student exam session if was active
+  const activeExamRaw = localStorage.getItem('zettcbt_active_student_exam');
+  if (activeExamRaw && !state.currentTeacher) {
+    try {
+      const activeExam = JSON.parse(activeExamRaw);
+      if (activeExam && activeExam.student && activeExam.student.nisn) {
+        state.student = activeExam.student;
+        if (activeExam.sessionSubject) state.session.subject = activeExam.sessionSubject;
+        if (activeExam.timeRemainingSeconds > 0) state.timeRemainingSeconds = activeExam.timeRemainingSeconds;
+        state.currentQuestionIndex = activeExam.currentQuestionIndex || 0;
+        state.isExamRunning = true;
+
+        const filteredQ = state.questions.filter(q => 
+          (!q.subject || q.subject.toLowerCase() === state.session.subject.toLowerCase() || (q.subject && q.subject.includes(state.session.subject))) &&
+          (!q.targetClass || q.targetClass === state.student.className || state.student.className.includes(q.targetClass))
+        );
+        state.activeExamQuestions = (filteredQ.length > 0) ? filteredQ : state.questions;
+
+        const elAvatar = document.getElementById('exam-avatar');
+        if (elAvatar) elAvatar.textContent = (state.student.name || 'S').charAt(0).toUpperCase();
+        const elName = document.getElementById('exam-student-name');
+        if (elName) elName.textContent = state.student.name;
+        const elSubj = document.getElementById('exam-subject-name');
+        if (elSubj) elSubj.textContent = state.session.subject;
+        const elClass = document.getElementById('exam-class-name');
+        if (elClass) elClass.textContent = state.student.className;
+
+        showScreen('student-exam');
+        renderCurrentQuestion();
+        renderQuestionGrid();
+        renderMobileQuestionGrid();
+        startTimer();
+      }
+    } catch(e) {}
   }
 }
 
@@ -455,6 +534,7 @@ function showScreen(screenId) {
   if (target) {
     target.classList.add('active');
     state.currentView = screenId;
+    localStorage.setItem('zettcbt_current_view', screenId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1109,13 +1189,16 @@ async function handleTeacherLogin(event) {
   if (matchedTeacher) {
     state.currentTeacher = matchedTeacher;
     sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(matchedTeacher));
+    localStorage.setItem('zettcbt_current_teacher', JSON.stringify(matchedTeacher));
+    localStorage.setItem('zettcbt_current_view', 'admin-dashboard');
     
     // Update navbar label
     const navLabel = document.getElementById('nav-teacher-label');
-    if (navLabel) navLabel.textContent = matchedTeacher.username;
+    if (navLabel) navLabel.textContent = matchedTeacher.fullName || matchedTeacher.username;
 
     applyTeacherIsolation();
     showScreen('admin-dashboard');
+    switchAdminTab('srms-dashboard');
     showToast('Login berhasil! Selamat datang, ' + matchedTeacher.fullName, 'success');
   } else {
     showToast('Username atau password salah! Silakan coba lagi.', 'danger');
@@ -1124,6 +1207,9 @@ async function handleTeacherLogin(event) {
 
 function handleTeacherLogout() {
   sessionStorage.removeItem('zettcbt_current_teacher');
+  localStorage.removeItem('zettcbt_current_teacher');
+  localStorage.removeItem('zettcbt_current_view');
+  localStorage.removeItem('zettcbt_current_admin_tab');
   state.currentTeacher = null;
 
   const navLabel = document.getElementById('nav-teacher-label');
@@ -1426,6 +1512,7 @@ function handleStudentLogin(event) {
   } else {
     state.liveStudents.unshift(liveEntry);
   }
+  localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
   updateAdminMetrics();
   renderLiveMonitoringTable();
 
@@ -1873,6 +1960,19 @@ function triggerAutoSaveIndicator() {
     badge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> <span>Tersimpan di Cloud ✓</span>';
   }, 250);
 
+  // Persist student answers to local storage immediately
+  if (state.student && state.student.nisn) {
+    try {
+      localStorage.setItem('zettcbt_active_student_exam', JSON.stringify({
+        student: state.student,
+        sessionSubject: state.session.subject,
+        timeRemainingSeconds: state.timeRemainingSeconds,
+        currentQuestionIndex: state.currentQuestionIndex,
+        timestamp: Date.now()
+      }));
+    } catch(e) {}
+  }
+
   // If Supabase credentials are configured, execute background patch
   if (state.supabase.url && state.supabase.key) {
     sendAnswerToSupabase(state.student.nisn, state.student.answers);
@@ -1886,6 +1986,7 @@ function syncLiveStudentProgress() {
   if (target) {
     target.answeredCount = answeredCount;
     target.warningCount = state.warningCount;
+    localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
   }
   updateAdminMetrics();
 }
@@ -2117,6 +2218,7 @@ function submitFinalExam(forced = false) {
     target.status = 'submitted';
     target.score = totalScore;
     target.time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+    localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
   }
   updateAdminMetrics();
   renderLiveMonitoringTable();
@@ -2143,6 +2245,7 @@ function submitFinalExam(forced = false) {
   }
 
   showScreen('student-finish');
+  localStorage.removeItem('zettcbt_active_student_exam');
   showToast('Jawaban berhasil diserahkan dengan selamat!', 'success');
 }
 
@@ -2208,6 +2311,9 @@ function switchAdminTab(tabId, element) {
 
   // Close mobile drawer on selection
   toggleMobileSidebar(false);
+
+  // Persist current admin tab
+  localStorage.setItem('zettcbt_current_admin_tab', tabId);
 
   if (tabId === 'srms-dashboard') renderSrmsDashboard();
   if (tabId === 'live-monitor') {
@@ -2398,6 +2504,16 @@ function handleSaveTeacherProfile(event) {
   }
 
   localStorage.setItem('zettcbt_current_teacher', JSON.stringify(state.currentTeacher));
+  sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(state.currentTeacher));
+
+  // Sinkronkan ke daftar state.teachers agar tersimpan permanen
+  const teacherIdx = (state.teachers || []).findIndex(t => t.id === state.currentTeacher.id || t.username === state.currentTeacher.username);
+  if (teacherIdx >= 0) {
+    state.teachers[teacherIdx].fullName = newName;
+    if (newNip) state.teachers[teacherIdx].nip = newNip;
+    localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
+    renderTeachersTable();
+  }
 
   // Perbarui tampilan Nama pada Topbar dan Salam secara realtime
   const headerName = document.getElementById('srms-header-user-name');
@@ -2469,13 +2585,27 @@ function toggleMobileSidebar(open) {
 
 function populateSessionSettings() {
   const setTokenInput = document.getElementById('setting-token');
-  if (setTokenInput) setTokenInput.value = state.session.token;
+  if (setTokenInput && state.session.token) setTokenInput.value = state.session.token;
   const setDurationInput = document.getElementById('setting-duration');
-  if (setDurationInput) setDurationInput.value = state.session.durationMinutes;
+  if (setDurationInput && state.session.durationMinutes) setDurationInput.value = state.session.durationMinutes;
   const setTitleInput = document.getElementById('setting-title');
-  if (setTitleInput) setTitleInput.value = state.session.title;
+  if (setTitleInput && state.session.title) setTitleInput.value = state.session.title;
   const setSubjectInput = document.getElementById('setting-subject');
-  if (setSubjectInput) setSubjectInput.value = state.session.subject;
+  if (setSubjectInput && state.session.subject) setSubjectInput.value = state.session.subject;
+
+  // Restore checkboxes (Acak Soal, Acak Opsi, Tampilkan Nilai)
+  const chkRandomQ = document.getElementById('setting-random-q');
+  if (chkRandomQ && typeof state.session.randomizeQuestions !== 'undefined') {
+    chkRandomQ.checked = !!state.session.randomizeQuestions;
+  }
+  const chkRandomOpt = document.getElementById('setting-random-opt');
+  if (chkRandomOpt && typeof state.session.randomizeOptions !== 'undefined') {
+    chkRandomOpt.checked = !!state.session.randomizeOptions;
+  }
+  const chkShowScore = document.getElementById('setting-show-score');
+  if (chkShowScore && typeof state.session.showScore !== 'undefined') {
+    chkShowScore.checked = !!state.session.showScore;
+  }
 }
 
 function populateDatabaseConfig() {
@@ -2551,6 +2681,7 @@ function resetStudentLogin(nisn) {
   if (st) {
     st.status = 'in_progress';
     st.warningCount = 0;
+    localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
     renderLiveMonitoringTable();
     updateAdminMetrics();
     showToast('Sesi siswa ' + st.name + ' berhasil di-reset!', 'success');
@@ -3000,13 +3131,15 @@ async function handleSaveStudent(event) {
     return;
   }
 
+  const existingStudent = originalNisn ? state.students.find(s => s.nisn === originalNisn) : null;
   const studentObj = {
-    id: originalNisn ? (state.students.find(s => s.nisn === originalNisn)?.id || 'st-' + Date.now()) : 'st-' + Date.now(),
+    id: originalNisn ? (existingStudent?.id || 'st-' + Date.now()) : 'st-' + Date.now(),
     nisn: nisn,
     name: name,
     className: className,
     gender: gender,
-    status: 'active'
+    status: 'active',
+    passwords: existingStudent?.passwords || generateStudentSubjectPasswords(nisn)
   };
 
   if (originalNisn) {
@@ -3736,6 +3869,7 @@ function handleSaveSchoolIdentity(event) {
 
   localStorage.setItem('zettcbt_school', JSON.stringify(state.school));
   applySchoolBrandingUI();
+  populateSchoolIdentityForm();
   renderExamCardsTab();
   showToast('Identitas sekolah & pengaturan ujian berhasil disimpan!', 'success');
 }
@@ -3749,7 +3883,7 @@ function applySchoolBrandingUI() {
   const schoolName = sch.name || 'SD NEGERI 14 TOBOALI';
   const examType = sch.examType || 'UAS';
 
-  // 1. Header Global
+  // 1. Header Global & Brand Labels
   const headerIcon = document.querySelector('.brand-icon');
   if (headerIcon) {
     if (logo) {
@@ -3760,6 +3894,14 @@ function applySchoolBrandingUI() {
   }
   document.querySelectorAll('.brand-title').forEach(el => el.textContent = schoolName);
   document.querySelectorAll('.brand-badge').forEach(el => el.textContent = 'UJIAN ONLINE');
+  document.querySelectorAll('.brand-school-name').forEach(el => el.textContent = schoolName);
+  document.querySelectorAll('.brand-school-subtitle').forEach(el => {
+    if (el.textContent.includes('Portal Guru') || el.textContent.includes('Pengawas')) {
+      el.textContent = `Portal Guru & Pengawas Ujian Online (${examType})`;
+    } else {
+      el.textContent = `Ujian Online Resmi (${examType})`;
+    }
+  });
 
   // Brand Sidebar Dasbor Utama (Gambar 1)
   const sidebarLogo = document.getElementById('sidebar-school-logo-img');
@@ -3812,7 +3954,7 @@ function applySchoolBrandingUI() {
     if (heroTag) heroTag.textContent = 'UJIAN ONLINE RESMI';
 
     const heroHeadline = teacherScreen.querySelector('.split-hero-headline');
-    if (heroHeadline) heroHeadline.textContent = `Portal Pendidik & Pengawas Ujian Online`;
+    if (heroHeadline) heroHeadline.textContent = `Portal Pendidik & Pengawas Ujian Online (${examType})`;
 
     // Update label fitur 5 tipe soal
     const featureItems = teacherScreen.querySelectorAll('.split-feature-item span');
