@@ -1453,19 +1453,24 @@ body {
 
 /* Responsive Drawer Breakpoints */
 @media (max-width: 992px) {
-  .admin-sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    height: 100vh;
-    z-index: 1000;
-    transform: translateX(-100%);
-    box-shadow: var(--shadow-xl);
+  .admin-sidebar,
+  .srms-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 280px !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    z-index: 1000 !important;
+    transform: translateX(-100%) !important;
+    box-shadow: var(--shadow-xl) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
-  .admin-sidebar.open {
-    transform: translateX(0);
+  .admin-sidebar.open,
+  .srms-sidebar.open {
+    transform: translateX(0) !important;
   }
 
   .sidebar-backdrop.active {
@@ -1482,8 +1487,21 @@ body {
     justify-content: center;
   }
 
-  .admin-main-panel {
-    padding: 1.25rem 1rem 2.5rem;
+  .admin-layout-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-main-panel,
+  .srms-main-panel {
+    width: 100% !important;
+    max-width: 100vw !important;
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 }
 
@@ -2251,10 +2269,10 @@ body {
 .srms-sidebar {
   background: #ffffff !important;
   border-right: 1px solid #e2e8f0 !important;
-  position: sticky !important;
-  top: 0 !important;
-  height: 100vh !important;
-  max-height: 100vh !important;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
@@ -3238,49 +3256,187 @@ body {
     white-space: nowrap;
   }
 
-  /* Hide desktop sidebar unless toggled */
-  .srms-topbar-left .srms-sidebar-toggle-btn {
-    display: block;
+  /* Mobile Dashboard Topbar & Content Optimizations */
+  .srms-topbar {
+    padding: 0.65rem 0.85rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .srms-topbar-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  .srms-sidebar-toggle-btn {
+    display: inline-flex !important;
+    padding: 5px 8px !important;
+    font-size: 0.75rem !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .srms-topbar-title {
+    font-size: 1.05rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 135px !important;
   }
 
   .srms-topbar-center {
-    display: none;
+    display: none !important;
   }
 
-  .srms-topbar {
-    padding: 0.75rem 1rem;
+  .srms-topbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    flex-shrink: 0 !important;
   }
 
-  .srms-kpi-row {
-    grid-template-columns: repeat(2, 1fr);
+  .srms-user-meta {
+    display: none !important;
   }
 
-  .srms-mid-grid {
-    grid-template-columns: 1fr;
+  .srms-chevron-icon {
+    display: none !important;
   }
 
-  .srms-bottom-grid {
-    grid-template-columns: 1fr;
+  .srms-user-chip {
+    padding: 2px !important;
+    border: none !important;
+    background: transparent !important;
   }
 
-  .srms-welcome-hero-card {
-    flex-direction: column;
-    text-align: center;
-    padding: 1.5rem 1rem;
+  .srms-avatar-img {
+    width: 32px !important;
+    height: 32px !important;
   }
 
-  .srms-welcome-right {
-    margin-top: 1rem;
+  .theme-toggle-label {
+    display: none !important;
   }
 
+  .srms-theme-toggle-btn {
+    padding: 5px !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    justify-content: center !important;
+    min-width: 32px !important;
+  }
+
+  .srms-notification-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 4px !important;
+  }
+
+  /* Ribbon Token Mobile */
   .token-ribbon-horizontal-bar {
-    padding: 0.65rem 1rem;
-    gap: 0.6rem;
+    padding: 0.55rem 0.75rem !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .token-ribbon-prefix {
-    width: 100%;
-    justify-content: space-between;
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .token-ribbon-pills-container {
+    gap: 0.35rem !important;
+    width: 100% !important;
+  }
+
+  .token-pill-badge {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.72rem !important;
+    gap: 0.3rem !important;
+  }
+
+  .token-pill-badge .pill-code {
+    font-size: 0.76rem !important;
+    padding: 1px 5px !important;
+  }
+
+  .token-pill-badge .pill-time {
+    font-size: 0.68rem !important;
+    padding: 1px 4px !important;
+  }
+
+  /* Tab Dashboard Mobile Container */
+  #tab-srms-dashboard {
+    padding: 0.85rem 0.75rem 2.5rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .srms-welcome-hero-card {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 1.25rem 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .srms-welcome-left {
+    width: 100% !important;
+  }
+
+  .srms-greeting-sub {
+    font-size: 0.85rem !important;
+  }
+
+  .srms-greeting-name {
+    font-size: 1.3rem !important;
+    margin: 0.2rem 0 !important;
+  }
+
+  .srms-greeting-desc {
+    font-size: 0.8rem !important;
+  }
+
+  .srms-welcome-right {
+    margin-top: 0.85rem !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .srms-hero-books-svg {
+    max-width: 150px !important;
+    height: auto !important;
+  }
+
+  .srms-kpi-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
+    width: 100% !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .srms-kpi-card {
+    padding: 0.75rem !important;
+    gap: 0.6rem !important;
+  }
+
+  .srms-kpi-value {
+    font-size: 1.35rem !important;
+  }
+
+  .srms-mid-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .srms-bottom-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
   }
 
   /* Fullscreen Smartphone Layout */
