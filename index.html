@@ -15,6 +15,9 @@
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
 
+  <!-- Logo Resmi SD NEGERI 14 TOBOALI Base64 (Anti-404 / Offline Safe) -->
+  <script src="assets/logo.js"></script>
+
   <link rel="stylesheet" href="style.css?v=2.2.0">
 </head>
 <body>
@@ -721,6 +724,16 @@
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </div>
+
+            <!-- Tombol Keluar Cepat di Topbar (1-Klik Tanpa Scroll) -->
+            <button type="button" class="srms-quick-logout-btn" onclick="handleTeacherLogout()" title="Keluar dari Akun">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span class="quick-logout-label">Keluar</span>
+            </button>
           </div>
         </header>
 
@@ -997,8 +1010,6 @@
                   <th>Jam Pelaksanaan</th>
                   <th>Ruangan</th>
                   <th>Token Ujian</th>
-                  <th>Status Sesi</th>
-                  <th>Aksi Login</th>
                   <th style="text-align: center; width: 75px;">Atur</th>
                 </tr>
               </thead>
@@ -1100,7 +1111,6 @@
                   <th style="width: 100px;">Kode</th>
                   <th style="width: 200px;">Token Ujian (Pengawas)</th>
                   <th style="width: 120px;">Durasi (Menit)</th>
-                  <th style="width: 120px;">Status Sesi</th>
                 </tr>
               </thead>
               <tbody id="table-subject-tokens-body">
@@ -2231,14 +2241,9 @@
             <input type="text" id="teacher-profile-input-school" class="form-control" value="SD NEGERI 14 TOBOALI" readonly style="background: var(--slate-100); color: var(--slate-600); cursor: not-allowed;">
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; border-top: 1px solid var(--slate-200); padding-top: 1rem;">
-            <button type="button" class="btn btn-outline" onclick="handleTeacherLogout()" style="color: #ef4444; border-color: #fca5a5;">
-              🚪 Keluar Akun
-            </button>
-            <div style="display: flex; gap: 0.5rem;">
-              <button type="button" class="btn btn-outline" onclick="closeTeacherProfileModal()">Batal</button>
-              <button type="submit" class="btn btn-primary">Simpan Profil</button>
-            </div>
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; border-top: 1px solid var(--slate-200); padding-top: 1rem;">
+            <button type="button" class="btn btn-outline" onclick="closeTeacherProfileModal()">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Profil</button>
           </div>
         </form>
       </div>
