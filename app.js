@@ -1495,13 +1495,11 @@ function handleStudentLogin(event) {
   event.preventDefault();
 
   const nisn = document.getElementById('login-nisn').value.trim();
-  const subjectSelect = document.getElementById('login-subject-select');
-  const subjectName = subjectSelect ? subjectSelect.value : '';
   const password = document.getElementById('login-password').value.trim();
   const token = document.getElementById('login-token').value.trim().toUpperCase();
 
-  if (!nisn || !subjectName || !password || !token) {
-    showToast('Harap lengkapi Nomor Peserta, Mata Pelajaran, Password Siswa, dan Token Ujian!', 'warning');
+  if (!nisn || !password || !token) {
+    showToast('Harap lengkapi Nomor Peserta, Password Siswa, dan Token Ujian!', 'warning');
     return;
   }
 
@@ -1512,23 +1510,32 @@ function handleStudentLogin(event) {
     return;
   }
 
-  // 2. Validasi Mata Pelajaran
-  const subj = (state.subjects || []).find(s => s.name === subjectName);
+  // 2. Deteksi Otomatis Mata Pelajaran Berdasarkan Token Ujian Pengawas
+  let subj = (state.subjects || []).find(s => (s.token || '').trim().toUpperCase() === token);
+
+  // Jika tidak ditemukan langsung di master subjects, periksa di daftar jadwal
+  if (!subj && Array.isArray(state.schedules)) {
+    const matchingSched = state.schedules.find(sc => (sc.token || '').trim().toUpperCase() === token);
+    if (matchingSched) {
+      subj = (state.subjects || []).find(s => s.name === matchingSched.subject) || {
+        name: matchingSched.subject,
+        durationMinutes: matchingSched.durationMinutes || 90,
+        token: matchingSched.token
+      };
+    }
+  }
+
   if (!subj) {
-    showToast('Mata pelajaran "' + subjectName + '" tidak valid!', 'danger');
+    showToast(`Token Ujian "${token}" tidak cocok dengan mata pelajaran apapun atau belum dirilis Pengawas!`, 'danger');
     return;
   }
 
-  // 3. Validasi Password Siswa untuk Mata Pelajaran Ini
+  const subjectName = subj.name;
+
+  // 3. Validasi Password Siswa untuk Mata Pelajaran yang Terdeteksi
   const expectedPassword = getStudentPasswordForSubject(student, subjectName);
   if (password.toUpperCase() !== expectedPassword.toUpperCase()) {
-    showToast(`Password untuk mata pelajaran ${subjectName} salah! Periksa password di Kartu Ujian Anda.`, 'danger');
-    return;
-  }
-
-  // 4. Validasi Token Mata Pelajaran dari Pengawas
-  if (token !== (subj.token || '').toUpperCase()) {
-    showToast(`Token Ujian untuk mata pelajaran ${subjectName} salah! Minta token resmi dari pengawas ruang.`, 'danger');
+    showToast(`Password tidak sesuai untuk mata pelajaran ${subjectName}! Silakan periksa password pada Kartu Ujian Anda.`, 'danger');
     return;
   }
 
@@ -4249,17 +4256,7 @@ function applySchoolBrandingUI() {
     teacherFormLogo.alt = schoolName;
   }
 
-  // Sinkronisasi pilihan mata pelajaran pada form login siswa
-  const loginSubSelect = document.getElementById('login-subject-select');
-  if (loginSubSelect && Array.isArray(state.subjects) && state.subjects.length > 0) {
-    const currentVal = loginSubSelect.value;
-    let opts = '<option value="">-- Pilih Mata Pelajaran --</option>';
-    state.subjects.filter(s => s.isActive !== false).forEach(s => {
-      opts += `<option value="${s.name}">${s.name} (${s.code}) - ${s.durationMinutes || 90} Menit</option>`;
-    });
-    loginSubSelect.innerHTML = opts;
-    if (currentVal) loginSubSelect.value = currentVal;
-  }
+  // Form login siswa kini mendeteksi mata pelajaran otomatis langsung dari token ujian
 }
 
 // ==============================================================================
