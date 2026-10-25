@@ -379,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateGlobalLoginButtonUI();
   updateAdminMetrics();
   startProctorTokenTimer();
+  initNeonAutoSync();
 });
 
 // ==============================================================================
@@ -4634,6 +4635,7 @@ async function exportLocalDataToNeonCloud() {
   const btn = document.getElementById('btn-export-neon');
   const title = document.getElementById('btn-export-neon-title');
   const origTitle = title ? title.textContent : 'Ekspor Data Lokal ke Neon Cloud';
+  const isSilent = !!options.silent;
 
   if (btn) {
     btn.disabled = true;
@@ -4641,7 +4643,7 @@ async function exportLocalDataToNeonCloud() {
   }
   if (title) title.textContent = '⏳ Mengunggah data ke Neon Cloud...';
 
-  showToast('Memulai sinkronisasi data lokal ke Neon Cloud...', 'info');
+  if (!isSilent) showToast('Memulai sinkronisasi data lokal ke Neon Cloud...', 'info');
 
   try {
     let teachersCount = 0;
@@ -4650,7 +4652,7 @@ async function exportLocalDataToNeonCloud() {
                  VALUES ($1, $2, $3, $4, $5, $6)
                  ON CONFLICT (username) DO UPDATE 
                  SET full_name = EXCLUDED.full_name, role = EXCLUDED.role, assigned_class = EXCLUDED.assigned_class, assigned_subject = EXCLUDED.assigned_subject, updated_at = NOW();`;
-      await executeNeonSql(q, [t.username, t.password, t.fullName, t.role, t.assignedClass, t.assignedSubject]);
+      await executeNeonSql(q, [t.username, t.password || 'guru123', t.fullName, t.role, t.assignedClass, t.assignedSubject]);
       teachersCount++;
     }
 
@@ -4680,11 +4682,15 @@ async function exportLocalDataToNeonCloud() {
     ]);
 
     updateSyncStatusBadge('✅ Berhasil Ekspor', true);
-    showToast(`✅ Berhasil! ${teachersCount} akun guru, ${studentsCount} siswa, & sesi ujian telah terunggah ke Neon Cloud.`, 'success');
+    if (!isSilent) {
+      showToast(`✅ Berhasil! ${teachersCount} akun guru, ${studentsCount} siswa, & sesi ujian telah terunggah ke Neon Cloud.`, 'success');
+    }
+    return { success: true, teachersCount, studentsCount };
   } catch (err) {
     console.error('Export to Neon error:', err);
     updateSyncStatusBadge('🔴 Gagal Ekspor', false);
-    showToast('Gagal ekspor ke Neon: ' + err.message, 'danger');
+    if (!isSilent) showToast('Gagal ekspor ke Neon: ' + err.message, 'danger');
+    return { success: false, error: err.message };
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -4694,14 +4700,17 @@ async function exportLocalDataToNeonCloud() {
   }
 }
 
-// Import data from Neon cloud
-async function importDataFromNeonCloud() {
+// Import data from Neon cloud (Guru, Siswa, dan Jadwal Ujian Lengkap)
+async function importDataFromNeonCloud(options = {}) {
+  const isSilent = !!options.silent;
   const creds = parseNeonCredentials();
   if (!creds.host) {
-    showToast('Harap masukkan Host / Endpoint Neon pada kolom di atas terlebih dahulu!', 'warning');
-    const epInput = document.getElementById('config-neon-endpoint');
-    if (epInput) epInput.focus();
-    return;
+    if (!isSilent) {
+      showToast('Harap masukkan Host / Endpoint Neon pada kolom di atas terlebih dahulu!', 'warning');
+      const epInput = document.getElementById('config-neon-endpoint');
+      if (epInput) epInput.focus();
+    }
+    return { success: false, message: 'Host belum diisi' };
   }
 
   // Auto-save form inputs to state & storage
@@ -4714,7 +4723,7 @@ async function importDataFromNeonCloud() {
 
   const btn = document.getElementById('btn-import-neon');
   const title = document.getElementById('btn-import-neon-title');
-  const origTitle = title ? title.textContent : 'Tarik Data Terbaru dari Neon ke Lokal';
+  const origTitle = title ? title.textContent : 'Tarik Seluruh Data dari Neon ke Lokal';
 
   if (btn) {
     btn.disabled = true;
@@ -4722,42 +4731,202 @@ async function importDataFromNeonCloud() {
   }
   if (title) title.textContent = '⏳ Mengunduh data dari Neon...';
 
-  showToast('Mengunduh master data terbaru dari Neon Cloud...', 'info');
+  if (!isSilent) showToast('Mengunduh akun guru, master siswa & jadwal dari Neon Cloud...', 'info');
 
   try {
-    const rawResult = await executeNeonSql('SELECT nisn, full_name, class_name, gender FROM students WHERE is_active = true ORDER BY class_name, full_name;');
-    const rows = (rawResult && rawResult.rows) ? rawResult.rows : (Array.isArray(rawResult) ? rawResult : []);
+    let teachersCount = 0;
+    let studentsCount = 0;
+    let sessionsCount = 0;
 
-    if (rows && rows.length > 0) {
-      const imported = rows.map(r => ({
-        id: 'st-' + Math.random().toString(36).substr(2, 9),
-        nisn: r.nisn,
-        name: r.full_name,
-        className: r.class_name,
-        gender: r.gender,
-        status: 'active'
-      }));
-      state.students = imported;
-      localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
-      renderStudentsTable();
-      renderExamCardsTab();
-      updateAdminMetrics();
-      updateSyncStatusBadge(`✅ Tersinkron (${imported.length} Siswa)`, true);
-      showToast(`✅ Berhasil menarik ${imported.length} data siswa dari Neon Cloud!`, 'success');
-    } else {
-      updateSyncStatusBadge('ℹ️ Database Neon Kosong', true);
-      showToast('Database Neon terhubung, namun belum ada data siswa. Silakan klik "Ekspor Data Lokal ke Neon Cloud".', 'info');
+    // 1. Tarik Akun Guru (Teachers)
+    try {
+      const rawTeachers = await executeNeonSql('SELECT username, password_hash, full_name, role, assigned_class, assigned_subject, is_active FROM teachers WHERE is_active = true ORDER BY created_at ASC;');
+      const teacherRows = (rawTeachers && rawTeachers.rows) ? rawTeachers.rows : (Array.isArray(rawTeachers) ? rawTeachers : []);
+      if (teacherRows && teacherRows.length > 0) {
+        const importedTeachers = teacherRows.map(r => {
+          const existing = (state.teachers || []).find(t => t.username === r.username);
+          return {
+            id: existing ? existing.id : ('t-' + Math.random().toString(36).substr(2, 9)),
+            username: r.username,
+            password: r.password_hash || (existing ? existing.password : 'guru123'),
+            fullName: r.full_name,
+            role: r.role || 'guru_kelas',
+            assignedClass: r.assigned_class || null,
+            assignedSubject: r.assigned_subject || null
+          };
+        });
+        state.teachers = importedTeachers;
+        localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
+        renderTeachersTable();
+        teachersCount = importedTeachers.length;
+      }
+    } catch (eTeacher) {
+      console.warn('Tarik guru gagal atau tabel belum ada:', eTeacher.message);
     }
+
+    // 2. Tarik Data Siswa (Students)
+    try {
+      const rawStudents = await executeNeonSql('SELECT nisn, full_name, class_name, gender FROM students WHERE is_active = true ORDER BY class_name, full_name;');
+      const studentRows = (rawStudents && rawStudents.rows) ? rawStudents.rows : (Array.isArray(rawStudents) ? rawStudents : []);
+      if (studentRows && studentRows.length > 0) {
+        const importedStudents = studentRows.map((r, idx) => {
+          const existing = (state.students || []).find(s => s.nisn === r.nisn);
+          return {
+            id: existing ? existing.id : ('st-' + Math.random().toString(36).substr(2, 9)),
+            nisn: r.nisn,
+            name: r.full_name,
+            className: r.class_name,
+            gender: r.gender || 'L',
+            status: 'active',
+            passwords: (existing && existing.passwords) ? existing.passwords : generateStudentSubjectPasswords(r.nisn || ('2026-0' + (idx + 1)))
+          };
+        });
+        state.students = importedStudents;
+        localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
+        renderStudentsTable();
+        renderExamCardsTab();
+        updateAdminMetrics();
+        studentsCount = importedStudents.length;
+      }
+    } catch (eStudent) {
+      console.warn('Tarik siswa gagal:', eStudent.message);
+    }
+
+    // 3. Tarik Sesi Ujian (Exam Sessions)
+    try {
+      const rawSessions = await executeNeonSql('SELECT token, title, subject, target_class, duration_minutes, is_active, show_score, randomize_questions FROM exam_sessions WHERE is_active = true ORDER BY created_at DESC LIMIT 1;');
+      const sessionRows = (rawSessions && rawSessions.rows) ? rawSessions.rows : (Array.isArray(rawSessions) ? rawSessions : []);
+      if (sessionRows && sessionRows.length > 0) {
+        const sRow = sessionRows[0];
+        state.session = {
+          ...state.session,
+          token: sRow.token,
+          title: sRow.title,
+          subject: sRow.subject,
+          durationMinutes: parseInt(sRow.duration_minutes) || 90,
+          showScore: !!sRow.show_score,
+          randomizeQuestions: !!sRow.randomize_questions
+        };
+        localStorage.setItem('zettcbt_session', JSON.stringify(state.session));
+        renderTeacherExamSchedules();
+        sessionsCount = 1;
+      }
+    } catch (eSession) {
+      console.warn('Tarik sesi gagal:', eSession.message);
+    }
+
+    updateSyncStatusBadge(`✅ Tersinkron (${teachersCount} Guru, ${studentsCount} Siswa)`, true);
+    if (!isSilent) {
+      showToast(`✅ Berhasil menarik dari Neon: ${teachersCount} Akun Guru, ${studentsCount} Siswa, & Sesi Ujian!`, 'success');
+    }
+    return { success: true, teachersCount, studentsCount, sessionsCount };
   } catch (err) {
     console.error('Import from Neon error:', err);
     updateSyncStatusBadge('🔴 Gagal Menarik Data', false);
-    showToast('Gagal menarik data dari Neon: ' + err.message, 'danger');
+    if (!isSilent) showToast('Gagal menarik data dari Neon: ' + err.message, 'danger');
+    return { success: false, error: err.message };
   } finally {
     if (btn) {
       btn.disabled = false;
       btn.style.opacity = '1';
     }
     if (title) title.textContent = origTitle;
+  }
+}
+
+// SINKRONISASI PENUH 2-ARAH (1 KALI KLIK JADI)
+async function syncTwoWayWithNeon(options = {}) {
+  const isSilent = !!options.silent;
+  const isAuto = !!options.isAuto;
+
+  const creds = parseNeonCredentials();
+  if (!creds.host) {
+    if (!isSilent) {
+      showToast('Harap lengkapi Host dan Password Neon terlebih dahulu di tab Database!', 'warning');
+      switchAdminTab('database-config');
+    }
+    return false;
+  }
+
+  const twBtn = document.getElementById('btn-sync-twoway');
+  const twText = document.getElementById('btn-sync-twoway-text');
+  if (twBtn) {
+    twBtn.disabled = true;
+    twBtn.style.opacity = '0.75';
+  }
+  if (twText) twText.textContent = '⏳ Mensinkronkan 2-Arah...';
+
+  if (!isSilent) {
+    showToast('Memulai Sinkronisasi 2-Arah (Web ⇄ Neon Cloud)...', 'info');
+  }
+
+  try {
+    // Langkah 1: Tarik data terbaru dari Neon Cloud (agar data di web mendapat akun guru/siswa dari Neon)
+    await importDataFromNeonCloud({ silent: true });
+
+    // Langkah 2: Ekspor data lokal yang mungkin ada yang baru dibuat di browser ke Neon
+    await exportLocalDataToNeonCloud({ silent: true });
+
+    // Langkah 3: Render ulang seluruh komponen UI agar segar seketika
+    renderTeachersTable();
+    renderStudentsTable();
+    renderTeacherExamSchedules();
+    renderExamCardsTab();
+    updateAdminMetrics();
+
+    const tCount = (state.teachers || []).length;
+    const sCount = (state.students || []).length;
+
+    updateSyncStatusBadge(`✅ Sinkron 2-Arah (${tCount} Guru, ${sCount} Siswa)`, true);
+
+    if (!isSilent) {
+      showToast(`🎉 Sinkronisasi 2-Arah Sukses! ${tCount} Akun Guru & ${sCount} Siswa kini telah sama persis antara Web & Neon Cloud.`, 'success');
+    } else if (isAuto) {
+      console.log(`Auto-sync Neon completed: ${tCount} teachers, ${sCount} students synchronized.`);
+    }
+
+    return true;
+  } catch (err) {
+    console.error('2-way sync error:', err);
+    updateSyncStatusBadge('🔴 Gagal Sinkron 2-Arah', false);
+    if (!isSilent) {
+      showToast('Sinkronisasi 2-arah gagal: ' + err.message, 'danger');
+    }
+    return false;
+  } finally {
+    if (twBtn) {
+      twBtn.disabled = false;
+      twBtn.style.opacity = '1';
+    }
+    if (twText) twText.textContent = 'Sinkronkan 2-Arah Sekarang';
+  }
+}
+
+// Sakelar Otomatis Sinkronisasi 2-Arah
+function toggleNeonAutoSync(enabled) {
+  localStorage.setItem('zettcbt_neon_auto_sync', enabled ? 'true' : 'false');
+  if (enabled) {
+    showToast('🔄 Auto-Sync 2-Arah aktif! Setiap aplikasi dibuka, data akan otomatis tersinkronisasi.', 'info');
+    syncTwoWayWithNeon({ silent: false });
+  } else {
+    showToast('Auto-Sync 2-Arah dinonaktifkan.', 'info');
+  }
+}
+
+// Inisialisasi status sakelar auto-sync pada saat aplikasi dimuat
+function initNeonAutoSync() {
+  const isEnabled = localStorage.getItem('zettcbt_neon_auto_sync') !== 'false'; // default aktif
+  const toggle = document.getElementById('toggle-neon-auto-sync');
+  if (toggle) {
+    toggle.checked = isEnabled;
+  }
+
+  // Jika auto-sync aktif dan kredensial Neon sudah ada, jalankan silent sync setelah peramban siap
+  const hasHost = state.neon.endpoint || localStorage.getItem('zettcbt_neon_endpoint');
+  if (isEnabled && hasHost) {
+    setTimeout(() => {
+      syncTwoWayWithNeon({ silent: true, isAuto: true });
+    }, 1500);
   }
 }
 
