@@ -2314,7 +2314,7 @@ function switchAdminTab(tabId, element) {
       'results-analysis': 'Rekapitulasi & Analisis Nilai Siswa',
       'exam-cards': 'Cetak Kartu Peserta Ujian',
       'school-identity': 'Pengaturan Identitas & Kop Sekolah',
-      'database-config': 'Koneksi Supabase Cloud Database'
+      'database-config': 'Koneksi Cloud Database (Neon.tech PostgreSQL)'
     };
     if (titles[tabId]) topbarTitle.textContent = titles[tabId];
   }
@@ -4432,24 +4432,99 @@ function parseNeonCredentials() {
   };
 }
 
+function validateNeonHostInput(val) {
+  const warningEl = document.getElementById('neon-host-warning');
+  if (!warningEl) return;
+  const clean = (val || '').trim().toLowerCase();
+  if (clean && !clean.includes('ep-') && (clean.includes('neon.tech') || clean.includes('aws'))) {
+    warningEl.style.display = 'block';
+  } else {
+    warningEl.style.display = 'none';
+  }
+}
+
+function quickPasteConnectionString() {
+  const inputStr = prompt("Tempelkan (Paste) 1 baris utuh Connection String PostgreSQL dari Neon Anda:\n(Contoh: postgresql://neondb_owner:npg_xxx@ep-cool-fog-123456.ap-southeast-1.aws.neon.tech/neondb?sslmode=require)");
+  if (!inputStr || !inputStr.trim()) return;
+
+  const raw = inputStr.trim();
+  let host = '';
+  let password = '';
+
+  if (raw.startsWith('postgres://') || raw.startsWith('postgresql://')) {
+    try {
+      const parsed = new URL(raw);
+      host = parsed.hostname;
+      password = decodeURIComponent(parsed.password || '');
+    } catch (e) {
+      const match = raw.match(/@([^/:]+)/);
+      if (match) host = match[1];
+      const passMatch = raw.match(/:([^@:]+)@/);
+      if (passMatch) password = passMatch[1];
+    }
+  } else if (raw.includes('@')) {
+    const parts = raw.split('@');
+    host = parts[1].split('/')[0].split('?')[0];
+    const userPass = parts[0].split(':');
+    if (userPass.length >= 2) password = userPass[1];
+  } else {
+    host = raw;
+  }
+
+  if (!host) {
+    showToast('Format connection string tidak dikenali!', 'warning');
+    return;
+  }
+
+  const epInput = document.getElementById('config-neon-endpoint');
+  const keyInput = document.getElementById('config-neon-key');
+
+  if (epInput) epInput.value = host;
+  if (keyInput && password) keyInput.value = password;
+
+  validateNeonHostInput(host);
+
+  // Auto-save to state and localStorage
+  state.neon.endpoint = host;
+  if (password) state.neon.apiKey = password;
+  state.dbProvider = 'neon';
+  localStorage.setItem('zettcbt_neon_endpoint', host);
+  if (password) localStorage.setItem('zettcbt_neon_key', password);
+  localStorage.setItem('zettcbt_db_provider', 'neon');
+
+  showToast(`✅ Berhasil mengekstrak Host: ${host}. Menguji koneksi ke Neon...`, 'info');
+  testNeonConnection();
+}
+
 // Execute SQL via Neon Serverless HTTP API
 async function executeNeonSql(query, params = []) {
   const creds = parseNeonCredentials();
   if (!creds.host) throw new Error('Host atau Endpoint Neon belum diisi!');
   
+  if (!creds.host.includes('ep-') && creds.host.includes('neon.tech')) {
+    throw new Error('Host Neon tidak lengkap! Host wajib diawali dengan "ep-..." (contoh: ep-cool-fog-123456.ap-southeast-1.aws.neon.tech). Cek kembali dashboard Neon Anda.');
+  }
+
   const headers = { 
-    'Content-Type': 'application/json',
-    'Neon-Connection-String': creds.connectionString
+    'Content-Type': 'application/json'
   };
   if (creds.password) {
     headers['Authorization'] = `Bearer ${creds.password}`;
   }
 
-  const res = await fetch(creds.url, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify({ query: query, params: params })
-  });
+  let res;
+  try {
+    res = await fetch(creds.url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ query: query, params: params })
+    });
+  } catch (netErr) {
+    if (netErr.name === 'TypeError' || (netErr.message && netErr.message.includes('fetch'))) {
+      throw new Error(`Koneksi ke "${creds.host}" gagal dijangkau (Failed to fetch). Pastikan Host lengkap dan diawali "ep-..." serta terhubung ke internet.`);
+    }
+    throw netErr;
+  }
 
   if (!res.ok) {
     const txt = await res.text();
