@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SD NEGERI 14 TOBOALI - Ujian Online</title>
-  <link rel="stylesheet" href="style.css?v=2.1.8">
+  <link rel="stylesheet" href="style.css?v=2.1.9">
 </head>
 <body>
 
@@ -1424,16 +1424,49 @@
 
               <!-- PUSAT SINKRONISASI DATA SATU KLIK -->
               <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--slate-200);">
-                <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem;">🔄 Pusat Sinkronisasi Data 1-Klik</h4>
-                <p style="font-size: 0.8rem; color: var(--slate-500); margin-bottom: 0.75rem;">
-                  Gunakan tombol di bawah untuk menyamakan data antara browser lokal Anda dan database cloud.
-                </p>
-                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-                  <button type="button" class="btn btn-outline btn-sm" onclick="exportLocalDataToNeonCloud()">
-                    ⬆️ Ekspor Master Data Lokal ke Neon Cloud
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+                  <div>
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
+                      <span>🔄 Pusat Sinkronisasi Data 1-Klik</span>
+                    </h4>
+                    <p style="font-size: 0.8rem; color: var(--slate-500); margin-top: 0.2rem; margin-bottom: 0;">
+                      Samakan akun guru, master siswa, dan sesi ujian antara browser lokal dan database Neon Cloud.
+                    </p>
+                  </div>
+                  <span id="sync-last-time-badge" style="font-size: 0.76rem; background: var(--slate-100); color: var(--slate-600); padding: 0.25rem 0.65rem; border-radius: 9999px; border: 1px solid var(--slate-200);">
+                    Status: Siap Sinkronisasi
+                  </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem; margin-top: 0.85rem;">
+                  <!-- Tombol 1: Ekspor Data ke Neon Cloud -->
+                  <button type="button" id="btn-export-neon" onclick="exportLocalDataToNeonCloud()" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1.15rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; border-radius: var(--radius-md); text-align: left; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.25); transition: transform 0.15s, box-shadow 0.15s;">
+                    <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 16l-4-4-4 4"></path>
+                        <path d="M12 12v9"></path>
+                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <div id="btn-export-neon-title" style="font-weight: 700; font-size: 0.92rem; line-height: 1.2;">Ekspor Data Lokal ke Neon Cloud</div>
+                      <div style="font-size: 0.74rem; opacity: 0.88; margin-top: 0.2rem;">Unggah akun guru, master siswa &amp; jadwal ke cloud</div>
+                    </div>
                   </button>
-                  <button type="button" class="btn btn-outline btn-sm" onclick="importDataFromNeonCloud()">
-                    ⬇️ Tarik Data Terbaru dari Neon ke Lokal
+
+                  <!-- Tombol 2: Tarik Data dari Neon ke Lokal -->
+                  <button type="button" id="btn-import-neon" onclick="importDataFromNeonCloud()" style="display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1.15rem; background: linear-gradient(135deg, #059669, #047857); color: #ffffff; border: none; border-radius: var(--radius-md); text-align: left; cursor: pointer; box-shadow: 0 4px 14px rgba(5,150,105,0.25); transition: transform 0.15s, box-shadow 0.15s;">
+                    <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 17l4 4 4-4"></path>
+                        <path d="M12 12v9"></path>
+                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <div id="btn-import-neon-title" style="font-weight: 700; font-size: 0.92rem; line-height: 1.2;">Tarik Data Terbaru dari Neon ke Lokal</div>
+                      <div style="font-size: 0.74rem; opacity: 0.88; margin-top: 0.2rem;">Unduh update master siswa terbaru dari cloud</div>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -2156,6 +2189,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=2.1.8"></script>
+  <script src="app.js?v=2.1.9"></script>
 </body>
 </html>
