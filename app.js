@@ -3014,31 +3014,43 @@ function openAddQuestionModal() {
   const subjInput = document.getElementById('edit-question-subject');
   const classInput = document.getElementById('edit-question-class');
 
+  // Sinkronisasi opsi dropdown mata pelajaran dari master state.subjects
+  if (subjInput && Array.isArray(state.subjects) && state.subjects.length > 0) {
+    let opts = '<option value="">-- Pilih Mata Pelajaran --</option>';
+    state.subjects.forEach(s => {
+      opts += `<option value="${s.name}">${s.name}</option>`;
+    });
+    subjInput.innerHTML = opts;
+  }
+
   // Kunci otomatis field sesuai identitas guru yang login
   if (state.currentTeacher) {
     const t = state.currentTeacher;
     if (t.role === 'guru_kelas') {
       if (classInput) {
-        classInput.value = t.assignedClass;
-        classInput.readOnly = true;
+        classInput.value = t.assignedClass || '6A';
+        classInput.disabled = true;
       }
       if (subjInput) {
-        subjInput.value = t.assignedSubject !== 'Semua' ? t.assignedSubject : 'Tematik';
-        subjInput.readOnly = false;
+        subjInput.value = (t.assignedSubject && t.assignedSubject !== 'Semua') ? t.assignedSubject : '';
+        subjInput.disabled = false;
       }
     } else if (t.role === 'guru_mapel') {
       if (subjInput) {
         subjInput.value = t.assignedSubject;
-        subjInput.readOnly = true;
+        subjInput.disabled = true;
       }
       if (classInput) {
         classInput.value = 'UMUM';
-        classInput.readOnly = false;
+        classInput.disabled = false;
       }
     } else {
-      if (subjInput) subjInput.readOnly = false;
-      if (classInput) classInput.readOnly = false;
+      if (subjInput) subjInput.disabled = false;
+      if (classInput) classInput.disabled = false;
     }
+  } else {
+    if (subjInput) subjInput.disabled = false;
+    if (classInput) classInput.disabled = false;
   }
 
   document.getElementById('modal-question-editor').style.display = 'flex';
@@ -3077,8 +3089,24 @@ function openEditQuestionModal(qId) {
   
   const subjInput = document.getElementById('edit-question-subject');
   const classInput = document.getElementById('edit-question-class');
-  if (subjInput) subjInput.value = q.subject || 'Umum';
-  if (classInput) classInput.value = q.targetClass || 'UMUM';
+
+  // Sinkronisasi opsi dropdown mata pelajaran dari master state.subjects
+  if (subjInput && Array.isArray(state.subjects) && state.subjects.length > 0) {
+    let opts = '<option value="">-- Pilih Mata Pelajaran --</option>';
+    state.subjects.forEach(s => {
+      opts += `<option value="${s.name}">${s.name}</option>`;
+    });
+    subjInput.innerHTML = opts;
+  }
+
+  if (subjInput) {
+    subjInput.value = q.subject || '';
+    subjInput.disabled = (state.currentTeacher && state.currentTeacher.role === 'guru_mapel');
+  }
+  if (classInput) {
+    classInput.value = q.targetClass || 'UMUM';
+    classInput.disabled = (state.currentTeacher && state.currentTeacher.role === 'guru_kelas');
+  }
 
   document.getElementById('edit-opt-a').value = q.optionA;
   document.getElementById('edit-opt-b').value = q.optionB;
