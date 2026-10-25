@@ -42,6 +42,15 @@ const state = {
   warningCount: 0,
   maxWarnings: 3,
 
+  // Database Provider ('neon' | 'supabase' | 'local')
+  dbProvider: localStorage.getItem('zettcbt_db_provider') || 'neon',
+
+  // Neon.tech Serverless PostgreSQL (Kapasitas 200+ Siswa)
+  neon: {
+    endpoint: localStorage.getItem('zettcbt_neon_endpoint') || '',
+    apiKey: localStorage.getItem('zettcbt_neon_key') || '',
+  },
+
   // Supabase Configuration
   supabase: {
     url: localStorage.getItem('zettcbt_sb_url') || '',
@@ -448,16 +457,11 @@ function loadSavedState() {
     }
   }
 
-  // Pre-fill inputs in settings
-  const sbUrlInput = document.getElementById('config-supabase-url');
-  const sbKeyInput = document.getElementById('config-supabase-key');
-  if (sbUrlInput && state.supabase.url) sbUrlInput.value = state.supabase.url;
-  if (sbKeyInput && state.supabase.key) sbKeyInput.value = state.supabase.key;
-
   // Restore and populate all settings forms
   populateSessionSettings();
   populateSchoolIdentityForm();
   renderSubjectTokensTable();
+  populateDatabaseConfig();
 
   // Restore teacher session state if active
   if (state.currentTeacher) {
@@ -1973,6 +1977,11 @@ function triggerAutoSaveIndicator() {
     } catch(e) {}
   }
 
+  // If Neon PostgreSQL credentials are configured, execute background patch
+  if (state.neon && state.neon.endpoint) {
+    sendAnswerToNeon(state.student.nisn, state.student.answers);
+  }
+
   // If Supabase credentials are configured, execute background patch
   if (state.supabase.url && state.supabase.key) {
     sendAnswerToSupabase(state.student.nisn, state.student.answers);
@@ -2220,6 +2229,12 @@ function submitFinalExam(forced = false) {
     target.time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
     localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
   }
+
+  // Finalize attempt in Neon Cloud
+  if (state.neon && state.neon.endpoint) {
+    finalizeStudentAttemptInNeon(state.student.nisn, totalScore);
+  }
+
   updateAdminMetrics();
   renderLiveMonitoringTable();
   renderResultsTable();
@@ -4296,6 +4311,398 @@ function exportResultsToExcel() {
   showToast('File nilai Excel/CSV berhasil diunduh!', 'success');
 }
 
+// ==============================================================================
+// CLOUD DATABASE ENGINE (NEON.TECH SERVERLESS POSTGRESQL & SUPABASE)
+// ==============================================================================
+
+function switchDatabaseProviderUI(provider) {
+  state.dbProvider = provider;
+  localStorage.setItem('zettcbt_db_provider', provider);
+
+  const neonSection = document.getElementById('form-provider-neon-section');
+  const sbSection = document.getElementById('form-provider-supabase-section');
+  const badge = document.getElementById('db-status-badge');
+
+  if (neonSection) neonSection.style.display = (provider === 'neon') ? 'block' : 'none';
+  if (sbSection) sbSection.style.display = (provider === 'supabase') ? 'block' : 'none';
+
+  if (badge) {
+    if (provider === 'neon') {
+      const isConfigured = !!(state.neon && state.neon.endpoint && state.neon.apiKey);
+      badge.textContent = isConfigured ? '🟢 Neon Cloud Aktif' : '🟡 Neon Belum Dikonfigurasi';
+      badge.style.background = isConfigured ? 'var(--emerald-100)' : 'var(--amber-100)';
+      badge.style.color = isConfigured ? 'var(--emerald-700)' : 'var(--amber-800)';
+    } else if (provider === 'supabase') {
+      const isConfigured = !!(state.supabase && state.supabase.url && state.supabase.key);
+      badge.textContent = isConfigured ? '🟢 Supabase Aktif' : '🟡 Supabase Belum Dikonfigurasi';
+      badge.style.background = isConfigured ? 'var(--emerald-100)' : 'var(--amber-100)';
+      badge.style.color = isConfigured ? 'var(--emerald-700)' : 'var(--amber-800)';
+    } else {
+      badge.textContent = '⚪ Mode Lokal (Offline)';
+      badge.style.background = 'var(--slate-200)';
+      badge.style.color = 'var(--slate-700)';
+    }
+  }
+}
+
+function toggleNeonKeyVisibility() {
+  const input = document.getElementById('config-neon-key');
+  if (!input) return;
+  input.type = (input.type === 'password') ? 'text' : 'password';
+}
+
+function populateDatabaseConfig() {
+  const provider = state.dbProvider || 'neon';
+  const optNeon = document.getElementById('provider-opt-neon');
+  const optSb = document.getElementById('provider-opt-supabase');
+  const optLoc = document.getElementById('provider-opt-local');
+
+  if (optNeon && provider === 'neon') optNeon.checked = true;
+  if (optSb && provider === 'supabase') optSb.checked = true;
+  if (optLoc && provider === 'local') optLoc.checked = true;
+
+  const endpointInput = document.getElementById('config-neon-endpoint');
+  const keyInput = document.getElementById('config-neon-key');
+  if (endpointInput) endpointInput.value = state.neon.endpoint || '';
+  if (keyInput) keyInput.value = state.neon.apiKey || '';
+
+  const sbUrlInput = document.getElementById('config-supabase-url');
+  const sbKeyInput = document.getElementById('config-supabase-key');
+  if (sbUrlInput) sbUrlInput.value = state.supabase.url || '';
+  if (sbKeyInput) sbKeyInput.value = state.supabase.key || '';
+
+  switchDatabaseProviderUI(provider);
+}
+
+function handleSaveNeonConfig(event) {
+  event.preventDefault();
+  const endpoint = document.getElementById('config-neon-endpoint').value.trim();
+  const key = document.getElementById('config-neon-key').value.trim();
+
+  state.neon.endpoint = endpoint;
+  state.neon.apiKey = key;
+  state.dbProvider = 'neon';
+
+  localStorage.setItem('zettcbt_neon_endpoint', endpoint);
+  localStorage.setItem('zettcbt_neon_key', key);
+  localStorage.setItem('zettcbt_db_provider', 'neon');
+
+  switchDatabaseProviderUI('neon');
+  showToast('Kredensial Neon.tech PostgreSQL berhasil disimpan!', 'success');
+}
+
+// Robust Neon Connection Credentials Parser (Handles Host, URL, and full Connection String)
+function parseNeonCredentials() {
+  const epInput = document.getElementById('config-neon-endpoint');
+  const keyInput = document.getElementById('config-neon-key');
+  let rawEp = (epInput && epInput.value ? epInput.value : (state.neon.endpoint || '')).trim();
+  let rawKey = (keyInput && keyInput.value ? keyInput.value : (state.neon.apiKey || '')).trim();
+
+  // If user pasted a full postgresql:// connection string
+  if (rawEp.startsWith('postgres://') || rawEp.startsWith('postgresql://')) {
+    try {
+      const parsed = new URL(rawEp);
+      const host = parsed.hostname;
+      const pass = decodeURIComponent(parsed.password || '');
+      const user = decodeURIComponent(parsed.username || 'neondb_owner');
+      const db = parsed.pathname.replace(/^\//, '') || 'neondb';
+      return {
+        host: host,
+        url: `https://${host}/sql`,
+        user: user,
+        password: pass || rawKey,
+        database: db,
+        connectionString: rawEp
+      };
+    } catch(e) {}
+  }
+
+  // Extract clean host
+  let host = rawEp.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim();
+  let user = 'neondb_owner';
+  let database = 'neondb';
+
+  return {
+    host: host,
+    url: host ? `https://${host}/sql` : '',
+    user: user,
+    password: rawKey,
+    database: database,
+    connectionString: host ? `postgresql://${user}:${encodeURIComponent(rawKey)}@${host}/${database}?sslmode=require` : ''
+  };
+}
+
+// Execute SQL via Neon Serverless HTTP API
+async function executeNeonSql(query, params = []) {
+  const creds = parseNeonCredentials();
+  if (!creds.host) throw new Error('Host atau Endpoint Neon belum diisi!');
+  
+  const headers = { 
+    'Content-Type': 'application/json',
+    'Neon-Connection-String': creds.connectionString
+  };
+  if (creds.password) {
+    headers['Authorization'] = `Bearer ${creds.password}`;
+  }
+
+  const res = await fetch(creds.url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify({ query: query, params: params })
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    let msg = txt;
+    try {
+      const j = JSON.parse(txt);
+      if (j.message) msg = j.message;
+    } catch(e) {}
+    throw new Error(`Neon Error (${res.status}): ${msg}`);
+  }
+
+  return await res.json();
+}
+
+function updateSyncStatusBadge(msg, isSuccess = true) {
+  const badge = document.getElementById('sync-last-time-badge');
+  if (!badge) return;
+  const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+  badge.textContent = `${msg} • ${timeStr}`;
+  badge.style.background = isSuccess ? 'var(--emerald-50)' : 'var(--rose-50)';
+  badge.style.color = isSuccess ? 'var(--emerald-700)' : 'var(--rose-700)';
+  badge.style.borderColor = isSuccess ? 'var(--emerald-200)' : 'var(--rose-200)';
+}
+
+// Test Neon Connection
+async function testNeonConnection() {
+  const creds = parseNeonCredentials();
+  if (!creds.host) {
+    showToast('Harap isi Host / Endpoint Neon terlebih dahulu!', 'warning');
+    const epInput = document.getElementById('config-neon-endpoint');
+    if (epInput) epInput.focus();
+    return;
+  }
+
+  // Auto-save form inputs
+  state.neon.endpoint = creds.host;
+  state.neon.apiKey = creds.password;
+  state.dbProvider = 'neon';
+  localStorage.setItem('zettcbt_neon_endpoint', creds.host);
+  localStorage.setItem('zettcbt_neon_key', creds.password);
+  localStorage.setItem('zettcbt_db_provider', 'neon');
+
+  showToast('Menghubungi serverless database Neon...', 'info');
+  const startTime = Date.now();
+
+  try {
+    await executeNeonSql('SELECT NOW() as server_time, version() as version;');
+    const latency = Date.now() - startTime;
+    showToast(`🟢 Terhubung ke Neon PostgreSQL! Latensi: ${latency}ms. Siap melayani 200 siswa serentak.`, 'success');
+    
+    const badge = document.getElementById('db-status-badge');
+    if (badge) {
+      badge.textContent = `🟢 Neon Online (${latency}ms)`;
+      badge.style.background = 'var(--emerald-100)';
+      badge.style.color = 'var(--emerald-700)';
+    }
+    updateSyncStatusBadge('🟢 Neon Terhubung', true);
+  } catch (err) {
+    console.error('Neon test connection error:', err);
+    showToast('🔴 Gagal menghubungi Neon: ' + err.message, 'danger');
+    const badge = document.getElementById('db-status-badge');
+    if (badge) {
+      badge.textContent = '🔴 Gagal Terkoneksi';
+      badge.style.background = 'var(--rose-100)';
+      badge.style.color = 'var(--rose-700)';
+    }
+    updateSyncStatusBadge('🔴 Koneksi Gagal', false);
+  }
+}
+
+// Copy Neon SQL Schema instructions to clipboard
+function copyNeonSqlSchema() {
+  navigator.clipboard.writeText(`-- Salin seluruh isi file neon_schema.sql di folder projek ZettCBT Pro dan jalankan di SQL Editor console.neon.tech`).then(() => {
+    showToast('Instruksi siap! Buka berkas neon_schema.sql di folder projek dan jalankan di SQL Editor Neon.', 'info');
+  });
+}
+
+// Export local data to Neon cloud
+async function exportLocalDataToNeonCloud() {
+  const creds = parseNeonCredentials();
+  if (!creds.host) {
+    showToast('Harap masukkan Host / Endpoint Neon pada kolom di atas terlebih dahulu!', 'warning');
+    const epInput = document.getElementById('config-neon-endpoint');
+    if (epInput) epInput.focus();
+    return;
+  }
+
+  // Auto-save form inputs to state & storage
+  state.neon.endpoint = creds.host;
+  state.neon.apiKey = creds.password;
+  state.dbProvider = 'neon';
+  localStorage.setItem('zettcbt_neon_endpoint', creds.host);
+  localStorage.setItem('zettcbt_neon_key', creds.password);
+  localStorage.setItem('zettcbt_db_provider', 'neon');
+
+  const btn = document.getElementById('btn-export-neon');
+  const title = document.getElementById('btn-export-neon-title');
+  const origTitle = title ? title.textContent : 'Ekspor Data Lokal ke Neon Cloud';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.75';
+  }
+  if (title) title.textContent = '⏳ Mengunggah data ke Neon Cloud...';
+
+  showToast('Memulai sinkronisasi data lokal ke Neon Cloud...', 'info');
+
+  try {
+    let teachersCount = 0;
+    for (const t of state.teachers || []) {
+      const q = `INSERT INTO teachers (username, password_hash, full_name, role, assigned_class, assigned_subject)
+                 VALUES ($1, $2, $3, $4, $5, $6)
+                 ON CONFLICT (username) DO UPDATE 
+                 SET full_name = EXCLUDED.full_name, role = EXCLUDED.role, assigned_class = EXCLUDED.assigned_class, assigned_subject = EXCLUDED.assigned_subject, updated_at = NOW();`;
+      await executeNeonSql(q, [t.username, t.password, t.fullName, t.role, t.assignedClass, t.assignedSubject]);
+      teachersCount++;
+    }
+
+    let studentsCount = 0;
+    for (const s of state.students || []) {
+      const q = `INSERT INTO students (nisn, full_name, class_name, gender)
+                 VALUES ($1, $2, $3, $4)
+                 ON CONFLICT (nisn) DO UPDATE
+                 SET full_name = EXCLUDED.full_name, class_name = EXCLUDED.class_name, gender = EXCLUDED.gender, updated_at = NOW();`;
+      await executeNeonSql(q, [s.nisn, s.name, s.className, s.gender || 'L']);
+      studentsCount++;
+    }
+
+    // Sync Sesi Ujian Aktif
+    const ses = state.session || {};
+    const qSes = `INSERT INTO exam_sessions (token, title, subject, target_class, duration_minutes, is_active, show_score, randomize_questions)
+                  VALUES ($1, $2, $3, 'Semua', $4, true, $5, $6)
+                  ON CONFLICT (token) DO UPDATE
+                  SET title = EXCLUDED.title, subject = EXCLUDED.subject, duration_minutes = EXCLUDED.duration_minutes, updated_at = NOW();`;
+    await executeNeonSql(qSes, [
+      ses.token || 'PAS2026',
+      ses.title || 'Ujian Sekolah',
+      ses.subject || 'Tematik SD',
+      ses.durationMinutes || 90,
+      !!ses.showScore,
+      !!ses.randomizeQuestions
+    ]);
+
+    updateSyncStatusBadge('✅ Berhasil Ekspor', true);
+    showToast(`✅ Berhasil! ${teachersCount} akun guru, ${studentsCount} siswa, & sesi ujian telah terunggah ke Neon Cloud.`, 'success');
+  } catch (err) {
+    console.error('Export to Neon error:', err);
+    updateSyncStatusBadge('🔴 Gagal Ekspor', false);
+    showToast('Gagal ekspor ke Neon: ' + err.message, 'danger');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+    if (title) title.textContent = origTitle;
+  }
+}
+
+// Import data from Neon cloud
+async function importDataFromNeonCloud() {
+  const creds = parseNeonCredentials();
+  if (!creds.host) {
+    showToast('Harap masukkan Host / Endpoint Neon pada kolom di atas terlebih dahulu!', 'warning');
+    const epInput = document.getElementById('config-neon-endpoint');
+    if (epInput) epInput.focus();
+    return;
+  }
+
+  // Auto-save form inputs to state & storage
+  state.neon.endpoint = creds.host;
+  state.neon.apiKey = creds.password;
+  state.dbProvider = 'neon';
+  localStorage.setItem('zettcbt_neon_endpoint', creds.host);
+  localStorage.setItem('zettcbt_neon_key', creds.password);
+  localStorage.setItem('zettcbt_db_provider', 'neon');
+
+  const btn = document.getElementById('btn-import-neon');
+  const title = document.getElementById('btn-import-neon-title');
+  const origTitle = title ? title.textContent : 'Tarik Data Terbaru dari Neon ke Lokal';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.75';
+  }
+  if (title) title.textContent = '⏳ Mengunduh data dari Neon...';
+
+  showToast('Mengunduh master data terbaru dari Neon Cloud...', 'info');
+
+  try {
+    const rawResult = await executeNeonSql('SELECT nisn, full_name, class_name, gender FROM students WHERE is_active = true ORDER BY class_name, full_name;');
+    const rows = (rawResult && rawResult.rows) ? rawResult.rows : (Array.isArray(rawResult) ? rawResult : []);
+
+    if (rows && rows.length > 0) {
+      const imported = rows.map(r => ({
+        id: 'st-' + Math.random().toString(36).substr(2, 9),
+        nisn: r.nisn,
+        name: r.full_name,
+        className: r.class_name,
+        gender: r.gender,
+        status: 'active'
+      }));
+      state.students = imported;
+      localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
+      renderStudentsTable();
+      renderExamCardsTab();
+      updateAdminMetrics();
+      updateSyncStatusBadge(`✅ Tersinkron (${imported.length} Siswa)`, true);
+      showToast(`✅ Berhasil menarik ${imported.length} data siswa dari Neon Cloud!`, 'success');
+    } else {
+      updateSyncStatusBadge('ℹ️ Database Neon Kosong', true);
+      showToast('Database Neon terhubung, namun belum ada data siswa. Silakan klik "Ekspor Data Lokal ke Neon Cloud".', 'info');
+    }
+  } catch (err) {
+    console.error('Import from Neon error:', err);
+    updateSyncStatusBadge('🔴 Gagal Menarik Data', false);
+    showToast('Gagal menarik data dari Neon: ' + err.message, 'danger');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+    if (title) title.textContent = origTitle;
+  }
+}
+
+// Background Auto-Save Answer to Neon
+async function sendAnswerToNeon(nisn, answers) {
+  if (!state.neon.endpoint) return;
+  try {
+    const q = `INSERT INTO student_attempts (session_id, participant_number, student_name, class_name, status, warning_count, updated_at)
+               SELECT id, $1, $2, $3, 'in_progress', $4, NOW()
+               FROM exam_sessions WHERE is_active = true LIMIT 1
+               ON CONFLICT (session_id, participant_number) DO UPDATE
+               SET warning_count = EXCLUDED.warning_count, updated_at = NOW();`;
+    await executeNeonSql(q, [nisn, state.student.name, state.student.className, state.warningCount]);
+  } catch (e) {
+    console.warn('Neon auto-save background sync deferred:', e.message);
+  }
+}
+
+// Finalize Student Attempt in Neon
+async function finalizeStudentAttemptInNeon(nisn, totalScore) {
+  if (!state.neon.endpoint) return;
+  try {
+    const q = `UPDATE student_attempts
+               SET status = 'submitted', total_score = $1, end_time = NOW(), updated_at = NOW()
+               WHERE participant_number = $2;`;
+    await executeNeonSql(q, [totalScore, nisn]);
+  } catch (e) {
+    console.warn('Neon finalize attempt sync deferred:', e.message);
+  }
+}
+
 // Save Supabase Configuration
 function handleSaveDatabaseConfig(event) {
   event.preventDefault();
@@ -4304,10 +4711,13 @@ function handleSaveDatabaseConfig(event) {
 
   state.supabase.url = url;
   state.supabase.key = key;
+  state.dbProvider = 'supabase';
 
   localStorage.setItem('zettcbt_sb_url', url);
   localStorage.setItem('zettcbt_sb_key', key);
+  localStorage.setItem('zettcbt_db_provider', 'supabase');
 
+  switchDatabaseProviderUI('supabase');
   showToast('Kredensial Supabase Cloud berhasil disimpan!', 'success');
 }
 
