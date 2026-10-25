@@ -1,10 +1,11 @@
 {
+  "id": "/",
   "name": "SD NEGERI 14 TOBOALI - Ujian Online",
   "short_name": "Ujian SDN 14",
   "description": "Sistem Ujian Online & Penilaian Hasil Belajar Resmi SD Negeri 14 Toboali",
-  "start_url": "./index.html",
-  "scope": "./",
-  "display": "fullscreen",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
   "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#2563eb",
@@ -13,7 +14,7 @@
       "src": "assets/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "assets/icon-512.png",
@@ -25,7 +26,7 @@
       "src": "assets/icon.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "categories": [
