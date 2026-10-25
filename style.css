@@ -3947,6 +3947,27 @@ body.dark-mode .stat-label {
   color: #94a3b8 !important;
 }
 
+/* ==============================================================================
+   ANTI-CHEAT EXAMBRO PROTECTION (ANTI-COPY & ANTI-SELECTION)
+   ============================================================================== */
+#screen-student-exam,
+#screen-student-exam .exam-workspace,
+#screen-student-exam .question-card,
+#screen-student-exam .question-text,
+#screen-student-exam .options-container,
+#screen-student-exam .option-item,
+#screen-student-exam .option-text {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
 
-
-
+#screen-student-exam input,
+#screen-student-exam textarea {
+  -webkit-user-select: auto !important;
+  -moz-user-select: auto !important;
+  -ms-user-select: auto !important;
+  user-select: auto !important;
+}
