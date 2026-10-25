@@ -380,7 +380,66 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAdminMetrics();
   startProctorTokenTimer();
   initNeonAutoSync();
+  initPwaSupport();
 });
+
+// ==============================================================================
+// PWA & ANDROID APK SUPPORT (INSTALL PROMPT & SERVICE WORKER)
+// ==============================================================================
+let deferredPwaPrompt = null;
+
+function initPwaSupport() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => {
+          console.log('✅ ZettCBT PWA Service Worker terdaftar:', reg.scope);
+        })
+        .catch((err) => {
+          console.warn('PWA Service Worker gagal didaftarkan:', err);
+        });
+    });
+  }
+
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isStandalone) {
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) banner.style.display = 'none';
+    return;
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPwaPrompt = e;
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) {
+      banner.style.display = 'flex';
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredPwaPrompt = null;
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) banner.style.display = 'none';
+    showToast('🎉 Aplikasi Ujian Online berhasil terpasang di HP!', 'success');
+  });
+}
+
+function triggerPwaInstall() {
+  if (deferredPwaPrompt) {
+    deferredPwaPrompt.prompt();
+    deferredPwaPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        showToast('Memasang aplikasi ke layar HP...', 'info');
+      }
+      deferredPwaPrompt = null;
+      const banner = document.getElementById('pwa-install-banner');
+      if (banner) banner.style.display = 'none';
+    });
+  } else {
+    alert('Untuk memasang aplikasi di HP Android:\n1. Buka menu titik tiga (⋮) di pojok kanan atas browser Chrome.\n2. Pilih "Tambahkan ke Layar Utama" atau "Install Aplikasi".\n3. Ikon Ujian Online akan langsung muncul di layar HP Anda!');
+  }
+}
 
 // ==============================================================================
 // THEME ENGINE: DARK MODE & LIGHT MODE (ZETTBOT ANTI-AI)
@@ -2127,8 +2186,56 @@ function toggleDoubtAnswerMobile() {
 }
 
 // ==============================================================================
-// ADVANCED ANTI-CHEAT ENGINE (TAB SWITCH & SMARTPHONE SPLIT-SCREEN DETECTOR - POIN 4)
+// ADVANCED ANTI-CHEAT ENGINE (EXAMBRO LEVEL - AUDIO ALARM, HAPTIC, BLOKIR KLIK & COPY)
 // ==============================================================================
+
+let cheatAudioCtx = null;
+
+// Audio Alarm Synthesizer (Web Audio API - Mandiri tanpa butuh file MP3 eksternal)
+function playCheatAlarmSound() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    if (!cheatAudioCtx) {
+      cheatAudioCtx = new AudioContextClass();
+    }
+    if (cheatAudioCtx.state === 'suspended') {
+      cheatAudioCtx.resume();
+    }
+    const now = cheatAudioCtx.currentTime;
+
+    // Dual-Tone Siren Alarm (880Hz -> 660Hz -> 880Hz)
+    const osc = cheatAudioCtx.createOscillator();
+    const gain = cheatAudioCtx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.setValueAtTime(660, now + 0.22);
+    osc.frequency.setValueAtTime(880, now + 0.44);
+    osc.frequency.setValueAtTime(660, now + 0.66);
+    osc.frequency.setValueAtTime(880, now + 0.88);
+
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.25);
+
+    osc.connect(gain);
+    gain.connect(cheatAudioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + 1.25);
+  } catch (err) {
+    console.warn('Audio alert warning:', err);
+  }
+}
+
+// Getar Ponsel (Haptic Vibration)
+function triggerHapticVibration() {
+  if (navigator.vibrate) {
+    try {
+      navigator.vibrate([300, 150, 300, 150, 450]);
+    } catch (e) {}
+  }
+}
 
 function initAntiCheatProtection() {
   // 1. Deteksi Tab Keluar / Minimalkan Browser / Buka Aplikasi Lain
@@ -2151,9 +2258,84 @@ function initAntiCheatProtection() {
     checkSmartphoneSplitScreen();
   });
 
-  // 4. Deteksi Keluar Fullscreen
+  // 4. Deteksi Perubahan Status Fullscreen
   document.addEventListener('fullscreenchange', handleFullscreenStateChange);
   document.addEventListener('webkitfullscreenchange', handleFullscreenStateChange);
+
+  // 5. Blokir Klik Kanan / Context Menu Selama Ujian
+  document.addEventListener('contextmenu', (e) => {
+    if (state.isExamRunning) {
+      e.preventDefault();
+      showToast('⚠️ Klik kanan dan inspeksi elemen dinonaktifkan selama ujian!', 'warning');
+      return false;
+    }
+  });
+
+  // 6. Blokir Salin (Copy), Potong (Cut), Tempel (Paste), dan Drag Soal
+  ['copy', 'cut', 'paste', 'dragstart'].forEach((evtName) => {
+    document.addEventListener(evtName, (e) => {
+      if (state.isExamRunning) {
+        const targetTag = e.target ? e.target.tagName : '';
+        if (targetTag !== 'INPUT' && targetTag !== 'TEXTAREA') {
+          e.preventDefault();
+          showToast('⚠️ Tindakan menyalin atau memindahkan teks soal dinonaktifkan!', 'warning');
+          return false;
+        }
+      }
+    });
+  });
+
+  // 7. Blokir Tombol Pintas Keyboard Berbahaya (F12, DevTools, Ctrl+C, Ctrl+U, dll)
+  document.addEventListener('keydown', (e) => {
+    if (!state.isExamRunning) return;
+
+    const key = e.key;
+    const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+    // F12 (DevTools)
+    if (key === 'F12') {
+      e.preventDefault();
+      triggerCheatWarning('dev_tools', '⚠️ Tombol inspeksi pengembang (F12) dinonaktifkan!');
+      return false;
+    }
+
+    // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C (Inspect Element)
+    if (ctrlOrMeta && e.shiftKey && (key === 'I' || key === 'i' || key === 'J' || key === 'j' || key === 'C' || key === 'c')) {
+      e.preventDefault();
+      triggerCheatWarning('dev_tools', '⚠️ Akses Developer Tools dinonaktifkan!');
+      return false;
+    }
+
+    // Ctrl+U (View Source)
+    if (ctrlOrMeta && (key === 'u' || key === 'U')) {
+      e.preventDefault();
+      showToast('⚠️ Akses kode sumber dinonaktifkan!', 'warning');
+      return false;
+    }
+
+    // Ctrl+P (Print)
+    if (ctrlOrMeta && (key === 'p' || key === 'P')) {
+      e.preventDefault();
+      showToast('⚠️ Cetak dokumen dinonaktifkan!', 'warning');
+      return false;
+    }
+
+    // Ctrl+S (Save)
+    if (ctrlOrMeta && (key === 's' || key === 'S')) {
+      e.preventDefault();
+      return false;
+    }
+
+    // Ctrl+C, Ctrl+V, Ctrl+A di luar kolom isian formulir
+    const activeTag = document.activeElement ? document.activeElement.tagName : '';
+    if (activeTag !== 'INPUT' && activeTag !== 'TEXTAREA') {
+      if (ctrlOrMeta && (key === 'c' || key === 'C' || key === 'v' || key === 'V' || key === 'x' || key === 'X' || key === 'a' || key === 'A')) {
+        e.preventDefault();
+        showToast('⚠️ Tombol pintas salin/tempel dinonaktifkan!', 'warning');
+        return false;
+      }
+    }
+  });
 }
 
 function checkSmartphoneSplitScreen() {
@@ -2188,6 +2370,10 @@ function triggerCheatWarning(reasonType, message) {
   state.warningCount = (state.warningCount || 0) + 1;
   syncLiveStudentProgress();
 
+  // Bunyikan Alarm Audio & Getar Ponsel
+  playCheatAlarmSound();
+  triggerHapticVibration();
+
   const countDisplay = document.getElementById('modal-warning-count');
   const reasonDisplay = document.getElementById('modal-cheat-reason');
   const modal = document.getElementById('modal-cheat-alert');
@@ -2210,10 +2396,8 @@ function triggerCheatWarning(reasonType, message) {
 function dismissCheatAlert() {
   const modal = document.getElementById('modal-cheat-alert');
   if (modal) modal.style.display = 'none';
-  // Jika di HP, tawarkan masuk kembali ke fullscreen
-  if (window.innerWidth <= 768) {
-    enterMobileFullscreen();
-  }
+  // Kembalikan ke mode layar penuh
+  enterMobileFullscreen();
 }
 
 // Submit Final Confirmation Modal
