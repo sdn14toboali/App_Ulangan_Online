@@ -2,8 +2,19 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SD NEGERI 14 TOBOALI - Ujian Online</title>
+
+  <!-- PWA & Android APK Web App Configuration -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ujian SDN 14">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+
   <link rel="stylesheet" href="style.css?v=2.2.0">
 </head>
 <body>
@@ -101,6 +112,20 @@
             </div>
             <h3 class="split-form-title">Masuk Ruang Ujian</h3>
             <p class="split-form-subtitle">Pilih mata pelajaran, masukkan password kartu ujian & token pengawas</p>
+          </div>
+
+          <!-- Banner Pasang Aplikasi Android / PWA Standalone -->
+          <div id="pwa-install-banner" style="display: none; background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #bfdbfe; border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; align-items: center; justify-content: space-between; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+              <span style="font-size: 1.3rem;">📱</span>
+              <div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #1e40af;">Pasang Aplikasi di Layar HP</div>
+                <div style="font-size: 0.74rem; color: #3b82f6;">Buka ujian layar penuh langsung seperti aplikasi Play Store</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="triggerPwaInstall()" style="white-space: nowrap; font-size: 0.8rem; padding: 0.45rem 0.85rem; font-weight: 700; box-shadow: 0 2px 8px rgba(37,99,235,0.25);">
+              + Pasang App
+            </button>
           </div>
 
           <form id="form-student-login" onsubmit="handleStudentLogin(event)">
@@ -1680,6 +1705,9 @@
         <div style="margin-top: 1rem; padding: 0.85rem; background-color: var(--slate-100); border-radius: var(--radius-md); font-size: 0.88rem;">
           Status Pelanggaran ke: <strong id="modal-warning-count" style="color: var(--rose-600); font-size: 1.25rem;">1</strong> dari toleransi maksimal <strong>3x</strong>.<br>
           <span style="color: var(--slate-500); font-size: 0.78rem;">⚠️ Jika mencapai 3x, ujian akan langsung dikunci otomatis dan jawaban dikumpulkan paksa.</span>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.75rem; color: #b91c1c; font-weight: 700; align-items: center;">
+            <span>🚨 Alarm Sirene Aktif</span> • <span>📳 Getar Ponsel Aktif</span> • <span>📡 Tercatat di Pengawas</span>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
