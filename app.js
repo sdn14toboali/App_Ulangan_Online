@@ -4505,12 +4505,11 @@ async function executeNeonSql(query, params = []) {
     throw new Error('Host Neon tidak lengkap! Host wajib diawali dengan "ep-..." (contoh: ep-cool-fog-123456.ap-southeast-1.aws.neon.tech). Cek kembali dashboard Neon Anda.');
   }
 
+  // Neon HTTP API requires 'Neon-Connection-String' header.
+  // Note: We intentionally omit 'Content-Type: application/json' and 'Authorization' because Neon's CORS preflight (Access-Control-Allow-Headers) does not include Content-Type, causing browser fetch to fail with CORS error. Neon parses JSON body seamlessly.
   const headers = { 
-    'Content-Type': 'application/json'
+    'Neon-Connection-String': creds.connectionString
   };
-  if (creds.password) {
-    headers['Authorization'] = `Bearer ${creds.password}`;
-  }
 
   let res;
   try {
@@ -4521,7 +4520,7 @@ async function executeNeonSql(query, params = []) {
     });
   } catch (netErr) {
     if (netErr.name === 'TypeError' || (netErr.message && netErr.message.includes('fetch'))) {
-      throw new Error(`Koneksi ke "${creds.host}" gagal dijangkau (Failed to fetch). Pastikan Host lengkap dan diawali "ep-..." serta terhubung ke internet.`);
+      throw new Error(`Koneksi ke "${creds.host}" gagal dijangkau (Failed to fetch). Pastikan koneksi internet stabil dan host diawali "ep-...".`);
     }
     throw netErr;
   }
@@ -4533,6 +4532,18 @@ async function executeNeonSql(query, params = []) {
       const j = JSON.parse(txt);
       if (j.message) msg = j.message;
     } catch(e) {}
+
+    // Terjemahkan error umum Neon agar mudah dipahami guru/operator
+    if (msg.includes('password authentication failed')) {
+      throw new Error(`Kata sandi database Neon SALAH untuk user '${creds.user}'! Silakan buka dasbor Neon -> menu Roles -> Reset password pada user neondb_owner.`);
+    }
+    if (msg.includes('relation') && msg.includes('does not exist')) {
+      throw new Error(`Tabel database belum dibuat di Neon! Buka menu SQL Editor di console.neon.tech, lalu Paste & Run berkas neon_schema.sql.`);
+    }
+    if (msg.includes('invalid header: neon-connection-string')) {
+      throw new Error(`Koneksi string Neon tidak valid. Pastikan Host dan Password terisi benar.`);
+    }
+
     throw new Error(`Neon Error (${res.status}): ${msg}`);
   }
 
