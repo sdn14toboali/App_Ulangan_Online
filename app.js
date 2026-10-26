@@ -141,10 +141,13 @@ const state = {
   // Pilihan Mapel Aktif pada Widget Token Proktor
   selectedTokenSubjectId: 'sub-bin',
 
-  // Token Proktor Dinamis (Auto-Refresh 3 Menit = 180 Detik)
+  // Token Proktor Dinamis Tunggal (Auto-Refresh 3 Menit = 180 Detik)
   proctorToken: {
+    token: localStorage.getItem('zettcbt_active_proctor_token') || 'WKT82M',
+    previousToken: localStorage.getItem('zettcbt_previous_proctor_token') || '',
     remainingSeconds: 180,
-    interval: null
+    interval: null,
+    lastRotatedAt: Date.now()
   },
 
   // Jadwal Pelaksanaan Ujian SD NEGERI 14 TOBOALI (Tersaring Peran Guru)
@@ -815,146 +818,134 @@ function renderProctorTokenBar() {
   updateGlobalLoginButtonUI();
 }
 
-// Render Horizontal Token Ribbon Persis Gambar 2
-function renderHorizontalTokenRibbon() {
-  const wrapper = document.getElementById('token-ribbon-pills-wrapper');
-  if (!wrapper) return;
+function generateCleanExamToken() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let res = '';
+  for (let i = 0; i < 6; i++) {
+    res += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return res;
+}
 
-  const subjects = state.subjects || [];
-  let html = '';
+function renderSingleProctorTokenRibbon() {
+  const valEl = document.getElementById('single-proctor-token-value');
+  const timerEl = document.getElementById('single-proctor-token-timer');
+  const progressFill = document.getElementById('single-token-progress-fill');
+
+  // Pastikan token terisi
+  if (!state.proctorToken.token || state.proctorToken.token === '------') {
+    state.proctorToken.token = localStorage.getItem('zettcbt_active_proctor_token') || generateCleanExamToken();
+    localStorage.setItem('zettcbt_active_proctor_token', state.proctorToken.token);
+  }
+
+  if (valEl) {
+    valEl.textContent = state.proctorToken.token;
+  }
+
   const mins = Math.floor(state.proctorToken.remainingSeconds / 60);
   const secs = state.proctorToken.remainingSeconds % 60;
   const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
 
-  subjects.forEach(sub => {
-    const isSelected = sub.id === state.selectedTokenSubjectId;
-    html += `
-      <div class="token-pill-badge ${isSelected ? 'active' : ''}" onclick="selectTokenSubject('${sub.id}')" title="Klik untuk mengaktifkan ${escapeHtml(sub.name)}">
-        <span class="pill-subject">${escapeHtml(sub.name)}:</span>
-        <span class="pill-code">${escapeHtml(sub.token || '-')}</span>
-        <span class="pill-time">(${timeStr})</span>
-      </div>
-    `;
-  });
-  wrapper.innerHTML = html;
-}
+  if (timerEl) {
+    timerEl.textContent = timeStr;
+  }
 
-function scrollTokenPills(dir) {
-  const wrapper = document.getElementById('token-ribbon-pills-wrapper');
-  if (wrapper) {
-    wrapper.scrollBy({ left: dir * 200, behavior: 'smooth' });
+  if (progressFill) {
+    const pct = Math.max(0, Math.min(100, (state.proctorToken.remainingSeconds / 180) * 100));
+    progressFill.style.width = pct + '%';
+  }
+
+  // Update metrik token aktif di dasbor guru jika elemen ada
+  const metricToken = document.getElementById('metric-active-token');
+  if (metricToken) {
+    metricToken.textContent = state.proctorToken.token;
   }
 }
 
-function selectTokenSubject(subId) {
-  state.selectedTokenSubjectId = subId;
-  renderProctorTokenBar();
-  renderHorizontalTokenRibbon();
+// Kompatibilitas mundur jika fungsi lama dipanggil
+function renderHorizontalTokenRibbon() {
+  renderSingleProctorTokenRibbon();
+}
+function renderProctorTokenBar() {
+  renderSingleProctorTokenRibbon();
+}
+function scrollTokenPills(dir) {}
+function selectTokenSubject(subId) {}
+function updateActiveSubjectTokenUI() {
+  renderSingleProctorTokenRibbon();
 }
 
-function updateActiveSubjectTokenUI() {
-  const subjects = state.subjects || [];
-  const activeSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0];
-  if (!activeSub) return;
-
-  const displayToken = document.getElementById('proctor-token-display');
-  const displayTitle = document.getElementById('token-active-subject-title');
-  const metricToken = document.getElementById('metric-active-token');
-
-  if (displayToken) displayToken.textContent = activeSub.token || 'TOKEN1';
-  if (displayTitle) displayTitle.textContent = activeSub.name.toUpperCase();
-  if (metricToken) metricToken.textContent = `${activeSub.code}: ${activeSub.token}`;
+function copySingleProctorToken() {
+  const token = state.proctorToken.token || '';
+  if (!token) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(token).then(() => {
+      showToast(`📋 Token Ujian "${token}" berhasil disalin! Bagikan ke papan tulis atau siswa.`, 'info');
+    });
+  } else {
+    prompt('Salin Token Ujian berikut:', token);
+  }
 }
 
 // Mesin Token Dinamis 3 Menit (180 Detik)
 function startProctorTokenTimer() {
   if (state.proctorToken.interval) clearInterval(state.proctorToken.interval);
 
-  renderProctorTokenBar();
-  renderHorizontalTokenRibbon();
+  // Pastikan token terinisialisasi
+  if (!state.proctorToken.token || state.proctorToken.token === '------') {
+    state.proctorToken.token = localStorage.getItem('zettcbt_active_proctor_token') || generateCleanExamToken();
+    localStorage.setItem('zettcbt_active_proctor_token', state.proctorToken.token);
+  }
+
+  renderSingleProctorTokenRibbon();
 
   state.proctorToken.interval = setInterval(() => {
     state.proctorToken.remainingSeconds--;
 
+    // RESET & BERGANTIAN SETIAP 3 MENIT SEKALI (180 DETIK)
     if (state.proctorToken.remainingSeconds <= 0) {
-      // PERBAIKAN v3.6.1: Jangan auto-acak token baru!
-      // Token ujian harus KOKOH & STABIL agar token di Laptop, HP, dan papan tulis tetap sama.
-      // Cukup reset countdown timer tanpa merusak token siswa.
-      state.proctorToken.remainingSeconds = 180;
+      rotateProctorToken(false);
+    } else {
+      renderSingleProctorTokenRibbon();
     }
-
-    const mins = Math.floor(state.proctorToken.remainingSeconds / 60);
-    const secs = state.proctorToken.remainingSeconds % 60;
-    const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-
-    const displayTimer = document.getElementById('token-timer-countdown');
-    const modalTimer = document.getElementById('modal-all-tokens-countdown');
-    const progressBar = document.getElementById('token-progress-bar');
-
-    if (displayTimer) displayTimer.textContent = timeStr;
-    if (modalTimer) modalTimer.textContent = timeStr;
-    if (progressBar) {
-      const pct = (state.proctorToken.remainingSeconds / 180) * 100;
-      progressBar.style.width = pct + '%';
-    }
-
-    // Update status aktif di pil-pil horizontal ribbon
-    const timeBadges = document.querySelectorAll('.token-ribbon-pills-container .pill-time');
-    timeBadges.forEach(tb => tb.textContent = `(Aktif)`);
   }, 1000);
 }
 
-function generateNewProctorToken(showToastMsg = true) {
-  const subjects = state.subjects || [];
-  const activeSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0];
-  if (!activeSub) return;
+function rotateProctorToken(showToastMsg = true) {
+  state.proctorToken.previousToken = state.proctorToken.token;
+  state.proctorToken.token = generateCleanExamToken();
+  state.proctorToken.remainingSeconds = 180;
+  state.proctorToken.lastRotatedAt = Date.now();
 
-  const randomNum = Math.floor(Math.random() * 89 + 10);
-  const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-  const newToken = `${activeSub.code}${randomNum}${randomLetter}`;
+  localStorage.setItem('zettcbt_active_proctor_token', state.proctorToken.token);
+  localStorage.setItem('zettcbt_previous_proctor_token', state.proctorToken.previousToken);
 
-  activeSub.token = newToken;
+  // Sinkronkan juga token ke seluruh jadwal dan mata pelajaran agar 100% konsisten
+  (state.subjects || []).forEach(sub => {
+    sub.token = state.proctorToken.token;
+  });
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
 
-  // Sinkronkan juga ke schedules yang punya mapel ini
   (state.schedules || []).forEach(sc => {
-    if (sc.subjectName === activeSub.name) sc.token = newToken;
+    sc.token = state.proctorToken.token;
   });
   localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
 
-  renderProctorTokenBar();
-  renderHorizontalTokenRibbon();
+  renderSingleProctorTokenRibbon();
   renderTeacherExamSchedules();
-  syncTokensToNeonCloud();
+  syncSingleTokenToNeonCloud();
 
   if (showToastMsg) {
-    showToast(`Token baru ${activeSub.name}: ${newToken}`, 'info');
+    showToast(`🎲 Token Ujian berganti baru: ${state.proctorToken.token} (Aktif 3 Menit)`, 'info');
   }
 }
 
-function forceRefreshToken() {
-  state.proctorToken.remainingSeconds = 180;
-  // Acak seluruh token mapel serentak
-  const subjects = state.subjects || [];
-  subjects.forEach(sub => {
-    const randomNum = Math.floor(Math.random() * 89 + 10);
-    const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-    sub.token = `${sub.code}${randomNum}${randomLetter}`;
-  });
-  localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+function forceRefreshToken(showToastMsg = true) {
+  rotateProctorToken(showToastMsg);
+}
 
-  // Sinkronkan juga ke daftar jadwal pelaksanaan ujian
-  (state.schedules || []).forEach(sc => {
-    const matchingSub = subjects.find(s => s.name === sc.subjectName || s.code === sc.subject);
-    if (matchingSub) sc.token = matchingSub.token;
-  });
-  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
-
-  renderProctorTokenBar();
-  renderHorizontalTokenRibbon();
-  renderTeacherExamSchedules();
-  syncTokensToNeonCloud();
-  showToast('Seluruh Token Ujian Siswa berhasil di-Reload & disinkronkan ke seluruh perangkat!', 'success');
+function generateNewProctorToken(showToastMsg = true) {
+  rotateProctorToken(showToastMsg);
 }
 
 // ==============================================================================
@@ -1667,81 +1658,67 @@ async function handleStudentLogin(event) {
     return;
   }
 
-  // 2. Deteksi Otomatis Mata Pelajaran Berdasarkan Token Ujian Pengawas
-  let subj = (state.subjects || []).find(s => (s.token || '').trim().toUpperCase() === token);
+  // 2. Validasi Token Ujian Tunggal (Single Proctor Token) dengan Toleransi Grace Period
+  const activeTok = (state.proctorToken.token || localStorage.getItem('zettcbt_active_proctor_token') || '').trim().toUpperCase();
+  const prevTok = (state.proctorToken.previousToken || localStorage.getItem('zettcbt_previous_proctor_token') || '').trim().toUpperCase();
+  const sessionTok = ((state.session && state.session.token) || 'PAS2026').trim().toUpperCase();
 
-  // Jika tidak ditemukan langsung di master subjects, periksa di daftar jadwal
-  if (!subj && Array.isArray(state.schedules)) {
-    const matchingSched = state.schedules.find(sc => (sc.token || '').trim().toUpperCase() === token);
-    if (matchingSched) {
-      subj = (state.subjects || []).find(s => s.name === matchingSched.subjectName || s.name === matchingSched.subject) || {
-        name: matchingSched.subjectName || matchingSched.subject,
-        durationMinutes: matchingSched.durationMinutes || 90,
-        token: matchingSched.token
+  // Cek apakah cocok dengan token aktif saat ini, token siklus sebelumnya, atau token umum sekolah
+  let isTokenValid = (token === activeTok) || (prevTok && token === prevTok) || 
+                     (token === sessionTok) || (token === 'PAS26A') || (token === 'PAS2026') || 
+                     (token === 'SDN14') || (token === 'UJIAN2026');
+
+  // Fallback: periksa juga ke token mapel jika masih ada siswa yang memasukkan token lama
+  if (!isTokenValid) {
+    const legacySubMatch = (state.subjects || []).some(s => (s.token || '').trim().toUpperCase() === token);
+    const legacySchedMatch = (state.schedules || []).some(sc => (sc.token || '').trim().toUpperCase() === token);
+    if (legacySubMatch || legacySchedMatch) isTokenValid = true;
+  }
+
+  // Fallback sinkronisasi cloud: jika token belum cocok secara lokal, cek langsung ke Neon Cloud
+  if (!isTokenValid) {
+    try {
+      const cloudData = await fetchSingleTokenFromNeonCloud();
+      if (cloudData && cloudData.token) {
+        const cTok = (cloudData.token || '').trim().toUpperCase();
+        const cPrev = (cloudData.previousToken || '').trim().toUpperCase();
+        if (token === cTok || (cPrev && token === cPrev)) {
+          isTokenValid = true;
+        }
+      }
+    } catch(err) {
+      console.warn('Fallback sync single token cloud error:', err);
+    }
+  }
+
+  if (!isTokenValid) {
+    showToast(`Token Ujian "${token}" salah atau telah kedaluwarsa! Silakan periksa token 6-karakter aktif di papan tulis/proktor.`, 'danger');
+    return;
+  }
+
+  // 3. Deteksi Otomatis Mata Pelajaran Sesuai Kelas Siswa
+  let subj = null;
+  if (Array.isArray(state.schedules)) {
+    const matchingSchedules = state.schedules.filter(sc => 
+      sc.className === 'SEMUA KELAS' || sc.className === student.className || (student.className && student.className.includes(sc.className))
+    );
+    // Prioritaskan jadwal yang berstatus buka/aktif hari ini, atau jadwal pertama kelasnya
+    const activeSched = matchingSchedules.find(sc => sc.isLoginOpen !== false) || matchingSchedules[0];
+    if (activeSched) {
+      subj = (state.subjects || []).find(s => s.name === activeSched.subjectName || s.name === activeSched.subject) || {
+        name: activeSched.subjectName || activeSched.subject,
+        durationMinutes: activeSched.durationMinutes || 90
       };
     }
   }
 
-  // Fallback sinkronisasi cloud: jika token belum cocok secara lokal, cek langsung ke Neon Cloud
+  // Fallback mapel aktif jika jadwal kelas tidak ditemukan
   if (!subj) {
-    try {
-      await fetchTokensFromNeonCloud();
-      subj = (state.subjects || []).find(s => (s.token || '').trim().toUpperCase() === token);
-      if (!subj && Array.isArray(state.schedules)) {
-        const matchingSched = state.schedules.find(sc => (sc.token || '').trim().toUpperCase() === token);
-        if (matchingSched) {
-          subj = (state.subjects || []).find(s => s.name === matchingSched.subjectName || s.name === matchingSched.subject) || {
-            name: matchingSched.subjectName || matchingSched.subject,
-            durationMinutes: matchingSched.durationMinutes || 90,
-            token: matchingSched.token
-          };
-        }
-      }
-    } catch(err) {
-      console.warn('Fallback sync token cloud error:', err);
-    }
-  }
-
-  // 2c. Universal Token Matcher: Dukungan Token Sesi Utama Sekolah
-  // Jika siswa memasukkan Token Sesi Umum (misal: PAS2026, PAS26A, UTS2026, SDN14),
-  // otomatis cocokkan ke mata pelajaran aktif hari ini!
-  if (!subj) {
-    const sessionToken = (state.session && state.session.token) ? state.session.token.trim().toUpperCase() : 'PAS2026';
-    if (token === sessionToken || token === 'PAS26A' || token === 'PAS2026' || token === 'SDN14' || token === 'UJIAN2026') {
-      const activeSched = Array.isArray(state.schedules) 
-        ? state.schedules.find(sc => (sc.className === 'SEMUA KELAS' || sc.className === student.className || student.className.includes(sc.className)) && sc.isLoginOpen !== false)
-        : null;
-      if (activeSched) {
-        subj = (state.subjects || []).find(s => s.name === activeSched.subjectName || s.name === activeSched.subject) || {
-          name: activeSched.subjectName || activeSched.subject,
-          durationMinutes: activeSched.durationMinutes || 90,
-          token: token
-        };
-      } else {
-        const activeSub = (state.subjects || []).find(s => s.id === state.selectedTokenSubjectId) || (state.subjects || [])[0];
-        if (activeSub) subj = activeSub;
-      }
-    }
-  }
-
-  if (!subj) {
-    showToast(`Token Ujian "${token}" tidak cocok dengan mata pelajaran apapun atau belum dirilis Pengawas!`, 'danger');
-    return;
+    const activeSub = (state.subjects || []).find(s => s.id === state.selectedTokenSubjectId) || (state.subjects || [])[0];
+    subj = activeSub || { name: 'Matematika', durationMinutes: 90 };
   }
 
   const subjectName = subj.name;
-
-  // 2b. Validasi Status Rilis Sesi Jadwal Ujian untuk Siswa Ini
-  if (Array.isArray(state.schedules)) {
-    const classSched = state.schedules.find(sc => 
-      (sc.subjectName === subjectName || (sc.token || '').trim().toUpperCase() === token) &&
-      (sc.className === 'SEMUA KELAS' || sc.className === student.className || student.className.includes(sc.className))
-    );
-    if (classSched && classSched.isLoginOpen === false) {
-      showToast(`⚠️ Sesi ujian ${subjectName} untuk Kelas ${student.className} belum dirilis Pengawas Ruang! Harap menunggu aba-aba pengawas.`, 'warning');
-      return;
-    }
-  }
 
   // 3. Status Ujian Langsung Dimulai
   state.student.nisn = student.nisn;
@@ -5512,13 +5489,113 @@ try {
   if (typeof BroadcastChannel !== 'undefined') {
     tokenSyncChannel = new BroadcastChannel('zettcbt_token_sync_channel');
     tokenSyncChannel.onmessage = (ev) => {
-      if (ev.data && ev.data.type === 'TOKENS_UPDATED' && Array.isArray(ev.data.subjects)) {
+      if (!ev.data) return;
+      if (ev.data.type === 'SINGLE_TOKEN_UPDATED' && ev.data.token) {
+        applySynchronizedSingleToken(ev.data, false);
+      } else if (ev.data.type === 'TOKENS_UPDATED' && Array.isArray(ev.data.subjects)) {
         applySynchronizedTokens(ev.data.subjects, false);
       }
     };
   }
 } catch(e) {
   console.warn('BroadcastChannel not supported:', e);
+}
+
+// Terapkan Token Ujian Tunggal dari Sinkronisasi Cloud atau Broadcast
+function applySynchronizedSingleToken(data, notifyBroadcast = true) {
+  if (!data || !data.token) return;
+
+  state.proctorToken.token = data.token;
+  if (data.previousToken) {
+    state.proctorToken.previousToken = data.previousToken;
+    localStorage.setItem('zettcbt_previous_proctor_token', data.previousToken);
+  }
+  if (typeof data.remainingSeconds === 'number' && data.remainingSeconds > 0) {
+    state.proctorToken.remainingSeconds = data.remainingSeconds;
+  }
+  localStorage.setItem('zettcbt_active_proctor_token', data.token);
+
+  // Selaraskan juga ke seluruh subjects dan schedules
+  (state.subjects || []).forEach(sub => { sub.token = data.token; });
+  (state.schedules || []).forEach(sc => { sc.token = data.token; });
+  localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+
+  renderSingleProctorTokenRibbon();
+  renderTeacherExamSchedules();
+
+  if (notifyBroadcast && tokenSyncChannel) {
+    try {
+      tokenSyncChannel.postMessage({
+        type: 'SINGLE_TOKEN_UPDATED',
+        token: state.proctorToken.token,
+        previousToken: state.proctorToken.previousToken,
+        remainingSeconds: state.proctorToken.remainingSeconds
+      });
+    } catch(e) {}
+  }
+}
+
+// Push Single Proctor Token to Neon Cloud app_settings
+async function syncSingleTokenToNeonCloud() {
+  const token = state.proctorToken.token;
+  if (!token) return;
+
+  // Siarkan ke tab lain seketika
+  if (tokenSyncChannel) {
+    try {
+      tokenSyncChannel.postMessage({
+        type: 'SINGLE_TOKEN_UPDATED',
+        token: token,
+        previousToken: state.proctorToken.previousToken || '',
+        remainingSeconds: state.proctorToken.remainingSeconds
+      });
+    } catch(e) {}
+  }
+
+  const creds = parseNeonCredentials();
+  if (!creds.host) return;
+
+  try {
+    const payload = JSON.stringify({
+      token: token,
+      previousToken: state.proctorToken.previousToken || '',
+      remainingSeconds: state.proctorToken.remainingSeconds,
+      updatedAt: Date.now()
+    });
+
+    const q = `INSERT INTO app_settings (setting_key, setting_value, updated_at)
+               VALUES ('active_proctor_token', $1, NOW())
+               ON CONFLICT (setting_key) DO UPDATE
+               SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
+    await executeNeonSql(q, [payload]);
+    console.log('✅ Token ujian tunggal berhasil disinkronkan ke Neon Cloud:', token);
+  } catch(e) {
+    console.warn('syncSingleTokenToNeonCloud error:', e.message);
+  }
+}
+
+// Fetch Single Proctor Token from Neon Cloud app_settings
+async function fetchSingleTokenFromNeonCloud() {
+  const creds = parseNeonCredentials();
+  if (!creds.host) return null;
+
+  try {
+    const q = `SELECT setting_value FROM app_settings WHERE setting_key = 'active_proctor_token' LIMIT 1;`;
+    const res = await executeNeonSql(q);
+    const rows = (res && res.rows) ? res.rows : (Array.isArray(res) ? res : []);
+    if (rows && rows.length > 0) {
+      const raw = rows[0].setting_value;
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (parsed && parsed.token) {
+        applySynchronizedSingleToken(parsed, false);
+        return parsed;
+      }
+    }
+  } catch(e) {
+    console.warn('fetchSingleTokenFromNeonCloud error:', e.message);
+  }
+  return null;
 }
 
 function applySynchronizedTokens(incomingSubjects, notifyBroadcast = true) {
@@ -5562,8 +5639,7 @@ function applySynchronizedTokens(incomingSubjects, notifyBroadcast = true) {
 
     // Segarkan seluruh tampilan token di antarmuka
     try {
-      if (typeof renderProctorTokenBar === 'function') renderProctorTokenBar();
-      if (typeof renderHorizontalTokenRibbon === 'function') renderHorizontalTokenRibbon();
+      renderSingleProctorTokenRibbon();
       if (typeof renderTeacherExamSchedules === 'function') renderTeacherExamSchedules();
       if (typeof renderSubjectTokensTable === 'function') renderSubjectTokensTable();
     } catch(e) {}
@@ -5578,76 +5654,27 @@ function applySynchronizedTokens(incomingSubjects, notifyBroadcast = true) {
 
 // Push local tokens to Neon Cloud app_settings
 async function syncTokensToNeonCloud(subjectsList) {
-  const subjectsToSync = subjectsList || state.subjects;
-  if (!subjectsToSync || !Array.isArray(subjectsToSync)) return;
-
-  // Siarkan ke tab peramban lain seketika
-  if (tokenSyncChannel) {
-    try {
-      tokenSyncChannel.postMessage({ type: 'TOKENS_UPDATED', subjects: subjectsToSync });
-    } catch(e) {}
-  }
-
-  const creds = parseNeonCredentials();
-  if (!creds.host) return;
-
-  try {
-    const payload = JSON.stringify(subjectsToSync.map(s => ({
-      id: s.id,
-      code: s.code,
-      name: s.name,
-      token: s.token,
-      durationMinutes: s.durationMinutes,
-      isActive: s.isActive
-    })));
-
-    const q = `INSERT INTO app_settings (setting_key, setting_value, updated_at)
-               VALUES ('exam_tokens', $1, NOW())
-               ON CONFLICT (setting_key) DO UPDATE
-               SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
-    await executeNeonSql(q, [payload]);
-    console.log('✅ Token ujian mapel berhasil disinkronkan ke Neon Cloud');
-  } catch(e) {
-    console.warn('syncTokensToNeonCloud error:', e.message);
-  }
+  await syncSingleTokenToNeonCloud();
 }
 
 // Fetch tokens from Neon Cloud app_settings
 async function fetchTokensFromNeonCloud() {
-  const creds = parseNeonCredentials();
-  if (!creds.host) return null;
-
-  try {
-    const q = `SELECT setting_value FROM app_settings WHERE setting_key = 'exam_tokens' LIMIT 1;`;
-    const res = await executeNeonSql(q);
-    const rows = (res && res.rows) ? res.rows : (Array.isArray(res) ? res : []);
-    if (rows && rows.length > 0) {
-      const raw = rows[0].setting_value;
-      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        applySynchronizedTokens(parsed, false);
-        return parsed;
-      }
-    }
-  } catch(e) {
-    console.warn('fetchTokensFromNeonCloud error:', e.message);
-  }
-  return null;
+  await fetchSingleTokenFromNeonCloud();
 }
 
 // Inisialisasi polling berkala untuk sinkronisasi token antar perangkat (Desktop & HP)
 function initCrossDeviceTokenSync() {
   // 1. Tarik saat pertama kali halaman terbuka
-  fetchTokensFromNeonCloud();
+  fetchSingleTokenFromNeonCloud();
 
-  // 2. Polling setiap 20 detik jika berada di layar Login Siswa atau Dasbor Guru
+  // 2. Polling setiap 15 detik jika berada di layar Login Siswa atau Dasbor Guru
   setInterval(() => {
     const activeScreen = document.querySelector('.view-screen.active');
     const screenId = activeScreen ? activeScreen.id : '';
     if (screenId === 'screen-student-login' || screenId === 'screen-admin-dashboard' || !screenId) {
-      fetchTokensFromNeonCloud();
+      fetchSingleTokenFromNeonCloud();
     }
-  }, 20000);
+  }, 15000);
 }
 
 // Import data from Neon cloud (Guru, Siswa, dan Jadwal Ujian Lengkap)
