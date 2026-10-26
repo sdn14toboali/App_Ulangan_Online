@@ -55,7 +55,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=2.2.0">
+  <link rel="stylesheet" href="style.css?v=3.5.1">
 </head>
 <body>
 
@@ -544,8 +544,8 @@
 
     <!-- FLOATING MOBILE BOTTOM THUMB BAR (MOBILE ONLY) -->
     <div class="mobile-exam-bottom-bar" id="mobile-exam-bottom-bar">
-      <button type="button" class="btn-mobile-nav" onclick="navigateQuestion(-1)" title="Soal Sebelumnya">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <button type="button" class="btn-mobile-nav" id="mobile-btn-prev" onclick="navigateQuestion(-1)" title="Soal Sebelumnya">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
         <span>Sebelumnya</span>
       </button>
 
@@ -559,14 +559,9 @@
         <span id="mobile-current-q-label">No. 1</span>
       </button>
 
-      <button type="button" class="btn-mobile-nav btn-primary" onclick="navigateQuestion(1)" title="Soal Berikutnya">
+      <button type="button" class="btn-mobile-nav btn-primary" id="mobile-btn-next" onclick="navigateQuestion(1)" title="Soal Berikutnya">
         <span>Berikutnya</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-
-      <button type="button" class="btn-mobile-finish" onclick="openSubmitConfirmModal()" title="Selesaikan Ujian">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        <span>Selesai</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
     </div>
 
@@ -588,6 +583,12 @@
         <div class="grid-buttons" id="mobile-question-grid-container">
           <!-- Rendered by JS -->
         </div>
+      </div>
+      <div class="mobile-drawer-footer">
+        <button type="button" class="btn-drawer-submit" onclick="toggleMobileQuestionDrawer(false); openSubmitConfirmModal();">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Kumpulkan Jawaban Ujian</span>
+        </button>
       </div>
     </div>
     <div id="mobile-drawer-backdrop" class="mobile-drawer-backdrop" onclick="toggleMobileQuestionDrawer(false)"></div>
