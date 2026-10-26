@@ -995,7 +995,11 @@
               </div>
               <p style="font-size: 0.8rem; color: var(--slate-500); margin-top: 2px;" id="schedule-role-hint">Menampilkan sesi ujian sesuai kewenangan kelas / mata pelajaran binaan Anda.</p>
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              <button type="button" id="btn-global-login-toggle" class="btn-student-login-toggle active" onclick="toggleGlobalStudentLogin()" title="Status Akses Ujian Siswa Sekolah. Klik untuk membuka/menutup.">
+                <span id="login-toggle-indicator">🟢</span>
+                <span id="login-toggle-text">Login Siswa: DIBUKA</span>
+              </button>
               <button type="button" class="btn btn-outline btn-sm" onclick="renderTeacherExamSchedules()">🔄 Segarkan Jadwal</button>
               <button type="button" class="btn btn-primary btn-sm" id="btn-add-schedule-admin" onclick="openAddScheduleModal()" style="display: none;">+ Tambah Sesi Jadwal</button>
             </div>
@@ -1012,6 +1016,7 @@
                   <th>Jam Pelaksanaan</th>
                   <th>Ruangan</th>
                   <th>Token Ujian</th>
+                  <th style="text-align: center; width: 145px;">Status Rilis Ujian</th>
                   <th style="text-align: center; width: 75px;">Atur</th>
                 </tr>
               </thead>
