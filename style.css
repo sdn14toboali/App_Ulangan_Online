@@ -4274,3 +4274,704 @@ body.dark-mode .btn-release-exam.release-inactive {
   color: #f87171;
 }
 
+/* ==========================================================================
+   v3.5.0: DUAL-VIEWPORT MASTER UI
+   - DESKTOP: Universitas Tarakarta 3-Column Architecture (#70C1B3 & #0FA97F)
+   - MOBILE: Native Mobile App UI Kit ("Final UI Design" Standard)
+   ========================================================================== */
+
+/* 1. Main Canvas & Shell */
+.cbt-tarakarta-canvas {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #70C1B3; /* Soothing mint/teal canvas ala Tarakarta */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.cbt-tarakarta-shell {
+  width: 100%;
+  max-width: 1320px;
+  min-height: 86vh;
+  background-color: #F4F9F7;
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(11, 79, 65, 0.2);
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* 2. Desktop Sidebar (Emerald Green) */
+.cbt-tarakarta-sidebar {
+  width: 230px;
+  min-width: 230px;
+  background-color: #0FA97F; /* Rich emerald green */
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.15rem;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.cbt-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.cbt-hamburger-icon {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  opacity: 0.85;
+}
+
+.cbt-hamburger-icon:hover {
+  opacity: 1;
+}
+
+.cbt-brand-emblem {
+  width: 38px;
+  height: 38px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.cbt-sidebar-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cbt-brand-info {
+  line-height: 1.15;
+}
+
+.cbt-brand-name {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+.cbt-brand-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #d1fae5;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.cbt-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.cbt-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #e6f4ea;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cbt-nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.cbt-nav-item.active {
+  background-color: #0B7A5F; /* Dark emerald pill */
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.cbt-sidebar-footer {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cbt-btn-exit {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cbt-btn-exit:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #fca5a5;
+  color: #fee2e2;
+}
+
+/* 3. Main Content Area */
+.cbt-tarakarta-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.75rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* 4. Topbar Header */
+.cbt-main-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+.cbt-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cbt-topbar-back-btn {
+  display: none; /* Only on mobile */
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  color: #334155;
+  cursor: pointer;
+}
+
+.cbt-desktop-title-text {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cbt-mobile-user-greeting {
+  display: none; /* Appears on Mobile */
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.cbt-user-hi {
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.2;
+}
+
+.cbt-user-sub {
+  font-size: 0.76rem;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.cbt-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.cbt-timer-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  background: #ffffff;
+  border: 1.5px solid #0FA97F;
+  color: #0FA97F;
+  border-radius: 99px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  box-shadow: 0 2px 8px rgba(15, 169, 127, 0.15);
+}
+
+.cbt-timer-pill.timer-danger {
+  border-color: #EF4444;
+  color: #EF4444;
+  background: #FEF2F2;
+  animation: pulse-danger 1s infinite alternate;
+}
+
+/* 5. Mobile Progress Banner */
+.cbt-mobile-hero-progress {
+  display: none;
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.cbt-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.cbt-progress-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cbt-progress-count {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #0FA97F;
+}
+
+.cbt-progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background-color: #E2E8F0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.cbt-progress-bar-fill {
+  height: 100%;
+  background-color: #0FA97F;
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* 6. 2-Column Grid (Control Column + Question Card) */
+.cbt-exam-grid {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* 7. Stacked Cards in Control Column */
+.cbt-control-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.cbt-stacked-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.cbt-card-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0FA97F;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.25rem;
+}
+
+.cbt-card-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.3;
+}
+
+.cbt-card-sub {
+  font-size: 0.72rem;
+  color: #64748B;
+  margin-top: 0.2rem;
+}
+
+.cbt-mono-timer {
+  font-family: 'SF Mono', Monaco, Consolas, 'Courier New', monospace;
+  font-size: 1.2rem;
+  color: #0FA97F;
+  letter-spacing: 0.04em;
+}
+
+.cbt-grid-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 0.4rem;
+}
+
+/* 8. Main Question Card (Right Column) */
+.cbt-question-main-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cbt-question-card-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #F1F5F9;
+  background-color: #FAFCFB;
+}
+
+.cbt-btn-prev, .cbt-btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.cbt-btn-prev {
+  background: transparent;
+  color: #475569;
+}
+
+.cbt-btn-prev:hover {
+  background: #F1F5F9;
+  color: #0F172A;
+}
+
+.cbt-btn-next {
+  background: transparent;
+  color: #0FA97F;
+  border-color: rgba(15, 169, 127, 0.2);
+}
+
+.cbt-btn-next:hover {
+  background: #ECFDF5;
+  border-color: #0FA97F;
+}
+
+.cbt-question-index-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0FA97F;
+}
+
+.cbt-question-body {
+  padding: 1.75rem 2rem;
+  flex: 1;
+}
+
+/* Option Items (Radio Circles ala Tarakarta) */
+.cbt-tarakarta-canvas .options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.cbt-tarakarta-canvas .option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.15rem;
+  background: #ffffff;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.cbt-tarakarta-canvas .option-item:hover {
+  border-color: #0FA97F;
+  background-color: #F0FDF4;
+}
+
+.cbt-tarakarta-canvas .option-item.selected {
+  border-color: #0FA97F;
+  background-color: #F0FDF4;
+  box-shadow: 0 0 0 1px #0FA97F;
+}
+
+/* Circular Radio Indicator */
+.cbt-tarakarta-canvas .option-key {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #94A3B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0;
+  position: relative;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+.cbt-tarakarta-canvas .option-item.selected .option-key {
+  border-color: #0FA97F;
+  background-color: #ffffff;
+}
+
+.cbt-tarakarta-canvas .option-item.selected .option-key::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #0FA97F;
+  display: block;
+}
+
+.cbt-tarakarta-canvas .option-text {
+  font-size: 0.96rem;
+  color: #1E293B;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* Question Action Footer */
+.cbt-question-card-footer {
+  padding: 1.15rem 2rem;
+  border-top: 1px solid #F1F5F9;
+  background-color: #FAFCFB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cbt-doubt-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cbt-doubt-checkbox-label input[type="checkbox"] {
+  accent-color: #D97706;
+  width: 16px;
+  height: 16px;
+}
+
+.cbt-btn-submit-green {
+  background-color: #0FA97F;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.6rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(15, 169, 127, 0.3);
+}
+
+.cbt-btn-submit-green:hover {
+  background-color: #0D8F6C;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 169, 127, 0.4);
+}
+
+/* Grid button styling inside Tarakarta shell */
+.cbt-grid-buttons .grid-btn {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid #CBD5E1;
+  background: #ffffff;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cbt-grid-buttons .grid-btn:hover {
+  border-color: #0FA97F;
+  color: #0FA97F;
+}
+
+.cbt-grid-buttons .grid-btn.current {
+  border-color: #0FA97F;
+  color: #0FA97F;
+  box-shadow: 0 0 0 2px rgba(15, 169, 127, 0.25);
+}
+
+.cbt-grid-buttons .grid-btn.answered {
+  background-color: #0FA97F;
+  border-color: #0FA97F;
+  color: #ffffff;
+}
+
+.cbt-grid-buttons .grid-btn.doubt {
+  background-color: #F59E0B;
+  border-color: #D97706;
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   MOBILE VIEWPORT ADAPTATIONS (≤ 768px)
+   Native Mobile App UI Kit ("Final UI Design" Standard)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .cbt-tarakarta-canvas {
+    padding: 0;
+    background-color: #F4F9F7;
+    align-items: stretch;
+  }
+
+  .cbt-tarakarta-shell {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    min-height: 100vh;
+  }
+
+  /* Hide Desktop Sidebar on Mobile */
+  .cbt-tarakarta-sidebar {
+    display: none !important;
+  }
+
+  /* Main Container Padding */
+  .cbt-tarakarta-main {
+    padding: 0.75rem 0.85rem 5.5rem;
+  }
+
+  /* Mobile Topbar */
+  .cbt-desktop-title-text {
+    display: none;
+  }
+
+  .cbt-topbar-back-btn {
+    display: flex;
+  }
+
+  .cbt-mobile-user-greeting {
+    display: flex;
+  }
+
+  .cbt-mobile-hero-progress {
+    display: block;
+  }
+
+  /* Hide Control Column on Mobile (Moved to Bottom Sheet) */
+  .cbt-exam-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .cbt-control-column {
+    display: none !important;
+  }
+
+  /* Mobile Question Card */
+  .cbt-question-main-card {
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  }
+
+  .cbt-question-card-topbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .cbt-btn-prev, .cbt-btn-next {
+    display: none; /* Managed by bottom bar */
+  }
+
+  .cbt-question-body {
+    padding: 1.25rem 1.15rem;
+  }
+
+  .question-content {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Thumb-Friendly Option Items (Min-Height: 52px) */
+  .cbt-tarakarta-canvas .option-item {
+    min-height: 52px;
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    gap: 0.75rem;
+  }
+
+  .cbt-question-card-footer {
+    display: none; /* Managed by mobile bottom thumb bar */
+  }
+
+  /* Mobile Sticky Bottom Bar */
+  .mobile-exam-bottom-bar {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-top: 1.5px solid #E2E8F0;
+    padding: 8px 10px;
+    z-index: 95;
+    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .btn-mobile-nav.btn-primary {
+    background-color: #0FA97F !important;
+    border-color: #0FA97F !important;
+  }
+
+  /* Mobile Dialog Card */
+  .cbt-mobile-dialog-card {
+    border-radius: 24px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
