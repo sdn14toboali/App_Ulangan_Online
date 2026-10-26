@@ -57,9 +57,9 @@ const state = {
     key: localStorage.getItem('zettcbt_sb_key') || '',
   },
 
-  // Identitas Sekolah SD NEGERI 14 TOBOALI
+  // Identitas Sekolah & Dedicated School Vault (Permanen Anti-Reset)
   school: (() => {
-    const defaultSchoolLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 1000) 
+    const defaultSchoolLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 100) 
       ? window.OFFICIAL_SDN14_LOGO 
       : "assets/logo-sdn14.png";
     const defaultSchool = {
@@ -72,15 +72,20 @@ const state = {
       headmasterNip: '19750312 199903 1 004',
       logoUrl: defaultSchoolLogo,
       teacherSigner: 'Siti Aminah, S.Pd',
-      teacherSignerNip: '-'
+      teacherSignerNip: '-',
+      isCustomLogo: false,
+      isCustomName: false
     };
     try {
+      // Prioritaskan pembacaan dari Dedicated Vault jika pengguna pernah menyimpan konfigurasi
+      const vault = JSON.parse(localStorage.getItem('zettcbt_school_vault') || 'null');
       const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
-      const merged = { ...defaultSchool, ...saved };
-      // Migrasikan logo jika belum ada, corrupt, masih berupa SVG lama, atau berupa path lokal yang rentan 404 di ponsel
-      if (!merged.logoUrl || typeof merged.logoUrl !== 'string' || merged.logoUrl.length < 1000 || merged.logoUrl.includes('assets/') || merged.logoUrl.includes('$b') || merged.logoUrl.includes('data:image/svg+xml') || merged.logoUrl.includes('SDN 14 TOBOALI')) {
+      const customSource = (vault && (vault.isCustomLogo || vault.isCustomName || vault.name)) ? { ...saved, ...vault } : saved;
+      const merged = { ...defaultSchool, ...customSource };
+
+      // Hanya gunakan fallback jika logoUrl kosong sama sekali
+      if (!merged.logoUrl || typeof merged.logoUrl !== 'string' || merged.logoUrl.trim() === '') {
         merged.logoUrl = defaultSchoolLogo;
-        localStorage.setItem('zettcbt_school', JSON.stringify(merged));
       }
       return merged;
     } catch(e) {
@@ -523,10 +528,16 @@ function loadSavedState() {
     }
   }
 
+  const savedSchoolVault = localStorage.getItem('zettcbt_school_vault');
   const savedSchool = localStorage.getItem('zettcbt_school');
-  if (savedSchool) {
+  if (savedSchoolVault || savedSchool) {
     try {
-      state.school = Object.assign(state.school, JSON.parse(savedSchool));
+      const vaultObj = savedSchoolVault ? JSON.parse(savedSchoolVault) : null;
+      const savedObj = savedSchool ? JSON.parse(savedSchool) : null;
+      const combined = Object.assign({}, state.school, savedObj || {}, vaultObj || {});
+      if (combined && combined.name) {
+        state.school = combined;
+      }
     } catch (e) {
       console.error('Failed to parse saved school', e);
     }
@@ -1370,7 +1381,7 @@ function handleTeacherLogout() {
   const elHeaderName = document.getElementById('srms-header-user-name');
   if (elHeaderName) elHeaderName.textContent = 'Bapak/Ibu Guru';
   const elHeaderRole = document.getElementById('srms-header-user-role');
-  if (elHeaderRole) elHeaderRole.textContent = 'SD Negeri 14 Toboali';
+  if (elHeaderRole) elHeaderRole.textContent = (state.school && state.school.name) ? state.school.name : 'SD Negeri 14 Toboali';
 
   showScreen('student-login');
   showToast('Anda telah berhasil keluar dari akun.', 'info');
@@ -2653,7 +2664,7 @@ function renderSrmsDashboard() {
   const teacherName = t ? t.fullName : 'Bapak/Ibu Guru & Pengawas';
   const teacherRole = t 
     ? (t.role === 'admin_sekolah' ? 'Operator Sekolah (Admin)' : (t.role === 'guru_kelas' ? 'Wali/Guru Kelas ' + t.assignedClass : 'Guru Mapel ' + t.assignedSubject)) 
-    : 'SD Negeri 14 Toboali';
+    : ((state.school && state.school.name) ? state.school.name : 'SD Negeri 14 Toboali');
 
   // 1. Update Profile & Greetings
   const heroNameEl = document.getElementById('srms-hero-name');
@@ -2784,7 +2795,10 @@ function openTeacherProfileModal() {
   if (nipInput) nipInput.value = t.nip || '';
   if (roleInput) roleInput.value = roleText;
   if (displayName) displayName.textContent = t.fullName || 'Bapak/Ibu Guru';
-  if (displayRole) displayRole.textContent = `${roleText} • SD NEGERI 14 TOBOALI`;
+  const schName = (state.school && state.school.name) ? state.school.name : 'SD NEGERI 14 TOBOALI';
+  if (displayRole) displayRole.textContent = `${roleText} • ${schName}`;
+  const schoolInput = document.getElementById('teacher-profile-input-school');
+  if (schoolInput) schoolInput.value = schName;
   if (avatarImg) avatarImg.src = t.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
 
   modal.style.display = 'flex';
@@ -4261,24 +4275,44 @@ function populateSchoolIdentityForm() {
 
 function handleSaveSchoolIdentity(event) {
   event.preventDefault();
+  const inputName = document.getElementById('school-name') ? document.getElementById('school-name').value.trim() : '';
+  const inputLogo = document.getElementById('school-logo-url') ? document.getElementById('school-logo-url').value.trim() : '';
+
+  const defaultLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 100)
+    ? window.OFFICIAL_SDN14_LOGO
+    : "assets/logo-sdn14.png";
+
+  const finalLogo = inputLogo ? inputLogo : (state.school.logoUrl || defaultLogo);
+  const isCustomLogo = !!(finalLogo && finalLogo !== defaultLogo && !finalLogo.includes('assets/logo-sdn14.png'));
+  const isCustomName = !!(inputName && inputName !== 'SD NEGERI 14 TOBOALI');
+
   state.school = {
-    name: document.getElementById('school-name').value.trim(),
-    npsn: document.getElementById('school-npsn').value.trim(),
-    academicYear: document.getElementById('school-academic-year').value.trim(),
+    name: inputName || 'SD NEGERI 14 TOBOALI',
+    npsn: document.getElementById('school-npsn') ? document.getElementById('school-npsn').value.trim() : '',
+    academicYear: document.getElementById('school-academic-year') ? document.getElementById('school-academic-year').value.trim() : '',
     examType: document.getElementById('school-exam-type') ? document.getElementById('school-exam-type').value : (state.school.examType || 'UAS'),
-    address: document.getElementById('school-address').value.trim(),
-    headmaster: document.getElementById('school-headmaster').value.trim(),
-    headmasterNip: document.getElementById('school-headmaster-nip').value.trim(),
-    logoUrl: document.getElementById('school-logo-url') ? document.getElementById('school-logo-url').value.trim() : (state.school.logoUrl || ''),
+    address: document.getElementById('school-address') ? document.getElementById('school-address').value.trim() : '',
+    headmaster: document.getElementById('school-headmaster') ? document.getElementById('school-headmaster').value.trim() : '',
+    headmasterNip: document.getElementById('school-headmaster-nip') ? document.getElementById('school-headmaster-nip').value.trim() : '',
+    logoUrl: finalLogo,
     teacherSigner: document.getElementById('school-teacher-signer') ? document.getElementById('school-teacher-signer').value.trim() : (state.school.teacherSigner || ''),
-    teacherSignerNip: document.getElementById('school-teacher-signer-nip') ? document.getElementById('school-teacher-signer-nip').value.trim() : (state.school.teacherSignerNip || '')
+    teacherSignerNip: document.getElementById('school-teacher-signer-nip') ? document.getElementById('school-teacher-signer-nip').value.trim() : (state.school.teacherSignerNip || ''),
+    isCustomLogo: isCustomLogo,
+    isCustomName: isCustomName,
+    updatedAt: new Date().toISOString()
   };
 
+  // Simpan permanen ganda: Operational State & Dedicated School Vault (Anti-Reset)
   localStorage.setItem('zettcbt_school', JSON.stringify(state.school));
+  localStorage.setItem('zettcbt_school_vault', JSON.stringify(state.school));
+
+  // Sinkronisasi otomatis ke database Neon Cloud jika koneksi tersedia
+  syncSchoolIdentityToNeonCloud(state.school).catch(e => console.warn('Sync school identity to Neon deferred:', e.message));
+
   applySchoolBrandingUI();
   populateSchoolIdentityForm();
   renderExamCardsTab();
-  showToast('Identitas sekolah & pengaturan ujian berhasil disimpan!', 'success');
+  showToast('Identitas sekolah & logo permanen berhasil disimpan!', 'success');
 }
 
 /**
@@ -4286,21 +4320,27 @@ function handleSaveSchoolIdentity(event) {
  */
 function applySchoolBrandingUI() {
   const sch = state.school || {};
-  const defaultLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 1000)
+  const defaultLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 100)
     ? window.OFFICIAL_SDN14_LOGO
     : "assets/logo-sdn14.png";
-  const logo = (sch.logoUrl && typeof sch.logoUrl === 'string' && sch.logoUrl.startsWith('data:image/') && sch.logoUrl.length > 1000)
-    ? sch.logoUrl
+  // Gunakan logo kustom jika ada dan tidak kosong; jika tidak ada, gunakan default
+  const logo = (sch.logoUrl && typeof sch.logoUrl === 'string' && sch.logoUrl.trim().length > 0)
+    ? sch.logoUrl.trim()
     : defaultLogo;
   sch.logoUrl = logo;
   const schoolName = sch.name || 'SD NEGERI 14 TOBOALI';
   const examType = sch.examType || 'UAS';
 
+  // 0. Update Judul Tab Browser
+  if (typeof document !== 'undefined') {
+    document.title = `${schoolName} - Ujian Online`;
+  }
+
   // 1. Header Global & Brand Labels
   const headerIcon = document.querySelector('.brand-icon');
   if (headerIcon) {
     if (logo) {
-      headerIcon.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
+      headerIcon.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&!this.src.startsWith('data:image')&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
     } else {
       headerIcon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
     }
@@ -4322,13 +4362,25 @@ function applySchoolBrandingUI() {
     sidebarLogo.src = logo;
     sidebarLogo.alt = schoolName;
     sidebarLogo.onerror = function() {
-      if (window.OFFICIAL_SDN14_LOGO && this.src !== window.OFFICIAL_SDN14_LOGO) {
-        this.src = window.OFFICIAL_SDN14_LOGO;
+      if (defaultLogo && !this.src.startsWith('data:image') && this.src !== defaultLogo) {
+        this.src = defaultLogo;
       }
     };
   }
   const srmsBrandTitle = document.querySelector('.srms-brand-title');
   if (srmsBrandTitle) srmsBrandTitle.textContent = 'UJIAN ONLINE';
+
+  // Subtitle Sidebar
+  const sidebarSub = document.querySelector('.srms-brand-subtitle');
+  if (sidebarSub) {
+    sidebarSub.innerHTML = `Sistem Ujian &amp; Hasil Belajar<br><span class="brand-school-name">${escapeHtml(schoolName)}</span>`;
+  }
+
+  // Header user role di Dasbor Admin
+  const headerRole = document.getElementById('srms-header-user-role');
+  if (headerRole && (!state.currentTeacher || state.currentTeacher.role !== 'admin_sekolah')) {
+    if (!state.currentTeacher) headerRole.textContent = schoolName;
+  }
 
   // 2. Ruang Siswa (screen-student-login)
   const studentScreen = document.getElementById('screen-student-login');
@@ -4336,7 +4388,7 @@ function applySchoolBrandingUI() {
     const heroLogo = studentScreen.querySelector('.split-hero-logo');
     if (heroLogo) {
       if (logo) {
-        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
+        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&!this.src.startsWith('data:image')&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
       } else {
         heroLogo.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
       }
@@ -4344,9 +4396,10 @@ function applySchoolBrandingUI() {
     const studentFormLogo = document.getElementById('student-form-school-logo');
     if (studentFormLogo) {
       studentFormLogo.src = logo;
+      studentFormLogo.alt = schoolName;
       studentFormLogo.onerror = function() {
-        if (window.OFFICIAL_SDN14_LOGO && this.src !== window.OFFICIAL_SDN14_LOGO) {
-          this.src = window.OFFICIAL_SDN14_LOGO;
+        if (defaultLogo && !this.src.startsWith('data:image') && this.src !== defaultLogo) {
+          this.src = defaultLogo;
         }
       };
     }
@@ -4369,7 +4422,7 @@ function applySchoolBrandingUI() {
     const heroLogo = teacherScreen.querySelector('.split-hero-logo');
     if (heroLogo) {
       if (logo) {
-        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
+        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&!this.src.startsWith('data:image')&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
       } else {
         heroLogo.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
       }
@@ -4377,9 +4430,10 @@ function applySchoolBrandingUI() {
     const teacherFormLogo = document.getElementById('teacher-form-school-logo');
     if (teacherFormLogo) {
       teacherFormLogo.src = logo;
+      teacherFormLogo.alt = schoolName;
       teacherFormLogo.onerror = function() {
-        if (window.OFFICIAL_SDN14_LOGO && this.src !== window.OFFICIAL_SDN14_LOGO) {
-          this.src = window.OFFICIAL_SDN14_LOGO;
+        if (defaultLogo && !this.src.startsWith('data:image') && this.src !== defaultLogo) {
+          this.src = defaultLogo;
         }
       };
     }
@@ -4425,7 +4479,9 @@ function applySchoolBrandingUI() {
     teacherFormLogo.alt = schoolName;
   }
 
-  // Form login siswa kini mendeteksi mata pelajaran otomatis langsung dari token ujian
+  // 6. Modal Profil Guru - Sekolah
+  const profileSchoolInput = document.getElementById('teacher-profile-input-school');
+  if (profileSchoolInput) profileSchoolInput.value = schoolName;
 }
 
 // ==============================================================================
@@ -5099,9 +5155,21 @@ async function exportLocalDataToNeonCloud(options = {}) {
       !!ses.randomizeQuestions
     ]);
 
+    // Sync Identitas Sekolah & Logo ke Neon Cloud (app_settings)
+    try {
+      const schData = state.school || {};
+      const qSch = `INSERT INTO app_settings (setting_key, setting_value, updated_at)
+                    VALUES ('school_identity', $1, NOW())
+                    ON CONFLICT (setting_key) DO UPDATE
+                    SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
+      await executeNeonSql(qSch, [JSON.stringify(schData)]);
+    } catch(eSch) {
+      console.warn('Sync school identity to Neon deferred:', eSch.message);
+    }
+
     updateSyncStatusBadge('✅ Berhasil Ekspor', true);
     if (!isSilent) {
-      showToast(`✅ Berhasil! ${teachersCount} akun guru, ${studentsCount} siswa, & sesi ujian telah terunggah ke Neon Cloud.`, 'success');
+      showToast(`✅ Berhasil! ${teachersCount} akun guru, ${studentsCount} siswa, & identitas sekolah telah terunggah ke Neon Cloud.`, 'success');
     }
     return { success: true, teachersCount, studentsCount };
   } catch (err) {
@@ -5115,6 +5183,22 @@ async function exportLocalDataToNeonCloud(options = {}) {
       btn.style.opacity = '1';
     }
     if (title) title.textContent = origTitle;
+  }
+}
+
+// Sinkronisasi Langsung Identitas Sekolah ke Neon Cloud
+async function syncSchoolIdentityToNeonCloud(schoolObj) {
+  if (!schoolObj) return;
+  const creds = parseNeonCredentials();
+  if (!creds.host) return;
+  try {
+    const q = `INSERT INTO app_settings (setting_key, setting_value, updated_at)
+               VALUES ('school_identity', $1, NOW())
+               ON CONFLICT (setting_key) DO UPDATE
+               SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
+    await executeNeonSql(q, [JSON.stringify(schoolObj)]);
+  } catch(e) {
+    console.warn('syncSchoolIdentityToNeonCloud error:', e.message);
   }
 }
 
@@ -5253,9 +5337,31 @@ async function importDataFromNeonCloud(options = {}) {
       console.warn('Tarik sesi gagal:', eSession.message);
     }
 
+    // 4. Tarik Pengaturan Identitas Sekolah (School Identity)
+    try {
+      const rawSettings = await executeNeonSql("SELECT setting_key, setting_value FROM app_settings WHERE setting_key = 'school_identity' LIMIT 1;");
+      const settingRows = (rawSettings && rawSettings.rows) ? rawSettings.rows : (Array.isArray(rawSettings) ? rawSettings : []);
+      if (settingRows && settingRows.length > 0) {
+        const cloudSchool = JSON.parse(settingRows[0].setting_value || '{}');
+        const vault = JSON.parse(localStorage.getItem('zettcbt_school_vault') || 'null');
+        const hasLocalCustom = vault && (vault.isCustomLogo || vault.isCustomName);
+        if (!hasLocalCustom && cloudSchool && cloudSchool.name) {
+          state.school = { ...state.school, ...cloudSchool };
+          localStorage.setItem('zettcbt_school', JSON.stringify(state.school));
+          localStorage.setItem('zettcbt_school_vault', JSON.stringify(state.school));
+          applySchoolBrandingUI();
+          populateSchoolIdentityForm();
+        } else if (hasLocalCustom && vault) {
+          syncSchoolIdentityToNeonCloud(vault).catch(e => console.warn('Sync vault to Neon deferred:', e.message));
+        }
+      }
+    } catch (eSch) {
+      console.warn('Tarik identitas sekolah dari Neon gagal:', eSch.message);
+    }
+
     updateSyncStatusBadge(`✅ Tersinkron (${teachersCount} Guru, ${studentsCount} Siswa)`, true);
     if (!isSilent) {
-      showToast(`✅ Berhasil menarik dari Neon: ${teachersCount} Akun Guru, ${studentsCount} Siswa, & Sesi Ujian!`, 'success');
+      showToast(`✅ Berhasil menarik dari Neon: ${teachersCount} Akun Guru, ${studentsCount} Siswa, & Identitas Sekolah!`, 'success');
     }
     return { success: true, teachersCount, studentsCount, sessionsCount };
   } catch (err) {
