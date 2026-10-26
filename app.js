@@ -1065,6 +1065,7 @@ function renderTeacherExamSchedules() {
 
   schedules.forEach((sc, idx) => {
     const dayInfo = formatIndonesianDayDate(sc.date);
+    const isReleased = sc.isLoginOpen !== false;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="text-align: center;">${idx + 1}</td>
@@ -1085,6 +1086,12 @@ function renderTeacherExamSchedules() {
       <td>${escapeHtml(sc.room || 'Lab Komputer')}</td>
       <td>
         <span class="pwd-badge" style="color: #1e40af; background: #eff6ff; font-weight: 800; font-size: 0.9rem;">${escapeHtml(sc.token || '-')}</span>
+      </td>
+      <td style="text-align: center; white-space: nowrap;">
+        <button type="button" class="btn-release-exam ${isReleased ? 'release-active' : 'release-inactive'}" onclick="toggleScheduleLoginStatus('${sc.id}')" title="Klik untuk ${isReleased ? 'menutup/mengunci' : 'merilis/membuka'} akses ujian bagi siswa">
+          <span class="release-indicator">${isReleased ? '🟢' : '🔴'}</span>
+          <span class="release-text">${isReleased ? 'DIRILIS (Buka)' : 'DITUTUP (Kunci)'}</span>
+        </button>
       </td>
       <td style="text-align: center; white-space: nowrap;">
         <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
@@ -1119,7 +1126,11 @@ function toggleScheduleLoginStatus(scheduleId) {
   localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
   renderTeacherExamSchedules();
 
-  showToast(`Sesi login untuk ${sc.subjectName} (${sc.className}) ${sc.isLoginOpen ? 'DIBUKA' : 'DITUTUP'}!`, sc.isLoginOpen ? 'success' : 'warning');
+  if (sc.isLoginOpen) {
+    showToast(`✅ Sesi ujian ${sc.subjectName} (${sc.className}) resmi DIRILIS! Siswa dapat masuk mengerjakan.`, 'success');
+  } else {
+    showToast(`🔒 Sesi ujian ${sc.subjectName} (${sc.className}) DITUTUP! Akses masuk siswa dikunci.`, 'warning');
+  }
 }
 
 function openAddScheduleModal() {
@@ -1536,6 +1547,12 @@ function handleStudentLogin(event) {
     return;
   }
 
+  // 1b. Validasi Sakelar Master Pintu Login Siswa Sekolah
+  if (state.isStudentLoginActive === false) {
+    showToast('⚠️ Pintu login ujian sekolah sedang DITUTUP oleh Pengawas! Harap menunggu instruksi pengawas.', 'warning');
+    return;
+  }
+
   // 2. Deteksi Otomatis Mata Pelajaran Berdasarkan Token Ujian Pengawas
   let subj = (state.subjects || []).find(s => (s.token || '').trim().toUpperCase() === token);
 
@@ -1543,8 +1560,8 @@ function handleStudentLogin(event) {
   if (!subj && Array.isArray(state.schedules)) {
     const matchingSched = state.schedules.find(sc => (sc.token || '').trim().toUpperCase() === token);
     if (matchingSched) {
-      subj = (state.subjects || []).find(s => s.name === matchingSched.subject) || {
-        name: matchingSched.subject,
+      subj = (state.subjects || []).find(s => s.name === matchingSched.subjectName || s.name === matchingSched.subject) || {
+        name: matchingSched.subjectName || matchingSched.subject,
         durationMinutes: matchingSched.durationMinutes || 90,
         token: matchingSched.token
       };
@@ -1557,6 +1574,18 @@ function handleStudentLogin(event) {
   }
 
   const subjectName = subj.name;
+
+  // 2b. Validasi Status Rilis Sesi Jadwal Ujian untuk Siswa Ini
+  if (Array.isArray(state.schedules)) {
+    const classSched = state.schedules.find(sc => 
+      (sc.subjectName === subjectName || (sc.token || '').trim().toUpperCase() === token) &&
+      (sc.className === 'SEMUA KELAS' || sc.className === student.className || student.className.includes(sc.className))
+    );
+    if (classSched && classSched.isLoginOpen === false) {
+      showToast(`⚠️ Sesi ujian ${subjectName} untuk Kelas ${student.className} belum dirilis Pengawas Ruang! Harap menunggu aba-aba pengawas.`, 'warning');
+      return;
+    }
+  }
 
   // 3. Validasi Password Siswa untuk Mata Pelajaran yang Terdeteksi
   const expectedPassword = getStudentPasswordForSubject(student, subjectName);
