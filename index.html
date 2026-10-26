@@ -341,115 +341,208 @@
       <span>Masuk Layar Penuh</span>
     </button>
 
-    <!-- Exam Banner Sticky -->
-    <div class="exam-banner">
-      <div class="exam-banner-inner">
-        <div class="student-identity">
-          <div class="student-avatar" id="exam-avatar">S</div>
-          <div class="student-meta">
-            <h3 id="exam-student-name">Peserta Ujian</h3>
-            <p><span id="exam-subject-name">-</span> • Kelas: <span id="exam-class-name">-</span></p>
-          </div>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div class="autosave-badge" id="exam-autosave-indicator">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-              <polyline points="17 21 17 13 7 13 7 21"></polyline>
-              <polyline points="7 3 7 8 15 8"></polyline>
-            </svg>
-            <span>Auto-Save</span>
-          </div>
-
-          <div class="exam-timer-box" id="exam-timer-wrapper">
-            <div>
-              <div class="timer-label">SISA WAKTU</div>
-              <div class="timer-value" id="exam-timer-display">00:00:00</div>
+    <!-- CONTAINER UTAMA DUAL-VIEWPORT (DESKTOP: TARAKARTA | HP: MOBILE UI KIT) -->
+    <div class="cbt-tarakarta-canvas">
+      <div class="cbt-tarakarta-shell">
+        
+        <!-- 1. BILAH SAMPING KIRI (DESKTOP SIDEBAR - REFERENSI TARAKARTA) -->
+        <aside class="cbt-tarakarta-sidebar">
+          <div class="cbt-sidebar-brand">
+            <div class="cbt-hamburger-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </div>
+            <div class="cbt-brand-emblem">
+              <img src="assets/logo-sdn14.png" alt="Logo Sekolah" class="cbt-sidebar-logo" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">
+            </div>
+            <div class="cbt-brand-info">
+              <div class="cbt-brand-name">SD NEGERI 14</div>
+              <div class="cbt-brand-sub">TOBOALI CBT</div>
             </div>
           </div>
-        </div>
+
+          <nav class="cbt-sidebar-nav">
+            <div class="cbt-nav-item" title="Dashboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>Dashboard</span>
+            </div>
+            <div class="cbt-nav-item" title="Biodata Peserta">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <span>Biodata</span>
+            </div>
+            <div class="cbt-nav-item active" title="Ujian Online (Aktif)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+              <span>Test Seleksi</span>
+            </div>
+            <div class="cbt-nav-item" title="Pengumuman">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              <span>Pengumuman</span>
+            </div>
+            <div class="cbt-nav-item" title="Tata Tertib Ujian">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <span>Tata Tertib</span>
+            </div>
+          </nav>
+
+          <div class="cbt-sidebar-footer">
+            <button type="button" class="cbt-btn-exit" onclick="confirmExitStudentExam()" title="Keluar dari ruang ujian">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <span>Keluar</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- 2. AREA KONTEN UTAMA (BODY KANAN) -->
+        <section class="cbt-tarakarta-main">
+          
+          <!-- TOPBAR HEADER (DESKTOP TITLE & MOBILE APP TOP BAR) -->
+          <header class="cbt-main-topbar">
+            <div class="cbt-topbar-left">
+              <button type="button" class="cbt-topbar-back-btn" onclick="openSubmitConfirmModal()" title="Selesaikan Ujian">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+
+              <!-- Desktop Header Title -->
+              <div class="cbt-desktop-title-text">
+                ← Test Seleksi Mandiri CBT
+              </div>
+
+              <!-- Mobile Header Greeting (Referensi "Final UI Design") -->
+              <div class="cbt-mobile-user-greeting">
+                <div class="student-avatar" id="exam-avatar">S</div>
+                <div class="cbt-greeting-meta">
+                  <div class="cbt-user-hi">Hi <span id="exam-student-name">Peserta</span>,</div>
+                  <div class="cbt-user-sub"><span id="exam-subject-name">Matematika</span> • Kelas <span id="exam-class-name">6A</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cbt-topbar-right">
+              <!-- Live Countdown Timer Pill -->
+              <div class="cbt-timer-pill" id="exam-timer-wrapper">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span id="exam-timer-display">00:00:00</span>
+              </div>
+
+              <div class="autosave-badge" id="exam-autosave-indicator">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Auto-Save</span>
+              </div>
+            </div>
+          </header>
+
+          <!-- MOBILE HERO PROGRESS BANNER (REFERENSI "FINAL UI DESIGN") -->
+          <div class="cbt-mobile-hero-progress">
+            <div class="cbt-progress-header">
+              <span class="cbt-progress-label" id="cbt-mobile-progress-label">Progres Jawaban Soal</span>
+              <span class="cbt-progress-count" id="cbt-mobile-progress-count">0 dari 0 Soal (0%)</span>
+            </div>
+            <div class="cbt-progress-bar-track">
+              <div class="cbt-progress-bar-fill" id="cbt-mobile-progress-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- 2-COLUMN EXAM LAYOUT -->
+          <div class="cbt-exam-grid">
+            
+            <!-- KOLOM KONTROL TENGAH (STACKED CARDS - DESKTOP ONLY) -->
+            <aside class="cbt-control-column">
+              
+              <!-- Card 1: Test / Mapel -->
+              <div class="cbt-stacked-card">
+                <div class="cbt-card-tag">Test</div>
+                <div class="cbt-card-val" id="cbt-card-subject-val">Matematika</div>
+                <div class="cbt-card-sub" id="cbt-card-class-val">Kelas 6A • UAS Resmi</div>
+              </div>
+
+              <!-- Card 2: Sisa Waktu -->
+              <div class="cbt-stacked-card">
+                <div class="cbt-card-tag">Sisa Waktu</div>
+                <div class="cbt-card-val cbt-mono-timer" id="cbt-desktop-timer-val">00 : 00 : 00</div>
+                <div class="cbt-card-sub">Sinkronisasi Server Otomatis</div>
+              </div>
+
+              <!-- Card 3: Soal (Grid Nomor) -->
+              <div class="cbt-stacked-card cbt-soal-card">
+                <div class="cbt-card-tag">Soal</div>
+                <div class="cbt-grid-buttons" id="question-grid-container">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+              <!-- Card 4: Status Peserta & Auto-Save -->
+              <div class="cbt-stacked-card">
+                <div class="cbt-card-tag">Status Jawaban</div>
+                <div class="cbt-card-val" style="font-size: 0.95rem; color: #0FA97F;" id="cbt-desktop-progress-text">0 Terjawab</div>
+                <div class="cbt-card-sub">🟢 Cloud Auto-Save Aktif</div>
+              </div>
+
+            </aside>
+
+            <!-- KOLOM KANAN: KARTU SOAL UTAMA -->
+            <div class="cbt-question-main-card">
+              
+              <!-- Top inside navigation -->
+              <div class="cbt-question-card-topbar">
+                <button type="button" id="btn-prev-q" class="cbt-btn-prev" onclick="navigateQuestion(-1)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  <span>Sebelumnya</span>
+                </button>
+
+                <div class="cbt-question-index-title" id="exam-question-badge">
+                  Pertanyaan 1
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <div class="font-size-control">
+                    <button class="btn-font-scale" onclick="scaleFontSize(-1)" title="Perkecil Teks">A-</button>
+                    <button class="btn-font-scale" onclick="scaleFontSize(0)" title="Ukuran Normal">A</button>
+                    <button class="btn-font-scale" onclick="scaleFontSize(1)" title="Perbesar Teks">A+</button>
+                  </div>
+                  <button type="button" id="btn-next-q" class="cbt-btn-next" onclick="navigateQuestion(1)">
+                    <span>Selanjutnya</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Question Body -->
+              <div class="cbt-question-body" id="question-text-container">
+                <div id="question-image-box" class="question-image-box" style="display: none;">
+                  <img id="question-image-tag" src="" alt="Lampiran Soal">
+                </div>
+
+                <div class="question-content" id="question-content-text">
+                  Memuat butir soal...
+                </div>
+
+                <!-- Options List Container (Radio Options) -->
+                <div class="options-list" id="options-list-container">
+                  <!-- Rendered by JS -->
+                </div>
+              </div>
+
+              <!-- Bottom Action Footer -->
+              <div class="cbt-question-card-footer">
+                <label class="cbt-doubt-checkbox-label" title="Tandai jika masih ragu-ragu">
+                  <input type="checkbox" id="checkbox-doubt" onchange="toggleDoubtAnswer()">
+                  <span>Ragu-ragu</span>
+                </label>
+
+                <button type="button" class="cbt-btn-submit-green" id="btn-submit-exam-tarakarta" onclick="openSubmitConfirmModal()">
+                  Submit Jawaban
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
       </div>
     </div>
 
-    <!-- Exam Layout (Question + Navigator) -->
-    <div class="exam-layout">
-      <!-- Question Container -->
-      <div class="question-card">
-        <div class="question-header">
-          <div class="question-index-badge" id="exam-question-badge">Soal No. 1</div>
-          <div class="font-size-control">
-            <span style="font-size: 0.78rem; color: var(--slate-500); margin-right: 0.25rem;">Huruf:</span>
-            <button class="btn-font-scale" onclick="scaleFontSize(-1)">A-</button>
-            <button class="btn-font-scale" onclick="scaleFontSize(0)">A</button>
-            <button class="btn-font-scale" onclick="scaleFontSize(1)">A+</button>
-          </div>
-        </div>
-
-        <div class="question-body" id="question-text-container">
-          <div id="question-image-box" class="question-image-box" style="display: none;">
-            <img id="question-image-tag" src="" alt="Lampiran Soal">
-          </div>
-          <div class="question-content" id="question-content-text">
-            Memuat butir soal...
-          </div>
-
-          <!-- Options List (A - E) -->
-          <div class="options-list" id="options-list-container">
-            <!-- Rendered by Javascript -->
-          </div>
-        </div>
-
-        <!-- Question Navigation Buttons Desktop -->
-        <div class="question-footer">
-          <button id="btn-prev-q" class="btn btn-outline" onclick="navigateQuestion(-1)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-            Sebelumnya
-          </button>
-
-          <label class="doubt-checkbox-wrapper">
-            <input type="checkbox" id="checkbox-doubt" onchange="toggleDoubtAnswer()">
-            <span>Ragu-ragu</span>
-          </label>
-
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <button id="btn-next-q" class="btn btn-primary" onclick="navigateQuestion(1)">
-              Berikutnya
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </button>
-            <button class="btn btn-danger" onclick="openSubmitConfirmModal()">
-              Selesai Ujian
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Navigation Panel (Grid Nomor Soal Desktop) -->
-      <aside class="nav-panel">
-        <div class="nav-panel-header">
-          <div class="nav-panel-title">Daftar Nomor Soal</div>
-          <div class="nav-panel-legend">
-            <div class="legend-item"><div class="legend-dot answered"></div> Dijawab</div>
-            <div class="legend-item"><div class="legend-dot doubt"></div> Ragu</div>
-            <div class="legend-item"><div class="legend-dot empty"></div> Belum</div>
-          </div>
-        </div>
-
-        <div class="nav-grid-body">
-          <div class="grid-buttons" id="question-grid-container">
-            <!-- Buttons 1 to N generated by Javascript -->
-          </div>
-        </div>
-      </aside>
-    </div>
-
-    <!-- Mobile Bottom Thumb Navigation Bar (Sticky khusus Layar Ponsel) -->
+    <!-- FLOATING MOBILE BOTTOM THUMB BAR (MOBILE ONLY) -->
     <div class="mobile-exam-bottom-bar" id="mobile-exam-bottom-bar">
       <button type="button" class="btn-mobile-nav" onclick="navigateQuestion(-1)" title="Soal Sebelumnya">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -477,19 +570,19 @@
       </button>
     </div>
 
-    <!-- Mobile Slide-up Bottom Sheet Drawer untuk Daftar Nomor Soal -->
+    <!-- MOBILE SLIDE-UP BOTTOM SHEET (REFERENSI "FINAL UI DESIGN") -->
     <div id="mobile-question-drawer" class="mobile-question-drawer">
       <div class="mobile-drawer-handle"></div>
       <div class="mobile-drawer-header">
         <div>
-          <h4>Daftar Nomor Soal Ujian</h4>
-          <div class="nav-panel-legend" style="margin-top: 4px;">
+          <h4 style="font-size: 1.05rem; font-weight: 800; color: #0F172A; margin: 0;">Daftar Nomor Soal Ujian</h4>
+          <div class="nav-panel-legend" style="margin-top: 6px;">
             <div class="legend-item"><div class="legend-dot answered"></div> Dijawab</div>
             <div class="legend-item"><div class="legend-dot doubt"></div> Ragu</div>
             <div class="legend-item"><div class="legend-dot empty"></div> Belum</div>
           </div>
         </div>
-        <button type="button" class="btn-close-drawer" onclick="toggleMobileQuestionDrawer(false)">✕ Tutup</button>
+        <button type="button" class="btn-close-drawer" onclick="toggleMobileQuestionDrawer(false)">✕</button>
       </div>
       <div class="mobile-drawer-body">
         <div class="grid-buttons" id="mobile-question-grid-container">
@@ -1714,34 +1807,42 @@
     </div>
   </div>
 
-  <!-- MODAL: KONFIRMASI SUBMIT FINAL -->
+  <!-- MODAL: KONFIRMASI SUBMIT FINAL (REFERENSI "DELETE TASK / LOG OUT") -->
   <div id="modal-submit-confirm" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 style="font-size: 1.15rem; font-weight: 700;">Konfirmasi Pengumpulan Ujian</h3>
+    <div class="modal-content cbt-mobile-dialog-card" style="max-width: 400px; border-radius: 24px; text-align: center; padding: 1.75rem 1.5rem; position: relative;">
+      <button type="button" onclick="closeSubmitConfirmModal()" class="cbt-dialog-close-btn" style="position: absolute; right: 16px; top: 16px; background: none; border: none; font-size: 1.25rem; color: #94A3B8; cursor: pointer;">✕</button>
+      
+      <div style="width: 56px; height: 56px; background: #ECFDF5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0.5rem auto 1rem; color: #0FA97F;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
       </div>
-      <div class="modal-body">
-        <p style="font-size: 0.92rem; color: var(--slate-600); margin-bottom: 1.25rem;">
-          Apakah Anda yakin ingin menyelesaikan ujian ini? Jawaban yang telah dikirim tidak dapat diubah kembali.
-        </p>
-        <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1rem; font-size: 0.9rem;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
-            <span>Sudah Dijawab:</span>
-            <strong id="confirm-answered-count" style="color: var(--emerald-600);">0</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
-            <span>Masih Ragu-ragu:</span>
-            <strong id="confirm-doubt-count" style="color: var(--amber-600);">0</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>Belum Dijawab:</span>
-            <strong id="confirm-empty-count" style="color: var(--rose-600);">0</strong>
-          </div>
+
+      <h3 style="font-size: 1.18rem; font-weight: 800; color: #0F172A; margin-bottom: 0.5rem;">Kumpulkan Ujian Sekarang?</h3>
+      <p style="font-size: 0.86rem; color: #64748B; margin-bottom: 1.25rem; line-height: 1.5;">
+        Pastikan seluruh jawaban Anda telah terisi dengan benar sebelum menyelesaikan ujian ini.
+      </p>
+
+      <div style="background-color: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 16px; padding: 0.85rem 1rem; font-size: 0.88rem; margin-bottom: 1.25rem; text-align: left;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+          <span style="color: #475569; font-weight: 600;">Sudah Dijawab:</span>
+          <strong id="confirm-answered-count" style="color: #0FA97F; font-weight: 800;">0 Soal</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+          <span style="color: #475569; font-weight: 600;">Masih Ragu-ragu:</span>
+          <strong id="confirm-doubt-count" style="color: #D97706; font-weight: 800;">0 Soal</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #475569; font-weight: 600;">Belum Dijawab:</span>
+          <strong id="confirm-empty-count" style="color: #DC2626; font-weight: 800;">0 Soal</strong>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeSubmitConfirmModal()">Kembali Periksa</button>
-        <button class="btn btn-primary" onclick="submitFinalExam()">Ya, Selesai & Kirim</button>
+
+      <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+        <button type="button" class="btn btn-primary" onclick="submitFinalExam()" style="width: 100%; padding: 0.75rem; border-radius: 99px; font-weight: 800; background: #0FA97F; border-color: #0FA97F; box-shadow: 0 4px 14px rgba(15,169,127,0.3);">
+          Ya, Kumpulkan Jawaban
+        </button>
+        <button type="button" class="btn btn-outline" onclick="closeSubmitConfirmModal()" style="width: 100%; padding: 0.75rem; border-radius: 99px; font-weight: 700; color: #475569; border-color: #CBD5E1;">
+          Periksa Kembali
+        </button>
       </div>
     </div>
   </div>
