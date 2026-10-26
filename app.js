@@ -1297,6 +1297,15 @@ async function handleTeacherLogin(event) {
   }
 
   if (matchedTeacher) {
+    // Hidrasi profil tersimpan dari Profile Vault permanen jika pernah disimpan
+    try {
+      const savedVault = JSON.parse(localStorage.getItem('zettcbt_admin_profile_' + matchedTeacher.username) || 'null');
+      if (savedVault) {
+        if (savedVault.fullName) matchedTeacher.fullName = savedVault.fullName;
+        if (savedVault.nip) matchedTeacher.nip = savedVault.nip;
+      }
+    } catch(e) {}
+
     state.currentTeacher = matchedTeacher;
     sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(matchedTeacher));
     localStorage.removeItem('zettcbt_current_teacher');
@@ -2747,6 +2756,16 @@ function openTeacherProfileModal() {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80'
   };
 
+  // Periksa apakah ada data profil tersimpan di Dedicated Profile Vault
+  const uName = t.username || 'admin';
+  try {
+    const savedVault = JSON.parse(localStorage.getItem('zettcbt_admin_profile_' + uName) || 'null');
+    if (savedVault) {
+      if (savedVault.fullName) t.fullName = savedVault.fullName;
+      if (savedVault.nip) t.nip = savedVault.nip;
+    }
+  } catch(e) {}
+
   const nameInput = document.getElementById('teacher-profile-input-name');
   const nipInput = document.getElementById('teacher-profile-input-nip');
   const roleInput = document.getElementById('teacher-profile-input-role');
@@ -2804,16 +2823,42 @@ function handleSaveTeacherProfile(event) {
     state.currentTeacher.nip = newNip;
   }
 
-  localStorage.setItem('zettcbt_current_teacher', JSON.stringify(state.currentTeacher));
   sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(state.currentTeacher));
 
-  // Sinkronkan ke daftar state.teachers agar tersimpan permanen
-  const teacherIdx = (state.teachers || []).findIndex(t => t.id === state.currentTeacher.id || t.username === state.currentTeacher.username);
+  // 1. Simpan ke Dedicated Profile Vault permanen (kebal dari logout / reload)
+  const uName = state.currentTeacher.username || 'admin';
+  localStorage.setItem('zettcbt_admin_profile_' + uName, JSON.stringify({
+    fullName: newName,
+    nip: newNip
+  }));
+
+  // 2. Sinkronkan ke daftar state.teachers agar tersimpan di memori lokal
+  const teacherIdx = (state.teachers || []).findIndex(t => t.id === state.currentTeacher.id || t.username === uName);
   if (teacherIdx >= 0) {
     state.teachers[teacherIdx].fullName = newName;
     if (newNip) state.teachers[teacherIdx].nip = newNip;
     localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
     renderTeachersTable();
+  }
+
+  // 3. Sinkronkan langsung ke Neon Cloud Database jika terhubung (agar tidak tertimpa seed lama)
+  if (state.neon && state.neon.endpoint) {
+    executeNeonSql('UPDATE teachers SET full_name = $1 WHERE username = $2;', [newName, uName])
+      .then(() => console.log('✅ Profil admin berhasil diperbarui di Neon Cloud'))
+      .catch(err => console.warn('Gagal sinkron nama ke Neon:', err.message));
+  }
+
+  // 4. Sinkronkan ke Supabase jika terhubung
+  if (state.supabase && state.supabase.url && state.supabase.key) {
+    fetch(state.supabase.url + '/rest/v1/teachers?username=eq.' + encodeURIComponent(uName), {
+      method: 'PATCH',
+      headers: {
+        'apikey': state.supabase.key,
+        'Authorization': 'Bearer ' + state.supabase.key,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ full_name: newName })
+    }).catch(err => console.warn('Gagal sinkron nama ke Supabase:', err));
   }
 
   // Perbarui tampilan Nama pada Topbar dan Salam secara realtime
@@ -2826,8 +2871,11 @@ function handleSaveTeacherProfile(event) {
   const navLabel = document.getElementById('nav-teacher-label');
   if (navLabel) navLabel.textContent = newName;
 
+  const displayProfName = document.getElementById('teacher-profile-display-name');
+  if (displayProfName) displayProfName.textContent = newName;
+
   closeTeacherProfileModal();
-  showToast('Profil pengguna berhasil disimpan!', 'success');
+  showToast('Profil pengguna berhasil disimpan permanen!', 'success');
 }
 
 function handleGlobalSearch(query) {
@@ -3697,6 +3745,20 @@ async function handleSaveTeacher(event) {
   }
 
   localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
+  localStorage.setItem('zettcbt_admin_profile_' + teacherObj.username, JSON.stringify({
+    fullName: teacherObj.fullName,
+    nip: teacherObj.nip || ''
+  }));
+
+  // Sinkronisasi ke Neon Cloud jika aktif
+  if (state.neon && state.neon.endpoint) {
+    executeNeonSql(`INSERT INTO teachers (username, password_hash, full_name, role, assigned_class, assigned_subject)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    ON CONFLICT (username) DO UPDATE
+                    SET full_name = EXCLUDED.full_name, role = EXCLUDED.role, assigned_class = EXCLUDED.assigned_class, assigned_subject = EXCLUDED.assigned_subject, updated_at = NOW();`,
+      [teacherObj.username, teacherObj.password, teacherObj.fullName, teacherObj.role, teacherObj.assignedClass, teacherObj.assignedSubject]
+    ).catch(e => console.warn('Gagal sinkron guru ke Neon:', e.message));
+  }
 
   // Sinkronisasi ke Supabase jika aktif
   if (state.supabase.url && state.supabase.key) {
@@ -5101,11 +5163,26 @@ async function importDataFromNeonCloud(options = {}) {
       if (teacherRows && teacherRows.length > 0) {
         const importedTeachers = teacherRows.map(r => {
           const existing = (state.teachers || []).find(t => t.username === r.username);
+          // Proteksi Profile Vault: JANGAN menimpa nama admin kustom dengan seed default Neon
+          let customName = r.full_name;
+          let customNip = null;
+          try {
+            const vault = JSON.parse(localStorage.getItem('zettcbt_admin_profile_' + r.username) || 'null');
+            if (vault && vault.fullName) {
+              customName = vault.fullName;
+              customNip = vault.nip;
+            } else if (existing && existing.fullName && existing.fullName !== 'Operator Sekolah' && r.full_name === 'Operator Sekolah') {
+              customName = existing.fullName;
+              customNip = existing.nip;
+            }
+          } catch(e) {}
+
           return {
             id: existing ? existing.id : ('t-' + Math.random().toString(36).substr(2, 9)),
             username: r.username,
             password: r.password_hash || (existing ? existing.password : 'guru123'),
-            fullName: r.full_name,
+            fullName: customName,
+            nip: customNip || (existing ? existing.nip : null),
             role: r.role || 'guru_kelas',
             assignedClass: r.assigned_class || null,
             assignedSubject: r.assigned_subject || null
