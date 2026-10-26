@@ -55,7 +55,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=3.6.0">
+  <link rel="stylesheet" href="style.css?v=3.6.1">
 </head>
 <body>
 
@@ -163,8 +163,8 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="login-token">Token Ujian Mata Pelajaran</label>
-              <input type="text" id="login-token" class="form-control" placeholder="Contoh: MTK26B" maxlength="10" style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.12em;" required autocomplete="off">
+              <label class="form-label" for="login-token">Token Ujian Siswa</label>
+              <input type="text" id="login-token" class="form-control" placeholder="Contoh: BIN26A / MTK26B" maxlength="12" style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.12em;" required autocomplete="off">
               <small style="color: var(--slate-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">*Token diumumkan oleh pengawas ruang sebelum ujian dimulai</small>
             </div>
 
@@ -837,11 +837,11 @@
           </div>
         </header>
 
-        <!-- TOKEN LOGIN SISWA RIBBON HORIZONTAL (PERSIS GAMBAR 2) -->
+        <!-- TOKEN UJIAN SISWA RIBBON HORIZONTAL (PERSIS GAMBAR 2) -->
         <div class="token-ribbon-horizontal-bar" id="global-token-ribbon">
           <div class="token-ribbon-prefix">
             <span class="token-key-icon">🔑</span>
-            <span class="token-ribbon-label-text">TOKEN LOGIN SISWA:</span>
+            <span class="token-ribbon-label-text">TOKEN UJIAN SISWA:</span>
             <button type="button" class="btn-token-ribbon-reload" onclick="forceRefreshToken()" title="Segarkan dan Acak Token Baru">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
               <span>Acak Baru</span>
@@ -1530,6 +1530,9 @@
                     </button>
                     <button type="button" class="btn btn-outline" onclick="copyNeonSqlSchema()">
                       📋 Salin Skema SQL Neon (neon_schema.sql)
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="copyNeonShareLink()" title="Salin Tautan Sinkronisasi untuk Dibuka di HP / Perangkat Lain">
+                      📱 Salin Tautan Sinkronisasi HP
                     </button>
                   </div>
                 </form>
@@ -2394,6 +2397,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=2.2.0"></script>
+  <script src="app.js?v=3.6.1"></script>
 </body>
 </html>
