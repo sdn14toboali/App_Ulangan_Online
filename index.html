@@ -55,7 +55,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=3.5.1">
+  <link rel="stylesheet" href="style.css?v=3.6.0">
 </head>
 <body>
 
@@ -542,27 +542,35 @@
       </div>
     </div>
 
-    <!-- FLOATING MOBILE BOTTOM THUMB BAR (MOBILE ONLY) -->
+    <!-- FLOATING MOBILE BOTTOM THUMB BAR WITH NUMBER RAIL & ACTIONS (MOBILE ONLY) -->
     <div class="mobile-exam-bottom-bar" id="mobile-exam-bottom-bar">
-      <button type="button" class="btn-mobile-nav" id="mobile-btn-prev" onclick="navigateQuestion(-1)" title="Soal Sebelumnya">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        <span>Sebelumnya</span>
-      </button>
+      <!-- 1. Deret Nomor Pengerjaan Soal (Tabel Nomor Interaktif) -->
+      <div class="mobile-q-strip-container" id="mobile-q-strip-container">
+        <div class="mobile-q-strip" id="mobile-q-strip">
+          <!-- Injected via JavaScript renderQuestionGrid() -->
+        </div>
+        <button type="button" class="btn-strip-drawer-more" onclick="toggleMobileQuestionDrawer(true)" title="Lihat Daftar Soal Selengkapnya">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </button>
+      </div>
 
-      <label class="mobile-doubt-btn" title="Tandai Ragu-ragu">
-        <input type="checkbox" id="checkbox-doubt-mobile" onchange="toggleDoubtAnswerMobile()">
-        <span>Ragu</span>
-      </label>
+      <!-- 2. Tombol Navigasi Aksi Utama -->
+      <div class="mobile-exam-actions-row">
+        <button type="button" class="btn-mobile-nav" id="mobile-btn-prev" onclick="navigateQuestion(-1)" title="Soal Sebelumnya">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>Sebelumnya</span>
+        </button>
 
-      <button type="button" class="btn-mobile-drawer-toggle" onclick="toggleMobileQuestionDrawer(true)" title="Buka Daftar Nomor Soal">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-        <span id="mobile-current-q-label">No. 1</span>
-      </button>
+        <label class="mobile-doubt-btn" title="Tandai Ragu-ragu">
+          <input type="checkbox" id="checkbox-doubt-mobile" onchange="toggleDoubtAnswerMobile()">
+          <span>Ragu</span>
+        </label>
 
-      <button type="button" class="btn-mobile-nav btn-primary" id="mobile-btn-next" onclick="navigateQuestion(1)" title="Soal Berikutnya">
-        <span>Berikutnya</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
+        <button type="button" class="btn-mobile-nav btn-primary" id="mobile-btn-next" onclick="navigateQuestion(1)" title="Soal Berikutnya">
+          <span>Berikutnya</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
     </div>
 
     <!-- MOBILE SLIDE-UP BOTTOM SHEET (REFERENSI "FINAL UI DESIGN") -->
