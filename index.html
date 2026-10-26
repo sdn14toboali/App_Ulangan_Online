@@ -139,7 +139,7 @@
               </div>
             </div>
             <h3 class="split-form-title">Masuk Ruang Ujian</h3>
-            <p class="split-form-subtitle">Masukkan Nomor Peserta, Password Kartu Ujian &amp; Token Pengawas</p>
+            <p class="split-form-subtitle">Masukkan data peserta dan token ujian dari pengawas</p>
           </div>
 
           <!-- Banner Pasang Aplikasi Android / PWA Standalone -->
@@ -160,20 +160,6 @@
             <div class="form-group">
               <label class="form-label" for="login-nisn">Nomor Peserta / NISN</label>
               <input type="text" id="login-nisn" class="form-control" placeholder="Contoh: 2026-001" required autocomplete="off" onchange="autoFillStudentInfo(this.value)">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="login-password">Password Siswa (Lihat di Kartu Ujian)</label>
-              <div style="position: relative;">
-                <input type="password" id="login-password" class="form-control" placeholder="Contoh: MTK-4821" required autocomplete="current-password" style="padding-right: 42px; font-weight: 700; letter-spacing: 0.05em;">
-                <button type="button" onclick="toggleStudentPasswordVisibility()" title="Tampilkan / Sembunyikan Password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-500); padding: 4px;">
-                  <svg id="student-eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </button>
-              </div>
-              <small style="color: var(--slate-500); font-size: 0.75rem; margin-top: 0.25rem; display: block;">*Password berbeda setiap mapel, tertera pada Kartu Ujian Anda</small>
             </div>
 
             <div class="form-group">
@@ -1011,6 +997,7 @@
                 <span id="login-toggle-text">Login Siswa: DIBUKA</span>
               </button>
               <button type="button" class="btn btn-outline btn-sm" onclick="renderTeacherExamSchedules()">🔄 Segarkan Jadwal</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="releaseAllExamSchedules()" title="Buka / Rilis seluruh sesi jadwal ujian agar semua siswa dapat langsung masuk">🔓 Rilis Semua Sesi</button>
               <button type="button" class="btn btn-primary btn-sm" id="btn-add-schedule-admin" onclick="openAddScheduleModal()" style="display: none;">+ Tambah Sesi Jadwal</button>
             </div>
           </div>
