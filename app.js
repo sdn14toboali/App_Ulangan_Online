@@ -714,10 +714,10 @@ function showScreen(screenId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Sembunyikan header global pada Admin Dashboard (Penyelesaian Gambar 2 Dihapus)
+  // Sembunyikan header global pada Admin Dashboard & Ruang Ujian Siswa (Fokus 100%)
   const globalHeader = document.getElementById('global-header');
   if (globalHeader) {
-    if (screenId === 'admin-dashboard') {
+    if (screenId === 'admin-dashboard' || screenId === 'student-exam') {
       globalHeader.style.display = 'none';
     } else {
       globalHeader.style.display = '';
@@ -2120,14 +2120,21 @@ function renderCurrentQuestion() {
     }
   }
 
-  // Update Mobile Navigation Bottom Bar Next Button
-  const mobileNext = document.querySelector('.mobile-exam-bottom-bar .btn-mobile-nav.btn-primary');
+  // Update Mobile Navigation Bottom Bar Prev & Next Button
+  const mobilePrev = document.getElementById('mobile-btn-prev') || document.querySelector('.mobile-exam-bottom-bar .btn-mobile-nav:first-child');
+  if (mobilePrev) {
+    mobilePrev.disabled = state.currentQuestionIndex === 0;
+  }
+
+  const mobileNext = document.getElementById('mobile-btn-next') || document.querySelector('.mobile-exam-bottom-bar .btn-mobile-nav.btn-primary');
   if (mobileNext) {
     if (state.currentQuestionIndex >= qList.length - 1) {
       mobileNext.innerHTML = '<span>Selesai</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      mobileNext.classList.add('btn-finish-mode');
       mobileNext.onclick = openSubmitConfirmModal;
     } else {
       mobileNext.innerHTML = '<span>Berikutnya</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+      mobileNext.classList.remove('btn-finish-mode');
       mobileNext.onclick = () => navigateQuestion(1);
     }
   }
