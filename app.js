@@ -1858,6 +1858,7 @@ function startTimerCountdown() {
 
 function updateTimerDisplay() {
   const display = document.getElementById('exam-timer-display');
+  const desktopTimer = document.getElementById('cbt-desktop-timer-val');
   const wrapper = document.getElementById('exam-timer-wrapper');
   if (!display) return;
 
@@ -1870,6 +1871,9 @@ function updateTimerDisplay() {
   const sStr = String(seconds).padStart(2, '0');
 
   display.textContent = hStr + ':' + mStr + ':' + sStr;
+  if (desktopTimer) {
+    desktopTimer.textContent = hStr + ' : ' + mStr + ' : ' + sStr;
+  }
 
   // If time is less than 5 minutes (300 seconds), pulse red
   if (state.timeRemainingSeconds <= 300) {
@@ -1898,11 +1902,27 @@ function renderCurrentQuestion() {
 
   // Header Badge Desktop
   const badge = document.getElementById('exam-question-badge');
-  if (badge) badge.textContent = 'Soal No. ' + (state.currentQuestionIndex + 1) + ' dari ' + qList.length;
+  if (badge) badge.textContent = 'Pertanyaan ' + (state.currentQuestionIndex + 1) + ' dari ' + qList.length;
 
   // Label Nomor pada Bar Jempol Mobile
   const mobileLabel = document.getElementById('mobile-current-q-label');
   if (mobileLabel) mobileLabel.textContent = 'No. ' + (state.currentQuestionIndex + 1);
+
+  // Sync Progress Status & Bar
+  const answeredCount = Object.keys(state.student.answers || {}).filter(k => state.student.answers[k] && state.student.answers[k].selected).length;
+  const pct = qList.length > 0 ? Math.round((answeredCount / qList.length) * 100) : 0;
+  
+  const mobProgBar = document.getElementById('cbt-mobile-progress-bar');
+  if (mobProgBar) mobProgBar.style.width = pct + '%';
+  const mobProgCount = document.getElementById('cbt-mobile-progress-count');
+  if (mobProgCount) mobProgCount.textContent = answeredCount + ' dari ' + qList.length + ' Soal (' + pct + '%)';
+  const deskProg = document.getElementById('cbt-desktop-progress-text');
+  if (deskProg) deskProg.textContent = answeredCount + ' dari ' + qList.length + ' Terjawab';
+  
+  const cbtSub = document.getElementById('cbt-card-subject-val');
+  if (cbtSub) cbtSub.textContent = state.student.subject || state.session.subject || '-';
+  const cbtClass = document.getElementById('cbt-card-class-val');
+  if (cbtClass) cbtClass.textContent = 'Kelas ' + (state.student.className || '-') + ' • UAS Resmi';
 
   // Content Text
   const content = document.getElementById('question-content-text');
@@ -2092,11 +2112,23 @@ function renderCurrentQuestion() {
   if (btnPrev) btnPrev.disabled = state.currentQuestionIndex === 0;
   if (btnNext) {
     if (state.currentQuestionIndex >= qList.length - 1) {
-      btnNext.innerHTML = 'Soal Terakhir';
+      btnNext.innerHTML = '<span>Soal Terakhir</span>';
       btnNext.disabled = true;
     } else {
-      btnNext.innerHTML = 'Berikutnya <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+      btnNext.innerHTML = '<span>Selanjutnya</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>';
       btnNext.disabled = false;
+    }
+  }
+
+  // Update Mobile Navigation Bottom Bar Next Button
+  const mobileNext = document.querySelector('.mobile-exam-bottom-bar .btn-mobile-nav.btn-primary');
+  if (mobileNext) {
+    if (state.currentQuestionIndex >= qList.length - 1) {
+      mobileNext.innerHTML = '<span>Selesai</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      mobileNext.onclick = openSubmitConfirmModal;
+    } else {
+      mobileNext.innerHTML = '<span>Berikutnya</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+      mobileNext.onclick = () => navigateQuestion(1);
     }
   }
 
@@ -2160,23 +2192,44 @@ function jumpToQuestion(index) {
   }
 }
 
-// Grid Buttons Generator (Desktop)
+// Grid Buttons Generator (Desktop & Mobile)
 function renderQuestionGrid() {
   const grid = document.getElementById('question-grid-container');
-  if (!grid) return;
-  grid.innerHTML = '';
+  const mobGrid = document.getElementById('mobile-question-grid-container');
+  if (grid) grid.innerHTML = '';
+  if (mobGrid) mobGrid.innerHTML = '';
 
   const qList = getActiveExamQuestions();
   qList.forEach((q, idx) => {
-    const btn = document.createElement('button');
-    btn.id = 'grid-btn-' + idx;
-    btn.className = 'grid-btn';
-    btn.textContent = idx + 1;
-    btn.onclick = () => jumpToQuestion(idx);
-    grid.appendChild(btn);
+    if (grid) {
+      const btn = document.createElement('button');
+      btn.id = 'grid-btn-' + idx;
+      btn.className = 'grid-btn';
+      btn.textContent = idx + 1;
+      btn.onclick = () => jumpToQuestion(idx);
+      grid.appendChild(btn);
+    }
+    if (mobGrid) {
+      const mBtn = document.createElement('button');
+      mBtn.id = 'mobile-grid-btn-' + idx;
+      mBtn.className = 'grid-btn';
+      mBtn.textContent = idx + 1;
+      mBtn.onclick = () => {
+        jumpToQuestion(idx);
+        toggleMobileQuestionDrawer(false);
+      };
+      mobGrid.appendChild(mBtn);
+    }
   });
 
   updateGridButtonStatus();
+}
+
+function confirmExitStudentExam() {
+  const conf = confirm('Apakah Anda yakin ingin keluar dari ruang ujian? Seluruh progres jawaban telah tersimpan aman di cloud.');
+  if (conf) {
+    showScreen('student-login');
+  }
 }
 
 // Update Grid Status Colors
