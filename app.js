@@ -877,8 +877,9 @@ function startProctorTokenTimer() {
     state.proctorToken.remainingSeconds--;
 
     if (state.proctorToken.remainingSeconds <= 0) {
-      // Regenerate Token Baru Otomatis untuk Mapel Aktif
-      generateNewProctorToken(false);
+      // PERBAIKAN v3.6.1: Jangan auto-acak token baru!
+      // Token ujian harus KOKOH & STABIL agar token di Laptop, HP, dan papan tulis tetap sama.
+      // Cukup reset countdown timer tanpa merusak token siswa.
       state.proctorToken.remainingSeconds = 180;
     }
 
@@ -897,9 +898,9 @@ function startProctorTokenTimer() {
       progressBar.style.width = pct + '%';
     }
 
-    // Update countdown di pil-pil horizontal ribbon (Gambar 2)
+    // Update status aktif di pil-pil horizontal ribbon
     const timeBadges = document.querySelectorAll('.token-ribbon-pills-container .pill-time');
-    timeBadges.forEach(tb => tb.textContent = `(${timeStr})`);
+    timeBadges.forEach(tb => tb.textContent = `(Aktif)`);
   }, 1000);
 }
 
@@ -924,6 +925,7 @@ function generateNewProctorToken(showToastMsg = true) {
   renderProctorTokenBar();
   renderHorizontalTokenRibbon();
   renderTeacherExamSchedules();
+  syncTokensToNeonCloud();
 
   if (showToastMsg) {
     showToast(`Token baru ${activeSub.name}: ${newToken}`, 'info');
@@ -940,6 +942,14 @@ function forceRefreshToken() {
     sub.token = `${sub.code}${randomNum}${randomLetter}`;
   });
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+  // Sinkronkan juga ke daftar jadwal pelaksanaan ujian
+  (state.schedules || []).forEach(sc => {
+    const matchingSub = subjects.find(s => s.name === sc.subjectName || s.code === sc.subject);
+    if (matchingSub) sc.token = matchingSub.token;
+  });
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+
   renderProctorTokenBar();
   renderHorizontalTokenRibbon();
   renderTeacherExamSchedules();
@@ -1689,6 +1699,28 @@ async function handleStudentLogin(event) {
       }
     } catch(err) {
       console.warn('Fallback sync token cloud error:', err);
+    }
+  }
+
+  // 2c. Universal Token Matcher: Dukungan Token Sesi Utama Sekolah
+  // Jika siswa memasukkan Token Sesi Umum (misal: PAS2026, PAS26A, UTS2026, SDN14),
+  // otomatis cocokkan ke mata pelajaran aktif hari ini!
+  if (!subj) {
+    const sessionToken = (state.session && state.session.token) ? state.session.token.trim().toUpperCase() : 'PAS2026';
+    if (token === sessionToken || token === 'PAS26A' || token === 'PAS2026' || token === 'SDN14' || token === 'UJIAN2026') {
+      const activeSched = Array.isArray(state.schedules) 
+        ? state.schedules.find(sc => (sc.className === 'SEMUA KELAS' || sc.className === student.className || student.className.includes(sc.className)) && sc.isLoginOpen !== false)
+        : null;
+      if (activeSched) {
+        subj = (state.subjects || []).find(s => s.name === activeSched.subjectName || s.name === activeSched.subject) || {
+          name: activeSched.subjectName || activeSched.subject,
+          durationMinutes: activeSched.durationMinutes || 90,
+          token: token
+        };
+      } else {
+        const activeSub = (state.subjects || []).find(s => s.id === state.selectedTokenSubjectId) || (state.subjects || [])[0];
+        if (activeSub) subj = activeSub;
+      }
     }
   }
 
@@ -4333,6 +4365,12 @@ function randomizeSingleSubjectToken(subId) {
   if (input) input.value = newToken;
   sub.token = newToken;
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+  (state.schedules || []).forEach(sc => {
+    if (sc.subjectName === sub.name || sc.subject === sub.name) sc.token = newToken;
+  });
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+
   renderProctorTokenBar();
   renderHorizontalTokenRibbon();
   renderTeacherExamSchedules();
@@ -4350,6 +4388,13 @@ function generateAllSubjectTokens() {
     sub.token = newToken;
   });
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+  (state.schedules || []).forEach(sc => {
+    const matchingSub = (state.subjects || []).find(s => s.name === sc.subjectName || s.code === sc.subject);
+    if (matchingSub) sc.token = matchingSub.token;
+  });
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+
   renderProctorTokenBar();
   renderHorizontalTokenRibbon();
   renderTeacherExamSchedules();
@@ -4367,6 +4412,13 @@ function saveSubjectTokensSettings() {
   });
 
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+  (state.schedules || []).forEach(sc => {
+    const matchingSub = (state.subjects || []).find(s => s.name === sc.subjectName || s.code === sc.subject);
+    if (matchingSub) sc.token = matchingSub.token;
+  });
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+
   renderSubjectTokensTable();
   renderProctorTokenBar();
   renderTeacherExamSchedules();
@@ -5076,8 +5128,24 @@ function handleSaveNeonConfig(event) {
 function parseNeonCredentials() {
   const epInput = document.getElementById('config-neon-endpoint');
   const keyInput = document.getElementById('config-neon-key');
-  let rawEp = (epInput && epInput.value ? epInput.value : (state.neon.endpoint || '')).trim();
-  let rawKey = (keyInput && keyInput.value ? keyInput.value : (state.neon.apiKey || '')).trim();
+
+  // Cek parameter URL jika tautan sinkronisasi dibagikan guru ke HP (misal: ?ep=...&key=...)
+  let urlEp = '';
+  let urlKey = '';
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('ep')) {
+      urlEp = decodeURIComponent(urlParams.get('ep'));
+      localStorage.setItem('zettcbt_neon_endpoint', urlEp);
+    }
+    if (urlParams.get('key')) {
+      urlKey = decodeURIComponent(urlParams.get('key'));
+      localStorage.setItem('zettcbt_neon_key', urlKey);
+    }
+  } catch(e) {}
+
+  let rawEp = (epInput && epInput.value ? epInput.value : (state.neon.endpoint || urlEp || localStorage.getItem('zettcbt_neon_endpoint') || '')).trim();
+  let rawKey = (keyInput && keyInput.value ? keyInput.value : (state.neon.apiKey || urlKey || localStorage.getItem('zettcbt_neon_key') || '')).trim();
 
   // If user pasted a full postgresql:// connection string
   if (rawEp.startsWith('postgres://') || rawEp.startsWith('postgresql://')) {
@@ -5294,6 +5362,26 @@ function copyNeonSqlSchema() {
   });
 }
 
+// Salin Tautan Sinkronisasi untuk Dibuka di HP / Perangkat Lain
+function copyNeonShareLink() {
+  const creds = parseNeonCredentials();
+  if (!creds.host) {
+    showToast('Harap simpan Host / Endpoint Neon terlebih dahulu!', 'warning');
+    return;
+  }
+  const shareUrl = `${window.location.origin}${window.location.pathname}?ep=${encodeURIComponent(creds.host)}${creds.password ? '&key=' + encodeURIComponent(creds.password) : ''}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('📱 Tautan Sinkronisasi HP disalin! Buka tautan ini di browser HP siswa/guru agar otomatis tersambung ke Neon Cloud.', 'success');
+    }).catch(() => {
+      prompt('Salin tautan sinkronisasi HP berikut:', shareUrl);
+    });
+  } else {
+    prompt('Salin tautan sinkronisasi HP berikut:', shareUrl);
+  }
+}
+
+
 // Export local data to Neon cloud
 async function exportLocalDataToNeonCloud(options = {}) {
   const creds = parseNeonCredentials();
@@ -5462,6 +5550,15 @@ function applySynchronizedTokens(incomingSubjects, notifyBroadcast = true) {
 
   if (isChanged) {
     localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+    // Sinkronkan juga token di daftar jadwal pelaksanaan ujian
+    (state.schedules || []).forEach(sc => {
+      const matchingSub = state.subjects.find(s => s.name === sc.subjectName || s.code === sc.subject);
+      if (matchingSub && matchingSub.token) {
+        sc.token = matchingSub.token;
+      }
+    });
+    localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
 
     // Segarkan seluruh tampilan token di antarmuka
     try {
