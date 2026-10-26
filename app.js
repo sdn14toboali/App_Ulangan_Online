@@ -4689,13 +4689,35 @@ function deleteQuestion(qId) {
 function handleSaveSessionSettings(event) {
   event.preventDefault();
 
-  state.session.title = document.getElementById('setting-title').value.trim();
-  state.session.subject = document.getElementById('setting-subject').value.trim();
-  state.session.token = document.getElementById('setting-token').value.trim().toUpperCase();
-  state.session.durationMinutes = parseInt(document.getElementById('setting-duration').value) || 90;
-  state.session.randomizeQuestions = document.getElementById('setting-random-q').checked;
-  state.session.randomizeOptions = document.getElementById('setting-random-opt').checked;
-  state.session.showScore = document.getElementById('setting-show-score').checked;
+  const titleEl = document.getElementById('setting-title');
+  if (titleEl) {
+    state.session.title = titleEl.value.trim();
+  }
+  const subjectEl = document.getElementById('setting-subject');
+  if (subjectEl) {
+    state.session.subject = subjectEl.value.trim();
+  }
+  const tokenEl = document.getElementById('setting-token');
+  if (tokenEl) {
+    state.session.token = tokenEl.value.trim().toUpperCase();
+  }
+  const durationEl = document.getElementById('setting-duration');
+  if (durationEl) {
+    state.session.durationMinutes = parseInt(durationEl.value, 10) || 90;
+  }
+
+  const chkRandomQ = document.getElementById('setting-random-q');
+  if (chkRandomQ) {
+    state.session.randomizeQuestions = chkRandomQ.checked;
+  }
+  const chkRandomOpt = document.getElementById('setting-random-opt');
+  if (chkRandomOpt) {
+    state.session.randomizeOptions = chkRandomOpt.checked;
+  }
+  const chkShowScore = document.getElementById('setting-show-score');
+  if (chkShowScore) {
+    state.session.showScore = chkShowScore.checked;
+  }
 
   localStorage.setItem('zettcbt_session', JSON.stringify(state.session));
   populateSessionSettings();
@@ -4703,11 +4725,11 @@ function handleSaveSessionSettings(event) {
   updateAdminMetrics();
 
   // Jika database Neon cloud terhubung, sinkronkan ke cloud
-  if (state.neon.endpoint) {
+  if (state.neon && state.neon.endpoint) {
     exportLocalDataToNeonCloud({ silent: true }).catch(e => console.warn('Neon session auto-save deferred:', e.message));
   }
 
-  showToast('Pengaturan sesi ujian berhasil diperbarui dan disimpan permanen!', 'success');
+  showToast('Pengaturan aturan pengerjaan siswa berhasil disimpan permanen!', 'success');
 }
 
 function generateRandomToken() {
