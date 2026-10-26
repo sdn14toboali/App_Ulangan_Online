@@ -18,31 +18,41 @@
   <!-- Logo Resmi SD NEGERI 14 TOBOALI Base64 (Anti-404 / Offline Safe) -->
   <script src="assets/logo.js"></script>
   <script>
-    // Self-healing logo cleanser: pulihkan localStorage jika tercemar cache logo lama/rusak
+    // Inisialisasi cepat Logo & Identitas Sekolah dari Dedicated Vault (Anti-Reset / Offline Safe)
     (function() {
       try {
-        if (window.OFFICIAL_SDN14_LOGO) {
-          var s = localStorage.getItem('zettcbt_school');
-          if (s) {
-            var parsed = JSON.parse(s);
-            if (!parsed.logoUrl || parsed.logoUrl.length < 1000 || parsed.logoUrl.indexOf('assets/') !== -1 || parsed.logoUrl.indexOf('$b') !== -1 || parsed.logoUrl.indexOf('svg+xml') !== -1) {
-              parsed.logoUrl = window.OFFICIAL_SDN14_LOGO;
-              localStorage.setItem('zettcbt_school', JSON.stringify(parsed));
-            }
-          }
+        var vault = JSON.parse(localStorage.getItem('zettcbt_school_vault') || 'null');
+        var s = JSON.parse(localStorage.getItem('zettcbt_school') || 'null');
+        var sch = (vault && (vault.isCustomLogo || vault.isCustomName || vault.name)) ? Object.assign({}, s || {}, vault) : (s || {});
+
+        // Pulihkan zettcbt_school jika vault ada
+        if (vault && vault.name && !s) {
+          localStorage.setItem('zettcbt_school', JSON.stringify(vault));
         }
+
+        // Terapkan logo & nama begitu DOM siap (memprioritaskan logo kustom pengguna)
+        document.addEventListener('DOMContentLoaded', function() {
+          var activeLogo = (sch && sch.logoUrl && sch.logoUrl.trim().length > 0)
+            ? sch.logoUrl.trim()
+            : (window.OFFICIAL_SDN14_LOGO || 'assets/logo-sdn14.png');
+          var activeName = (sch && sch.name && sch.name.trim().length > 0)
+            ? sch.name.trim()
+            : 'SD NEGERI 14 TOBOALI';
+
+          // Update gambar logo di seluruh halaman
+          var logoTargets = document.querySelectorAll('#sidebar-school-logo-img, #student-form-school-logo, #teacher-form-school-logo, .srms-brand-school-logo, .brand-icon img, .split-hero-logo img');
+          logoTargets.forEach(function(img) {
+            img.src = activeLogo;
+          });
+
+          // Update teks nama sekolah di header, hero & profil
+          document.querySelectorAll('.brand-title, .brand-school-name, .split-hero-school').forEach(function(el) {
+            el.textContent = activeName;
+          });
+          document.title = activeName + ' - Ujian Online';
+        });
       } catch(e) {}
     })();
-
-    // Pasang logo Base64 langsung ke elemen gambar begitu DOM siap tanpa menunggu network
-    document.addEventListener('DOMContentLoaded', function() {
-      if (window.OFFICIAL_SDN14_LOGO) {
-        var targets = document.querySelectorAll('img[src*="logo-sdn14"], #sidebar-school-logo-img, #student-form-school-logo, #teacher-form-school-logo, .srms-brand-school-logo, .brand-icon img, .split-hero-logo img');
-        targets.forEach(function(img) {
-          img.src = window.OFFICIAL_SDN14_LOGO;
-        });
-      }
-    });
   </script>
 
   <link rel="stylesheet" href="style.css?v=2.2.0">
@@ -566,7 +576,7 @@
           </div>
           <div class="srms-brand-text">
             <div class="srms-brand-title">UJIAN ONLINE</div>
-            <div class="srms-brand-subtitle">Sistem Ujian &amp; Hasil Belajar<br>SD Negeri 14 Toboali</div>
+            <div class="srms-brand-subtitle">Sistem Ujian &amp; Hasil Belajar<br><span class="brand-school-name">SD Negeri 14 Toboali</span></div>
           </div>
           <button class="sidebar-close-mobile-btn" onclick="toggleMobileSidebar(false)" title="Tutup Menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
