@@ -143,12 +143,12 @@ const state = {
 
   currentEditorQType: 'pg',
 
-  // Active Teacher Session (Unified Storage)
+  // Active Teacher Session (SessionStorage Only: Wajib Entry Ulang saat Halaman/Tab Ditutup)
   currentTeacher: (() => {
     try {
-      const local = localStorage.getItem('zettcbt_current_teacher');
+      // Hapus residu lama di localStorage agar tidak login otomatis setelah peramban ditutup
+      localStorage.removeItem('zettcbt_current_teacher');
       const session = sessionStorage.getItem('zettcbt_current_teacher');
-      if (local) return JSON.parse(local);
       if (session) return JSON.parse(session);
     } catch(e) {}
     return null;
@@ -553,9 +553,9 @@ function loadSavedState() {
     applyTeacherIsolation();
   }
 
-  // Restore active screen & tab on refresh
-  const savedView = localStorage.getItem('zettcbt_current_view');
-  const savedTab = localStorage.getItem('zettcbt_current_admin_tab');
+  // Restore active screen & tab on refresh (Hanya jika sesi peramban masih aktif di sessionStorage)
+  const savedView = sessionStorage.getItem('zettcbt_current_view') || localStorage.getItem('zettcbt_current_view');
+  const savedTab = sessionStorage.getItem('zettcbt_current_admin_tab') || localStorage.getItem('zettcbt_current_admin_tab');
 
   if (state.currentTeacher) {
     if (savedView === 'admin-dashboard' || !savedView) {
@@ -571,44 +571,62 @@ function loadSavedState() {
     } else {
       showScreen(savedView);
     }
-  } else if (savedView && savedView !== 'admin-dashboard' && savedView !== 'student-exam') {
-    showScreen(savedView);
-  }
+  } else {
+    // Tanpa sesi guru aktif (misal setelah tab/browser ditutup), bersihkan residu view admin
+    localStorage.removeItem('zettcbt_current_teacher');
+    sessionStorage.removeItem('zettcbt_current_teacher');
+    localStorage.removeItem('zettcbt_current_admin_tab');
+    sessionStorage.removeItem('zettcbt_current_admin_tab');
+    if (savedView === 'admin-dashboard') {
+      localStorage.removeItem('zettcbt_current_view');
+      sessionStorage.removeItem('zettcbt_current_view');
+    }
 
-  // Restore student exam session if was active
-  const activeExamRaw = localStorage.getItem('zettcbt_active_student_exam');
-  if (activeExamRaw && !state.currentTeacher) {
-    try {
-      const activeExam = JSON.parse(activeExamRaw);
-      if (activeExam && activeExam.student && activeExam.student.nisn) {
-        state.student = activeExam.student;
-        if (activeExam.sessionSubject) state.session.subject = activeExam.sessionSubject;
-        if (activeExam.timeRemainingSeconds > 0) state.timeRemainingSeconds = activeExam.timeRemainingSeconds;
-        state.currentQuestionIndex = activeExam.currentQuestionIndex || 0;
-        state.isExamRunning = true;
+    // Cek apakah siswa hanya melakukan refresh halaman (F5) saat ujian berlangsung di sesi yang sama
+    const isExamInSession = sessionStorage.getItem('zettcbt_exam_in_session') === 'true';
+    const activeExamRaw = localStorage.getItem('zettcbt_active_student_exam');
 
-        const filteredQ = state.questions.filter(q => 
-          (!q.subject || q.subject.toLowerCase() === state.session.subject.toLowerCase() || (q.subject && q.subject.includes(state.session.subject))) &&
-          (!q.targetClass || q.targetClass === state.student.className || state.student.className.includes(q.targetClass))
-        );
-        state.activeExamQuestions = (filteredQ.length > 0) ? filteredQ : state.questions;
+    if (isExamInSession && activeExamRaw) {
+      try {
+        const activeExam = JSON.parse(activeExamRaw);
+        if (activeExam && activeExam.student && activeExam.student.nisn) {
+          state.student = activeExam.student;
+          if (activeExam.sessionSubject) state.session.subject = activeExam.sessionSubject;
+          if (activeExam.timeRemainingSeconds > 0) state.timeRemainingSeconds = activeExam.timeRemainingSeconds;
+          state.currentQuestionIndex = activeExam.currentQuestionIndex || 0;
+          state.isExamRunning = true;
 
-        const elAvatar = document.getElementById('exam-avatar');
-        if (elAvatar) elAvatar.textContent = (state.student.name || 'S').charAt(0).toUpperCase();
-        const elName = document.getElementById('exam-student-name');
-        if (elName) elName.textContent = state.student.name;
-        const elSubj = document.getElementById('exam-subject-name');
-        if (elSubj) elSubj.textContent = state.session.subject;
-        const elClass = document.getElementById('exam-class-name');
-        if (elClass) elClass.textContent = state.student.className;
+          const filteredQ = state.questions.filter(q => 
+            (!q.subject || q.subject.toLowerCase() === state.session.subject.toLowerCase() || (q.subject && q.subject.includes(state.session.subject))) &&
+            (!q.targetClass || q.targetClass === state.student.className || state.student.className.includes(q.targetClass))
+          );
+          state.activeExamQuestions = (filteredQ.length > 0) ? filteredQ : state.questions;
 
-        showScreen('student-exam');
-        renderCurrentQuestion();
-        renderQuestionGrid();
-        renderMobileQuestionGrid();
-        startTimer();
+          const elAvatar = document.getElementById('exam-avatar');
+          if (elAvatar) elAvatar.textContent = (state.student.name || 'S').charAt(0).toUpperCase();
+          const elName = document.getElementById('exam-student-name');
+          if (elName) elName.textContent = state.student.name;
+          const elSubj = document.getElementById('exam-subject-name');
+          if (elSubj) elSubj.textContent = state.session.subject;
+          const elClass = document.getElementById('exam-class-name');
+          if (elClass) elClass.textContent = state.student.className;
+
+          showScreen('student-exam');
+          renderCurrentQuestion();
+          renderQuestionGrid();
+          renderMobileQuestionGrid();
+          startTimerCountdown();
+        }
+      } catch(e) {}
+    } else {
+      // Jika tab/browser ditutup, sesi sessionStorage musnah -> Wajib entry ulang akun di halaman login
+      sessionStorage.removeItem('zettcbt_exam_in_session');
+      if (savedView && savedView !== 'admin-dashboard' && savedView !== 'student-exam') {
+        showScreen(savedView);
+      } else {
+        showScreen('student-login');
       }
-    } catch(e) {}
+    }
   }
 }
 
@@ -621,7 +639,12 @@ function showScreen(screenId) {
   if (target) {
     target.classList.add('active');
     state.currentView = screenId;
-    localStorage.setItem('zettcbt_current_view', screenId);
+    if (screenId === 'admin-dashboard' || screenId === 'student-exam') {
+      sessionStorage.setItem('zettcbt_current_view', screenId);
+      localStorage.removeItem('zettcbt_current_view');
+    } else {
+      localStorage.setItem('zettcbt_current_view', screenId);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1265,8 +1288,9 @@ async function handleTeacherLogin(event) {
   if (matchedTeacher) {
     state.currentTeacher = matchedTeacher;
     sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(matchedTeacher));
-    localStorage.setItem('zettcbt_current_teacher', JSON.stringify(matchedTeacher));
-    localStorage.setItem('zettcbt_current_view', 'admin-dashboard');
+    localStorage.removeItem('zettcbt_current_teacher');
+    sessionStorage.setItem('zettcbt_current_view', 'admin-dashboard');
+    localStorage.removeItem('zettcbt_current_view');
     
     // Update navbar label
     const navLabel = document.getElementById('nav-teacher-label');
@@ -1298,6 +1322,8 @@ function handleTeacherLogout() {
 
   // Bersihkan data sesi
   sessionStorage.removeItem('zettcbt_current_teacher');
+  sessionStorage.removeItem('zettcbt_current_view');
+  sessionStorage.removeItem('zettcbt_current_admin_tab');
   localStorage.removeItem('zettcbt_current_teacher');
   localStorage.removeItem('zettcbt_current_view');
   localStorage.removeItem('zettcbt_current_admin_tab');
@@ -1552,6 +1578,24 @@ function handleStudentLogin(event) {
   state.session.durationMinutes = subj.durationMinutes || 90;
   state.timeRemainingSeconds = state.session.durationMinutes * 60;
 
+  // Cek apakah siswa melanjutkan (resume) sesi ujian yang sempat ditutup
+  let isResumed = false;
+  try {
+    const rawSaved = localStorage.getItem('zettcbt_active_student_exam');
+    if (rawSaved) {
+      const parsed = JSON.parse(rawSaved);
+      if (parsed && parsed.student && parsed.student.nisn.toLowerCase() === student.nisn.toLowerCase() && parsed.sessionSubject === subjectName) {
+        state.student.answers = parsed.student.answers || {};
+        if (parsed.timeRemainingSeconds > 0) state.timeRemainingSeconds = parsed.timeRemainingSeconds;
+        if (parsed.currentQuestionIndex !== undefined) state.currentQuestionIndex = parsed.currentQuestionIndex;
+        isResumed = true;
+      }
+    }
+  } catch (e) {}
+
+  // Tandai sesi ujian aktif di sessionStorage (musnah otomatis jika browser/tab ditutup)
+  sessionStorage.setItem('zettcbt_exam_in_session', 'true');
+
   // Filter Soal Sesuai Mata Pelajaran & Kelas
   const filteredQ = state.questions.filter(q => 
     (!q.subject || q.subject.toLowerCase() === subjectName.toLowerCase() || q.subject.includes(subj.code)) &&
@@ -1586,7 +1630,7 @@ function handleStudentLogin(event) {
     name: student.name,
     className: student.className,
     subject: subjectName,
-    answeredCount: 0,
+    answeredCount: Object.keys(state.student.answers || {}).length,
     totalQ: state.activeExamQuestions.length,
     warningCount: 0,
     status: 'in_progress',
@@ -1604,7 +1648,7 @@ function handleStudentLogin(event) {
 
   // Aktifkan Sesi Ujian & Timer Langsung
   state.isExamRunning = true;
-  state.currentQuestionIndex = 0;
+  if (!isResumed) state.currentQuestionIndex = 0;
   state.initialExamHeight = window.innerHeight;
   enterMobileFullscreen();
   startTimerCountdown();
@@ -1612,7 +1656,11 @@ function handleStudentLogin(event) {
   renderCurrentQuestion();
   showScreen('student-exam');
 
-  showToast(`Token terverifikasi! Ujian ${subjectName} resmi dimulai dalam mode layar penuh. Selamat mengerjakan!`, 'success');
+  if (isResumed) {
+    showToast(`Selamat datang kembali, ${student.name}! Sesi ujian ${subjectName} dilanjutkan. Jawaban Anda tersimpan aman.`, 'success');
+  } else {
+    showToast(`Token terverifikasi! Ujian ${subjectName} resmi dimulai dalam mode layar penuh. Selamat mengerjakan!`, 'success');
+  }
 }
 
 // SCREEN 2 -> SCREEN 3: Start Exam
@@ -2467,6 +2515,7 @@ function submitFinalExam(forced = false) {
   }
 
   showScreen('student-finish');
+  sessionStorage.removeItem('zettcbt_exam_in_session');
   localStorage.removeItem('zettcbt_active_student_exam');
   showToast('Jawaban berhasil diserahkan dengan selamat!', 'success');
 }
@@ -2534,8 +2583,9 @@ function switchAdminTab(tabId, element) {
   // Close mobile drawer on selection
   toggleMobileSidebar(false);
 
-  // Persist current admin tab
-  localStorage.setItem('zettcbt_current_admin_tab', tabId);
+  // Persist current admin tab (SessionStorage Only agar hilang saat tab ditutup)
+  sessionStorage.setItem('zettcbt_current_admin_tab', tabId);
+  localStorage.removeItem('zettcbt_current_admin_tab');
 
   if (tabId === 'srms-dashboard') renderSrmsDashboard();
   if (tabId === 'live-monitor') {
