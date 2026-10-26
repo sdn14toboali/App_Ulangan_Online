@@ -1199,6 +1199,19 @@ function toggleScheduleLoginStatus(scheduleId) {
   }
 }
 
+function releaseAllExamSchedules() {
+  if (!Array.isArray(state.schedules) || state.schedules.length === 0) {
+    showToast('Tidak ada jadwal ujian untuk dirilis!', 'warning');
+    return;
+  }
+  state.schedules.forEach(sc => {
+    sc.isLoginOpen = true;
+  });
+  localStorage.setItem('zettcbt_schedules', JSON.stringify(state.schedules));
+  renderTeacherExamSchedules();
+  showToast('✅ Seluruh sesi jadwal ujian berhasil DIRILIS! Semua siswa di setiap kelas dapat langsung masuk.', 'success');
+}
+
 function populateScheduleSubjectDropdown(selectedSubject = '') {
   const selectEl = document.getElementById('schedule-input-subject');
   if (!selectEl) return;
@@ -1613,20 +1626,19 @@ function autoFillStudentInfo(nisn) {
   if (!nisn) return;
   const st = (state.students || []).find(s => s.nisn.trim().toLowerCase() === nisn.trim().toLowerCase());
   if (st) {
-    showToast(`Peserta ditemukan: ${st.name} (${st.className}). Silakan pilih mapel dan masukkan password kartu.`, 'info');
+    showToast(`Peserta ditemukan: ${st.name} (${st.className}). Masukkan Token Ujian dari Pengawas.`, 'info');
   }
 }
 
-// SCREEN 1: Handle Student Login (Direct Exam Start with Subject Token & Password)
+// SCREEN 1: Handle Student Login (Direct Exam Start with Single Exam Token from Proctor)
 function handleStudentLogin(event) {
   event.preventDefault();
 
   const nisn = document.getElementById('login-nisn').value.trim();
-  const password = document.getElementById('login-password').value.trim();
   const token = document.getElementById('login-token').value.trim().toUpperCase();
 
-  if (!nisn || !password || !token) {
-    showToast('Harap lengkapi Nomor Peserta, Password Siswa, dan Token Ujian!', 'warning');
+  if (!nisn || !token) {
+    showToast('Harap lengkapi Nomor Peserta dan Token Ujian!', 'warning');
     return;
   }
 
@@ -1677,14 +1689,7 @@ function handleStudentLogin(event) {
     }
   }
 
-  // 3. Validasi Password Siswa untuk Mata Pelajaran yang Terdeteksi
-  const expectedPassword = getStudentPasswordForSubject(student, subjectName);
-  if (password.toUpperCase() !== expectedPassword.toUpperCase()) {
-    showToast(`Password tidak sesuai untuk mata pelajaran ${subjectName}! Silakan periksa password pada Kartu Ujian Anda.`, 'danger');
-    return;
-  }
-
-  // 5. Status Ujian Langsung Dimulai (Poin 1 Permintaan Pengguna)
+  // 3. Status Ujian Langsung Dimulai
   state.student.nisn = student.nisn;
   state.student.name = student.name;
   state.student.className = student.className;
@@ -4047,13 +4052,12 @@ function printExamCardsPdf() {
 
     let subRows = '';
     subjects.forEach((sub, subIdx) => {
-      const pwd = getStudentPasswordForSubject(st, sub.name);
       subRows += `
         <tr>
           <td style="border: 1px solid #333; padding: 2px 4px; text-align: center; font-size: 7pt;">${subIdx + 1}</td>
           <td style="border: 1px solid #333; padding: 2px 4px; font-size: 7.5pt; font-weight: bold;">${escapeHtml(sub.name)}</td>
-          <td style="border: 1px solid #333; padding: 2px 4px; font-family: monospace; font-weight: bold; font-size: 8pt; text-align: center; color: #1e40af;">${pwd}</td>
-          <td style="border: 1px solid #333; padding: 2px 4px; font-size: 6.8pt; color: #555; text-align: center;">Dirilis Pengawas</td>
+          <td style="border: 1px solid #333; padding: 2px 4px; text-align: center; font-size: 7pt;">${sub.durationMinutes || 90} Menit</td>
+          <td style="border: 1px solid #333; padding: 2px 4px; font-size: 6.8pt; color: #1e40af; font-weight: bold; text-align: center;">Dirilis Pengawas</td>
         </tr>
       `;
     });
@@ -4082,13 +4086,13 @@ function printExamCardsPdf() {
           </div>
         </div>
 
-        <!-- Tabel Password Siswa per Mata Pelajaran -->
+        <!-- Tabel Jadwal Mata Pelajaran Ujian -->
         <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 6px;">
           <thead>
             <tr style="background: #f0f0f0;">
               <th style="border: 1px solid #333; padding: 2px 4px; width: 20px; font-size: 7pt;">No</th>
               <th style="border: 1px solid #333; padding: 2px 4px; text-align: left; font-size: 7pt;">Mata Pelajaran</th>
-              <th style="border: 1px solid #333; padding: 2px 4px; width: 90px; font-size: 7pt;">Password Siswa</th>
+              <th style="border: 1px solid #333; padding: 2px 4px; width: 90px; font-size: 7pt;">Durasi</th>
               <th style="border: 1px solid #333; padding: 2px 4px; width: 85px; font-size: 7pt;">Token Ujian</th>
             </tr>
           </thead>
@@ -4098,7 +4102,7 @@ function printExamCardsPdf() {
         </table>
 
         <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 7pt; margin-top: 4px;">
-          <div style="color: #555; font-style: italic;">*Password wajib dijaga kerahasiaannya</div>
+          <div style="color: #1e40af; font-weight: bold;">*Token Ujian diumumkan oleh Pengawas Ruang sebelum ujian dimulai</div>
           <div style="text-align: right;">
             Kepala Sekolah,<br><br>
             <strong>${sch.headmaster}</strong><br>
@@ -4133,13 +4137,12 @@ function renderExamCardsTab() {
   students.forEach((st) => {
     let subRows = '';
     subjects.forEach((sub, subIdx) => {
-      const pwd = getStudentPasswordForSubject(st, sub.name);
       subRows += `
         <tr>
           <td style="text-align: center; width: 22px;">${subIdx + 1}</td>
           <td><strong>${escapeHtml(sub.name)}</strong></td>
-          <td style="text-align: center; width: 85px;"><span class="pwd-badge">${pwd}</span></td>
-          <td style="color: var(--slate-500); font-size: 0.68rem; text-align: center; width: 80px;">Dirilis Pengawas</td>
+          <td style="text-align: center; width: 85px;">${sub.durationMinutes || 90} Menit</td>
+          <td style="color: var(--primary-600); font-weight: 700; font-size: 0.68rem; text-align: center; width: 80px;">Dirilis Pengawas</td>
         </tr>
       `;
     });
@@ -4166,13 +4169,13 @@ function renderExamCardsTab() {
         </div>
       </div>
 
-      <!-- Tabel Password per Mapel -->
+      <!-- Tabel Mata Pelajaran Ujian -->
       <table class="exam-card-subject-table">
         <thead>
           <tr>
             <th style="width: 22px;">No</th>
             <th>Mata Pelajaran</th>
-            <th style="width: 85px; text-align: center;">Password</th>
+            <th style="width: 85px; text-align: center;">Durasi</th>
             <th style="width: 80px; text-align: center;">Token Mapel</th>
           </tr>
         </thead>
