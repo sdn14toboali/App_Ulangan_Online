@@ -12,7 +12,10 @@ function generateStudentSubjectPasswords(nisn) {
     'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS',
     'Pendidikan Pancasila (PPKn)': 'PKN',
     'Pendidikan Agama Islam (PAI)': 'PAI',
-    'PJOK / Penjaskes': 'PJK'
+    'PJOK / Penjaskes': 'PJK',
+    'Seni dan Budaya (SBdP)': 'SBD',
+    'Muatan Lokal (Bahasa Daerah)': 'MLK',
+    'Bahasa Inggris': 'BIG'
   };
   const numPart = parseInt((nisn || '2026001').replace(/\D/g, '') || '101', 10);
   Object.keys(subCodes).forEach((subName, idx) => {
@@ -28,7 +31,11 @@ function getStudentPasswordForSubject(student, subjectName) {
   if (!student.passwords || typeof student.passwords !== 'object') {
     student.passwords = generateStudentSubjectPasswords(student.nisn);
   }
-  return student.passwords[subjectName] || generateStudentSubjectPasswords(student.nisn)[subjectName] || 'CBT-1234';
+  if (!student.passwords[subjectName]) {
+    const generated = generateStudentSubjectPasswords(student.nisn);
+    student.passwords[subjectName] = generated[subjectName] || 'CBT-1234';
+  }
+  return student.passwords[subjectName];
 }
 
 // Global State
@@ -101,11 +108,28 @@ const state = {
       { id: 'sub-ipas', name: 'IPAS (Ilmu Pengetahuan Alam & Sosial)', code: 'IPS', token: 'IPS26C', durationMinutes: 90, isActive: true },
       { id: 'sub-pkn', name: 'Pendidikan Pancasila (PPKn)', code: 'PKN', token: 'PKN26D', durationMinutes: 90, isActive: true },
       { id: 'sub-pai', name: 'Pendidikan Agama Islam (PAI)', code: 'PAI', token: 'PAI26E', durationMinutes: 90, isActive: true },
-      { id: 'sub-pjok', name: 'PJOK / Penjaskes', code: 'PJK', token: 'PJK26F', durationMinutes: 90, isActive: true }
+      { id: 'sub-pjok', name: 'PJOK / Penjaskes', code: 'PJK', token: 'PJK26F', durationMinutes: 90, isActive: true },
+      { id: 'sub-sbdp', name: 'Seni dan Budaya (SBdP)', code: 'SBD', token: 'SBD26G', durationMinutes: 90, isActive: true },
+      { id: 'sub-mulok', name: 'Muatan Lokal (Bahasa Daerah)', code: 'MLK', token: 'MLK26H', durationMinutes: 90, isActive: true },
+      { id: 'sub-bing', name: 'Bahasa Inggris', code: 'BIG', token: 'BIG26I', durationMinutes: 90, isActive: true }
     ];
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_subjects') || 'null');
-      if (saved && Array.isArray(saved) && saved.length > 0) return saved;
+      if (saved && Array.isArray(saved) && saved.length > 0) {
+        // Smart Migration: Jangan reset token mapel yang sudah ada, tapi tambahkan mapel baru yang belum ada
+        let changed = false;
+        defaultSubjects.forEach(defSub => {
+          const exists = saved.some(s => s.id === defSub.id || s.code === defSub.code || s.name === defSub.name);
+          if (!exists) {
+            saved.push(defSub);
+            changed = true;
+          }
+        });
+        if (changed) {
+          localStorage.setItem('zettcbt_subjects', JSON.stringify(saved));
+        }
+        return saved;
+      }
     } catch(e) {}
     localStorage.setItem('zettcbt_subjects', JSON.stringify(defaultSubjects));
     return defaultSubjects;
@@ -184,31 +208,31 @@ const state = {
     const defaultSdStudents = [
       { 
         id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active',
-        passwords: { 'Bahasa Indonesia': 'BIN-4821', 'Matematika': 'MTK-9314', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-5720', 'Pendidikan Pancasila (PPKn)': 'PKN-1648', 'Pendidikan Agama Islam (PAI)': 'PAI-8293', 'PJOK / Penjaskes': 'PJK-3047' }
+        passwords: { 'Bahasa Indonesia': 'BIN-4821', 'Matematika': 'MTK-9314', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-5720', 'Pendidikan Pancasila (PPKn)': 'PKN-1648', 'Pendidikan Agama Islam (PAI)': 'PAI-8293', 'PJOK / Penjaskes': 'PJK-3047', 'Seni dan Budaya (SBdP)': 'SBD-5921', 'Muatan Lokal (Bahasa Daerah)': 'MLK-8142', 'Bahasa Inggris': 'BIG-3765' }
       },
       { 
         id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active',
-        passwords: { 'Bahasa Indonesia': 'BIN-5192', 'Matematika': 'MTK-2840', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-6173', 'Pendidikan Pancasila (PPKn)': 'PKN-4921', 'Pendidikan Agama Islam (PAI)': 'PAI-3850', 'PJOK / Penjaskes': 'PJK-7419' }
+        passwords: { 'Bahasa Indonesia': 'BIN-5192', 'Matematika': 'MTK-2840', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-6173', 'Pendidikan Pancasila (PPKn)': 'PKN-4921', 'Pendidikan Agama Islam (PAI)': 'PAI-3850', 'PJOK / Penjaskes': 'PJK-7419', 'Seni dan Budaya (SBdP)': 'SBD-6292', 'Muatan Lokal (Bahasa Daerah)': 'MLK-8513', 'Bahasa Inggris': 'BIG-4136' }
       },
       { 
         id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active',
-        passwords: { 'Bahasa Indonesia': 'BIN-6340', 'Matematika': 'MTK-1972', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-4829', 'Pendidikan Pancasila (PPKn)': 'PKN-3715', 'Pendidikan Agama Islam (PAI)': 'PAI-6204', 'PJOK / Penjaskes': 'PJK-8531' }
+        passwords: { 'Bahasa Indonesia': 'BIN-6340', 'Matematika': 'MTK-1972', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-4829', 'Pendidikan Pancasila (PPKn)': 'PKN-3715', 'Pendidikan Agama Islam (PAI)': 'PAI-6204', 'PJOK / Penjaskes': 'PJK-8531', 'Seni dan Budaya (SBdP)': 'SBD-7440', 'Muatan Lokal (Bahasa Daerah)': 'MLK-9661', 'Bahasa Inggris': 'BIG-5284' }
       },
       { 
         id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active',
-        passwords: { 'Bahasa Indonesia': 'BIN-7815', 'Matematika': 'MTK-3406', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-7931', 'Pendidikan Pancasila (PPKn)': 'PKN-2580', 'Pendidikan Agama Islam (PAI)': 'PAI-9147', 'PJOK / Penjaskes': 'PJK-4628' }
+        passwords: { 'Bahasa Indonesia': 'BIN-7815', 'Matematika': 'MTK-3406', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-7931', 'Pendidikan Pancasila (PPKn)': 'PKN-2580', 'Pendidikan Agama Islam (PAI)': 'PAI-9147', 'PJOK / Penjaskes': 'PJK-4628', 'Seni dan Budaya (SBdP)': 'SBD-8915', 'Muatan Lokal (Bahasa Daerah)': 'MLK-2136', 'Bahasa Inggris': 'BIG-6759' }
       },
       { 
         id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active',
-        passwords: { 'Bahasa Indonesia': 'BIN-2904', 'Matematika': 'MTK-8153', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-3694', 'Pendidikan Pancasila (PPKn)': 'PKN-6402', 'Pendidikan Agama Islam (PAI)': 'PAI-1758', 'PJOK / Penjaskes': 'PJK-5283' }
+        passwords: { 'Bahasa Indonesia': 'BIN-2904', 'Matematika': 'MTK-8153', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-3694', 'Pendidikan Pancasila (PPKn)': 'PKN-6402', 'Pendidikan Agama Islam (PAI)': 'PAI-1758', 'PJOK / Penjaskes': 'PJK-5283', 'Seni dan Budaya (SBdP)': 'SBD-4004', 'Muatan Lokal (Bahasa Daerah)': 'MLK-6225', 'Bahasa Inggris': 'BIG-1848' }
       },
       { 
         id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active',
-        passwords: { 'Bahasa Indonesia': 'BIN-3481', 'Matematika': 'MTK-7629', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-8205', 'Pendidikan Pancasila (PPKn)': 'PKN-5137', 'Pendidikan Agama Islam (PAI)': 'PAI-4920', 'PJOK / Penjaskes': 'PJK-6371' }
+        passwords: { 'Bahasa Indonesia': 'BIN-3481', 'Matematika': 'MTK-7629', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-8205', 'Pendidikan Pancasila (PPKn)': 'PKN-5137', 'Pendidikan Agama Islam (PAI)': 'PAI-4920', 'PJOK / Penjaskes': 'PJK-6371', 'Seni dan Budaya (SBdP)': 'SBD-4581', 'Muatan Lokal (Bahasa Daerah)': 'MLK-6802', 'Bahasa Inggris': 'BIG-2425' }
       },
       { 
         id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active',
-        passwords: { 'Bahasa Indonesia': 'BIN-4592', 'Matematika': 'MTK-6318', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-9451', 'Pendidikan Pancasila (PPKn)': 'PKN-7824', 'Pendidikan Agama Islam (PAI)': 'PAI-5039', 'PJOK / Penjaskes': 'PJK-2184' }
+        passwords: { 'Bahasa Indonesia': 'BIN-4592', 'Matematika': 'MTK-6318', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-9451', 'Pendidikan Pancasila (PPKn)': 'PKN-7824', 'Pendidikan Agama Islam (PAI)': 'PAI-5039', 'PJOK / Penjaskes': 'PJK-2184', 'Seni dan Budaya (SBdP)': 'SBD-5692', 'Muatan Lokal (Bahasa Daerah)': 'MLK-7913', 'Bahasa Inggris': 'BIG-3536' }
       }
     ];
     try {
@@ -218,9 +242,17 @@ const state = {
         if (Array.isArray(parsed)) {
           let changed = false;
           parsed.forEach((st, idx) => {
+            const fresh = generateStudentSubjectPasswords(st.nisn || ('2026-0' + (idx + 1)));
             if (!st.passwords) {
-              st.passwords = generateStudentSubjectPasswords(st.nisn || ('2026-0' + (idx + 1)));
+              st.passwords = fresh;
               changed = true;
+            } else {
+              Object.keys(fresh).forEach(subName => {
+                if (!st.passwords[subName]) {
+                  st.passwords[subName] = fresh[subName];
+                  changed = true;
+                }
+              });
             }
           });
           if (changed) localStorage.setItem('zettcbt_students', JSON.stringify(parsed));
@@ -547,7 +579,30 @@ function loadSavedState() {
   if (savedSubjects) {
     try {
       const parsedSubs = JSON.parse(savedSubjects);
-      if (Array.isArray(parsedSubs) && parsedSubs.length > 0) state.subjects = parsedSubs;
+      if (Array.isArray(parsedSubs) && parsedSubs.length > 0) {
+        const defaultMapels = [
+          { id: 'sub-bin', name: 'Bahasa Indonesia', code: 'BIN', token: 'BIN26A', durationMinutes: 90, isActive: true },
+          { id: 'sub-mtk', name: 'Matematika', code: 'MTK', token: 'MTK26B', durationMinutes: 90, isActive: true },
+          { id: 'sub-ipas', name: 'IPAS (Ilmu Pengetahuan Alam & Sosial)', code: 'IPS', token: 'IPS26C', durationMinutes: 90, isActive: true },
+          { id: 'sub-pkn', name: 'Pendidikan Pancasila (PPKn)', code: 'PKN', token: 'PKN26D', durationMinutes: 90, isActive: true },
+          { id: 'sub-pai', name: 'Pendidikan Agama Islam (PAI)', code: 'PAI', token: 'PAI26E', durationMinutes: 90, isActive: true },
+          { id: 'sub-pjok', name: 'PJOK / Penjaskes', code: 'PJK', token: 'PJK26F', durationMinutes: 90, isActive: true },
+          { id: 'sub-sbdp', name: 'Seni dan Budaya (SBdP)', code: 'SBD', token: 'SBD26G', durationMinutes: 90, isActive: true },
+          { id: 'sub-mulok', name: 'Muatan Lokal (Bahasa Daerah)', code: 'MLK', token: 'MLK26H', durationMinutes: 90, isActive: true },
+          { id: 'sub-bing', name: 'Bahasa Inggris', code: 'BIG', token: 'BIG26I', durationMinutes: 90, isActive: true }
+        ];
+        let subChanged = false;
+        defaultMapels.forEach(dm => {
+          if (!parsedSubs.some(s => s.id === dm.id || s.code === dm.code || s.name === dm.name)) {
+            parsedSubs.push(dm);
+            subChanged = true;
+          }
+        });
+        state.subjects = parsedSubs;
+        if (subChanged) {
+          localStorage.setItem('zettcbt_subjects', JSON.stringify(parsedSubs));
+        }
+      }
     } catch(e) {}
   }
 
@@ -1144,10 +1199,24 @@ function toggleScheduleLoginStatus(scheduleId) {
   }
 }
 
+function populateScheduleSubjectDropdown(selectedSubject = '') {
+  const selectEl = document.getElementById('schedule-input-subject');
+  if (!selectEl) return;
+  if (Array.isArray(state.subjects) && state.subjects.length > 0) {
+    let opts = '<option value="">-- Pilih Mata Pelajaran --</option>';
+    state.subjects.forEach(s => {
+      opts += `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`;
+    });
+    selectEl.innerHTML = opts;
+    if (selectedSubject) selectEl.value = selectedSubject;
+  }
+}
+
 function openAddScheduleModal() {
   const modal = document.getElementById('modal-schedule-editor');
   if (!modal) return;
 
+  populateScheduleSubjectDropdown('');
   document.getElementById('edit-schedule-id').value = '';
   document.getElementById('modal-schedule-title').textContent = 'Tambah Sesi Jadwal Ujian';
   document.getElementById('schedule-input-subject').value = '';
@@ -1171,6 +1240,7 @@ function openEditScheduleModal(scheduleId) {
   const modal = document.getElementById('modal-schedule-editor');
   if (!modal) return;
 
+  populateScheduleSubjectDropdown(sc.subjectName || '');
   document.getElementById('edit-schedule-id').value = sc.id;
   document.getElementById('modal-schedule-title').textContent = `Atur Sesi Jadwal (${sc.subjectName} - Kelas ${sc.className})`;
   document.getElementById('schedule-input-subject').value = sc.subjectName || '';
