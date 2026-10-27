@@ -3852,6 +3852,25 @@ body.dark-mode .srms-quick-logout-btn:hover {
     transform: scale(1.1);
   }
 
+  .admin-mob-nav-btn.admin-mob-nav-btn-logout {
+    color: #ef4444 !important;
+  }
+
+  .admin-mob-nav-btn.admin-mob-nav-btn-logout:hover,
+  .admin-mob-nav-btn.admin-mob-nav-btn-logout:active {
+    color: #dc2626 !important;
+    background: #fee2e2 !important;
+  }
+
+  body.dark-mode .admin-mob-nav-btn.admin-mob-nav-btn-logout {
+    color: #f87171 !important;
+  }
+
+  body.dark-mode .admin-mob-nav-btn.admin-mob-nav-btn-logout:hover,
+  body.dark-mode .admin-mob-nav-btn.admin-mob-nav-btn-logout:active {
+    background: rgba(239, 68, 68, 0.15) !important;
+  }
+
   /* Berikan padding bawah pada konten admin agar tidak tertutup bottom bar di HP */
   .admin-main-panel {
     padding-bottom: 75px !important;
