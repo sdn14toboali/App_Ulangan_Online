@@ -162,6 +162,19 @@
               <input type="text" id="login-nisn" class="form-control" placeholder="Contoh: 2026-001" required autocomplete="off" onchange="autoFillStudentInfo(this.value)">
             </div>
 
+            <div class="form-group">
+              <label class="form-label" for="login-password">Password Siswa</label>
+              <div style="position: relative;">
+                <input type="password" id="login-password" class="form-control" placeholder="Contoh: 482915" required autocomplete="off" style="font-family: monospace; font-weight: 700; letter-spacing: 0.12em; padding-right: 42px;">
+                <button type="button" onclick="toggleStudentPasswordVisibility()" title="Tampilkan / Sembunyikan Password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-500); padding: 4px;">
+                  <svg id="student-pass-eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <small style="color: var(--slate-500); font-size: 0.74rem; margin-top: 0.35rem; display: block; line-height: 1.35;">*Lihat password 6-digit pada Kartu Ujian fisik Anda</small>
+            </div>
 
             <div class="form-group">
               <label class="form-label" for="login-subject">Mata Pelajaran Ujian</label>
@@ -2680,6 +2693,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.20.0"></script>
+  <script src="app.js?v=3.21.0"></script>
 </body>
 </html>
