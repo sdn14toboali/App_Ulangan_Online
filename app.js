@@ -222,31 +222,31 @@ const state = {
   students: (() => {
     const defaultSdStudents = [
       { 
-        id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active',
+        id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active', password: '123456',
         passwords: { 'Bahasa Indonesia': 'BIN-4821', 'Matematika': 'MTK-9314', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-5720', 'Pendidikan Pancasila (PPKn)': 'PKN-1648', 'Pendidikan Agama Islam (PAI)': 'PAI-8293', 'PJOK / Penjaskes': 'PJK-3047', 'Seni dan Budaya (SBdP)': 'SBD-5921', 'Muatan Lokal (Bahasa Daerah)': 'MLK-8142', 'Bahasa Inggris': 'BIG-3765' }
       },
       { 
-        id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active',
+        id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active', password: '123456',
         passwords: { 'Bahasa Indonesia': 'BIN-5192', 'Matematika': 'MTK-2840', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-6173', 'Pendidikan Pancasila (PPKn)': 'PKN-4921', 'Pendidikan Agama Islam (PAI)': 'PAI-3850', 'PJOK / Penjaskes': 'PJK-7419', 'Seni dan Budaya (SBdP)': 'SBD-6292', 'Muatan Lokal (Bahasa Daerah)': 'MLK-8513', 'Bahasa Inggris': 'BIG-4136' }
       },
       { 
-        id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active',
+        id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active', password: '123456',
         passwords: { 'Bahasa Indonesia': 'BIN-6340', 'Matematika': 'MTK-1972', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-4829', 'Pendidikan Pancasila (PPKn)': 'PKN-3715', 'Pendidikan Agama Islam (PAI)': 'PAI-6204', 'PJOK / Penjaskes': 'PJK-8531', 'Seni dan Budaya (SBdP)': 'SBD-7440', 'Muatan Lokal (Bahasa Daerah)': 'MLK-9661', 'Bahasa Inggris': 'BIG-5284' }
       },
       { 
-        id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active',
+        id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active', password: '123456',
         passwords: { 'Bahasa Indonesia': 'BIN-7815', 'Matematika': 'MTK-3406', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-7931', 'Pendidikan Pancasila (PPKn)': 'PKN-2580', 'Pendidikan Agama Islam (PAI)': 'PAI-9147', 'PJOK / Penjaskes': 'PJK-4628', 'Seni dan Budaya (SBdP)': 'SBD-8915', 'Muatan Lokal (Bahasa Daerah)': 'MLK-2136', 'Bahasa Inggris': 'BIG-6759' }
       },
       { 
-        id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active',
+        id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active', password: '123456',
         passwords: { 'Bahasa Indonesia': 'BIN-2904', 'Matematika': 'MTK-8153', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-3694', 'Pendidikan Pancasila (PPKn)': 'PKN-6402', 'Pendidikan Agama Islam (PAI)': 'PAI-1758', 'PJOK / Penjaskes': 'PJK-5283', 'Seni dan Budaya (SBdP)': 'SBD-4004', 'Muatan Lokal (Bahasa Daerah)': 'MLK-6225', 'Bahasa Inggris': 'BIG-1848' }
       },
       { 
-        id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active',
+        id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active', password: '123456',
         passwords: { 'Bahasa Indonesia': 'BIN-3481', 'Matematika': 'MTK-7629', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-8205', 'Pendidikan Pancasila (PPKn)': 'PKN-5137', 'Pendidikan Agama Islam (PAI)': 'PAI-4920', 'PJOK / Penjaskes': 'PJK-6371', 'Seni dan Budaya (SBdP)': 'SBD-4581', 'Muatan Lokal (Bahasa Daerah)': 'MLK-6802', 'Bahasa Inggris': 'BIG-2425' }
       },
       { 
-        id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active',
+        id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active', password: '123456',
         passwords: { 'Bahasa Indonesia': 'BIN-4592', 'Matematika': 'MTK-6318', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-9451', 'Pendidikan Pancasila (PPKn)': 'PKN-7824', 'Pendidikan Agama Islam (PAI)': 'PAI-5039', 'PJOK / Penjaskes': 'PJK-2184', 'Seni dan Budaya (SBdP)': 'SBD-5692', 'Muatan Lokal (Bahasa Daerah)': 'MLK-7913', 'Bahasa Inggris': 'BIG-3536' }
       }
     ];
@@ -258,6 +258,10 @@ const state = {
           let changed = false;
           parsed.forEach((st, idx) => {
             const fresh = generateStudentSubjectPasswords(st.nisn || ('2026-0' + (idx + 1)));
+            if (!st.password) {
+              st.password = '123456';
+              changed = true;
+            }
             if (!st.passwords) {
               st.passwords = fresh;
               changed = true;
@@ -421,7 +425,20 @@ const state = {
     } catch(e) {}
     localStorage.setItem('zettcbt_live_students', JSON.stringify(defaultLiveStudents));
     return defaultLiveStudents;
-  })()
+  })(),
+
+  // Pusat Notifikasi & Log Aktivitas Ujian Realtime (Pelanggaran, Selesai, Kendala)
+  notifications: (() => {
+    try {
+      const raw = localStorage.getItem('zettcbt_notifications');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch(e) {}
+    return [];
+  })(),
+  currentNotifFilter: 'all'
 };
 
 // Initialize Application
@@ -436,6 +453,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProctorTokenBar();
   updateGlobalLoginButtonUI();
   updateAdminMetrics();
+  updateNotificationBadge();
+  initNotificationListeners();
   startProctorTokenTimer();
   initNeonAutoSync();
   initPwaSupport();
@@ -1743,15 +1762,34 @@ function autoFillStudentInfo(nisn) {
   }
 }
 
-// SCREEN 1: Handle Student Login (Direct Exam Start with Single Exam Token from Proctor)
+function toggleStudentPasswordVisibility() {
+  const input = document.getElementById('login-password');
+  const icon = document.getElementById('student-pass-eye-icon');
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) {
+      icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    }
+  } else {
+    input.type = 'password';
+    if (icon) {
+      icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+  }
+}
+
+// SCREEN 1: Handle Student Login (Direct Exam Start with NISN, Student Password, and Exam Token)
 async function handleStudentLogin(event) {
   event.preventDefault();
 
   const nisn = document.getElementById('login-nisn').value.trim();
+  const passEl = document.getElementById('login-password');
+  const password = passEl ? passEl.value.trim() : '';
   const token = document.getElementById('login-token').value.trim().toUpperCase();
 
-  if (!nisn || !token) {
-    showToast('Harap lengkapi Nomor Peserta dan Token Ujian!', 'warning');
+  if (!nisn || !password || !token) {
+    showToast('Harap lengkapi Nomor Peserta, Password Siswa, dan Token Ujian!', 'warning');
     return;
   }
 
@@ -1759,6 +1797,19 @@ async function handleStudentLogin(event) {
   const student = (state.students || []).find(s => s.nisn.toLowerCase() === nisn.toLowerCase());
   if (!student) {
     showToast('Nomor Peserta / NISN "' + nisn + '" belum terdaftar di sistem sekolah! Hubungi pengawas.', 'danger');
+    return;
+  }
+
+  // 1a. Validasi Kata Sandi Siswa
+  const expectedPassword = (student.password || '123456').trim();
+  const rawNisnDigits = (student.nisn || '').replace(/\D/g, '');
+  let isPasswordValid = (password === expectedPassword) || (password === '123456') || (rawNisnDigits && password === rawNisnDigits);
+  if (!isPasswordValid && student.passwords && typeof student.passwords === 'object') {
+    isPasswordValid = Object.values(student.passwords).some(p => p.trim() === password || p.trim().toLowerCase() === password.toLowerCase());
+  }
+
+  if (!isPasswordValid) {
+    showToast('Kata sandi siswa salah! Periksa password di Kartu Peserta Ujian Anda (bawaan: 123456).', 'danger');
     return;
   }
 
@@ -2760,6 +2811,19 @@ function triggerCheatWarning(reasonType, message) {
   state.warningCount = (state.warningCount || 0) + 1;
   syncLiveStudentProgress();
 
+  // Catat & Siarkan Notifikasi Pelanggaran Realtime
+  if (typeof addExamNotification === 'function') {
+    addExamNotification('violation', {
+      nisn: state.student.nisn,
+      name: state.student.name,
+      className: state.student.className,
+      subject: state.student.subject || state.session.subject
+    }, message || 'Terdeteksi melakukan pelanggaran ujian (beralih tab / split screen / keluar fullscreen)!', {
+      warningCount: state.warningCount,
+      reasonType: reasonType
+    });
+  }
+
   // Bunyikan Alarm Audio & Getar Ponsel
   playCheatAlarmSound();
   triggerHapticVibration();
@@ -2775,6 +2839,17 @@ function triggerCheatWarning(reasonType, message) {
   if (modal) modal.style.display = 'flex';
 
   if (state.warningCount >= (state.maxWarnings || 3)) {
+    if (typeof addExamNotification === 'function') {
+      addExamNotification('issue', {
+        nisn: state.student.nisn,
+        name: state.student.name,
+        className: state.student.className,
+        subject: state.student.subject || state.session.subject
+      }, 'Ujian terkunci otomatis karena telah melampaui batas 3x pelanggaran! Butuh pemulihan/reset dari pengawas.', {
+        warningCount: state.warningCount,
+        actionType: 'reset_exam'
+      });
+    }
     showToast('Batas toleransi pelanggaran 3x terlewati! Ujian dikunci dan dikumpulkan otomatis.', 'danger');
     setTimeout(() => {
       dismissCheatAlert();
@@ -2843,6 +2918,20 @@ function submitFinalExam(forced = false) {
     target.score = totalScore;
     target.time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
     localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
+  }
+
+  // Catat & Siarkan Notifikasi Selesai Ujian Realtime
+  if (typeof addExamNotification === 'function') {
+    addExamNotification('submitted', {
+      nisn: state.student.nisn,
+      name: state.student.name,
+      className: state.student.className,
+      subject: state.session.subject || state.student.subject
+    }, forced ? 'Lembar jawaban ujian dikumpulkan otomatis oleh sistem (melebihi batas pelanggaran).' : 'Telah menyelesaikan ujian dan mengumpulkan lembar jawaban dengan selamat.', {
+      score: totalScore,
+      correctCount: correctCount,
+      forced: forced
+    });
   }
 
   // Finalize attempt in Neon Cloud
@@ -3120,6 +3209,295 @@ function openTeacherProfileModal() {
 function closeTeacherProfileModal() {
   const modal = document.getElementById('modal-teacher-profile');
   if (modal) modal.style.display = 'none';
+}
+
+// ==============================================================================
+// PUSAT NOTIFIKASI & LOG AKTIVITAS UJIAN REALTIME (v3.10.0)
+// ==============================================================================
+
+function getVisibleNotifications() {
+  const allNotifs = Array.isArray(state.notifications) ? state.notifications : [];
+  const teacher = state.currentTeacher;
+
+  if (!teacher || teacher.role === 'admin_sekolah' || teacher.username === 'admin') {
+    return allNotifs;
+  }
+
+  return allNotifs.filter(n => {
+    if (teacher.role === 'guru_kelas' && teacher.assignedClass) {
+      return isClassMatch(n.className, teacher.assignedClass);
+    }
+    if (teacher.role === 'guru_mapel' && teacher.assignedSubject) {
+      return n.subject === teacher.assignedSubject;
+    }
+    return true;
+  });
+}
+
+function updateNotificationBadge() {
+  const badge = document.getElementById('srms-notif-badge');
+  if (!badge) return;
+
+  const unreadCount = getVisibleNotifications().filter(n => !n.isRead).length;
+  badge.textContent = unreadCount;
+  if (unreadCount > 0) {
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function openNotificationsModal() {
+  const modal = document.getElementById('modal-notifications-center');
+  if (modal) {
+    modal.style.display = 'flex';
+    renderNotificationsList();
+  }
+}
+
+function closeNotificationsModal() {
+  const modal = document.getElementById('modal-notifications-center');
+  if (modal) modal.style.display = 'none';
+}
+
+function filterExamNotifications(filterType, btnEl) {
+  state.currentNotifFilter = filterType || 'all';
+
+  const chips = document.querySelectorAll('.notif-chip');
+  chips.forEach(c => c.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+
+  renderNotificationsList();
+}
+
+function renderNotificationsList() {
+  const container = document.getElementById('notifications-list-container');
+  const counterLabel = document.getElementById('notif-counter-label');
+  if (!container) return;
+
+  const visible = getVisibleNotifications();
+  const filter = state.currentNotifFilter || 'all';
+
+  const filtered = visible.filter(n => {
+    if (filter === 'all') return true;
+    return n.type === filter;
+  });
+
+  if (counterLabel) {
+    const unread = visible.filter(n => !n.isRead).length;
+    counterLabel.textContent = `${visible.length} notifikasi tercatat (${unread} belum dibaca)`;
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="notif-empty-state">
+        <div class="notif-empty-icon">🔕</div>
+        <div style="font-weight: 700; font-size: 0.95rem; color: var(--slate-600); margin-bottom: 0.25rem;">Tidak Ada Notifikasi</div>
+        <div style="font-size: 0.8rem; color: var(--slate-400);">Belum ada log aktivitas ${filter !== 'all' ? 'kategori ini' : ''} pada kelas binaan Anda.</div>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  filtered.forEach(n => {
+    let typeClass = 'notif-violation';
+    let badgeClass = 'notif-badge-violation';
+    let badgeText = '🚨 Pelanggaran';
+
+    if (n.type === 'submitted') {
+      typeClass = 'notif-submitted';
+      badgeClass = 'notif-badge-submitted';
+      badgeText = '✅ Selesai';
+    } else if (n.type === 'issue') {
+      typeClass = 'notif-issue';
+      badgeClass = 'notif-badge-issue';
+      badgeText = '⚠️ Kendala Teknis';
+    }
+
+    const unreadClass = !n.isRead ? 'notif-unread' : '';
+
+    let actionButton = '';
+    if (n.type === 'issue' || n.type === 'violation') {
+      actionButton = `
+        <button type="button" class="btn btn-warning btn-sm" onclick="handleResetStudentFromNotif('${escapeHtml(n.nisn)}')" style="font-size: 0.75rem; padding: 0.25rem 0.65rem; font-weight: 700;">
+          🔓 Pulihkan / Reset Login Siswa
+        </button>
+      `;
+    } else if (n.type === 'submitted') {
+      actionButton = `
+        <button type="button" class="btn btn-outline btn-sm" onclick="switchAdminTab('results-analysis'); closeNotificationsModal();" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">
+          📊 Lihat Hasil Rekap Nilai
+        </button>
+      `;
+    }
+
+    html += `
+      <div class="notif-card-item ${typeClass} ${unreadClass}">
+        <div class="notif-header-row">
+          <span class="notif-badge-pill ${badgeClass}">${badgeText}</span>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="badge badge-info" style="font-size: 0.68rem; padding: 1px 6px;">Kelas ${escapeHtml(n.className)}</span>
+            <span class="notif-time">${escapeHtml(n.timestamp)}</span>
+          </div>
+        </div>
+        <div class="notif-title">${escapeHtml(n.studentName)} (${escapeHtml(n.nisn)})</div>
+        <div class="notif-message">${escapeHtml(n.message)}</div>
+        <div class="notif-action-row">
+          <span style="font-size: 0.72rem; color: var(--slate-400);">Mapel: <strong>${escapeHtml(n.subject || '-')}</strong></span>
+          ${actionButton}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function addExamNotification(type, studentInfo, message, details = {}) {
+  const notif = {
+    id: 'notif-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+    type: type,
+    nisn: studentInfo.nisn || '-',
+    studentName: studentInfo.name || studentInfo.studentName || 'Siswa',
+    className: studentInfo.className || '-',
+    subject: studentInfo.subject || state.session.subject || '-',
+    title: details.title || (
+      type === 'violation' ? 'Peringatan Pelanggaran' :
+      type === 'submitted' ? 'Ujian Selesai Dikumpulkan' :
+      'Kendala Ujian Peserta'
+    ),
+    message: message || '',
+    details: details,
+    timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB',
+    createdAt: Date.now(),
+    isRead: false
+  };
+
+  if (!Array.isArray(state.notifications)) state.notifications = [];
+  state.notifications.unshift(notif);
+  if (state.notifications.length > 100) state.notifications.length = 100;
+
+  try {
+    localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
+    localStorage.setItem('zettcbt_last_notification', JSON.stringify(notif));
+  } catch(e) {}
+
+  // Siarkan ke channel broadcast bila didukung
+  try {
+    if (tokenSyncChannel && typeof tokenSyncChannel.postMessage === 'function') {
+      tokenSyncChannel.postMessage({ type: 'EXAM_NOTIFICATION', notification: notif });
+    }
+  } catch(e) {}
+
+  updateNotificationBadge();
+
+  const modal = document.getElementById('modal-notifications-center');
+  if (modal && modal.style.display === 'flex') {
+    renderNotificationsList();
+  }
+
+  // Notifikasi Toast di Dasbor Guru
+  if (state.currentTeacher) {
+    const isVisibleToCurrentTeacher = (state.currentTeacher.role === 'admin_sekolah' || state.currentTeacher.username === 'admin') ||
+      isClassMatch(notif.className, state.currentTeacher.assignedClass);
+
+    if (isVisibleToCurrentTeacher) {
+      if (type === 'violation') {
+        showToast(`🚨 [${notif.className}] ${notif.studentName}: ${notif.message}`, 'warning');
+      } else if (type === 'submitted') {
+        showToast(`✅ [${notif.className}] ${notif.studentName} mengumpulkan ujian (${notif.subject})`, 'success');
+      } else if (type === 'issue') {
+        showToast(`⚠️ [${notif.className}] ${notif.studentName}: ${notif.message}`, 'danger');
+      }
+    }
+  }
+}
+
+function receiveBroadcastNotification(notif) {
+  if (!notif || !notif.id) return;
+  if (!Array.isArray(state.notifications)) state.notifications = [];
+
+  const exists = state.notifications.some(n => n.id === notif.id);
+  if (exists) return;
+
+  state.notifications.unshift(notif);
+  if (state.notifications.length > 100) state.notifications.length = 100;
+
+  try {
+    localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
+  } catch(e) {}
+
+  updateNotificationBadge();
+
+  const modal = document.getElementById('modal-notifications-center');
+  if (modal && modal.style.display === 'flex') {
+    renderNotificationsList();
+  }
+
+  if (state.currentTeacher) {
+    const isVisible = (state.currentTeacher.role === 'admin_sekolah' || state.currentTeacher.username === 'admin') ||
+      isClassMatch(notif.className, state.currentTeacher.assignedClass);
+
+    if (isVisible) {
+      if (notif.type === 'violation') {
+        showToast(`🚨 [${notif.className}] ${notif.studentName}: ${notif.message}`, 'warning');
+      } else if (notif.type === 'submitted') {
+        showToast(`✅ [${notif.className}] ${notif.studentName} mengumpulkan ujian (${notif.subject})`, 'success');
+      } else if (notif.type === 'issue') {
+        showToast(`⚠️ [${notif.className}] ${notif.studentName}: ${notif.message}`, 'danger');
+      }
+    }
+  }
+}
+
+function markAllNotificationsRead() {
+  const visible = getVisibleNotifications();
+  visible.forEach(n => { n.isRead = true; });
+  try {
+    localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
+  } catch(e) {}
+  updateNotificationBadge();
+  renderNotificationsList();
+  showToast('Semua notifikasi ditandai sebagai telah dibaca.', 'success');
+}
+
+function clearAllNotifications() {
+  if (!confirm('Apakah Anda yakin ingin membersihkan riwayat notifikasi?')) return;
+  const visible = getVisibleNotifications();
+  const visibleIds = new Set(visible.map(v => v.id));
+
+  state.notifications = (state.notifications || []).filter(n => !visibleIds.has(n.id));
+  try {
+    localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
+  } catch(e) {}
+  updateNotificationBadge();
+  renderNotificationsList();
+  showToast('Riwayat notifikasi berhasil dibersihkan.', 'success');
+}
+
+function handleResetStudentFromNotif(nisn) {
+  resetStudentLogin(nisn);
+  // Tandai notifikasi terkait sebagai telah dibaca
+  (state.notifications || []).forEach(n => {
+    if (n.nisn === nisn) n.isRead = true;
+  });
+  try {
+    localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
+  } catch(e) {}
+  updateNotificationBadge();
+  renderNotificationsList();
+}
+
+function initNotificationListeners() {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'zettcbt_last_notification' && e.newValue) {
+      try {
+        const notif = JSON.parse(e.newValue);
+        receiveBroadcastNotification(notif);
+      } catch(err) {}
+    }
+  });
 }
 
 function handleSaveTeacherProfile(event) {
@@ -3743,7 +4121,7 @@ function renderStudentsTable() {
   tbody.innerHTML = '';
 
   if (students.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada data siswa di kelas kewenangan Anda. Klik "+ Tambah Siswa Baru" di atas.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada data siswa di kelas kewenangan Anda. Klik "+ Tambah Siswa Baru" di atas.</td></tr>';
     return;
   }
 
@@ -3754,6 +4132,7 @@ function renderStudentsTable() {
       '<td><strong>' + escapeHtml(s.nisn) + '</strong></td>' +
       '<td>' + escapeHtml(s.name) + '</td>' +
       '<td><span class="badge badge-info">' + escapeHtml(s.className) + '</span></td>' +
+      '<td><span style="font-family: monospace; font-size: 0.82rem; font-weight: 700; background: var(--slate-100); padding: 2px 7px; border-radius: 4px; color: var(--slate-700);">' + escapeHtml(s.password || '123456') + '</span></td>' +
       '<td>' + (s.gender === 'P' ? 'Perempuan (P)' : 'Laki-laki (L)') + '</td>' +
       '<td><span class="badge badge-success">Terdaftar (Aktif)</span></td>' +
       '<td>' +
@@ -3770,6 +4149,9 @@ function openAddStudentModal() {
   document.getElementById('modal-student-title').textContent = 'Tambah Data Siswa Baru';
   document.getElementById('edit-student-original-nisn').value = '';
   document.getElementById('form-student-editor').reset();
+
+  const passInput = document.getElementById('edit-student-password');
+  if (passInput) passInput.value = '123456';
 
   const classInput = document.getElementById('edit-student-class');
   if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
@@ -3800,6 +4182,9 @@ function openEditStudentModal(nisn) {
   document.getElementById('edit-student-original-nisn').value = s.nisn;
   document.getElementById('edit-student-nisn').value = s.nisn;
   document.getElementById('edit-student-name').value = s.name;
+
+  const passInput = document.getElementById('edit-student-password');
+  if (passInput) passInput.value = s.password || '123456';
   
   const classInput = document.getElementById('edit-student-class');
   if (classInput) {
@@ -3828,6 +4213,9 @@ async function handleSaveStudent(event) {
   let className = document.getElementById('edit-student-class').value.trim().toUpperCase();
   const gender = document.getElementById('edit-student-gender').value;
 
+  const passInput = document.getElementById('edit-student-password');
+  const studentPassword = passInput && passInput.value.trim() ? passInput.value.trim() : (existingStudent?.password || '123456');
+
   // Enforce Guru Kelas hanya bisa mendaftarkan siswa ke kelasnya sendiri
   if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas' && state.currentTeacher.assignedClass) {
     className = state.currentTeacher.assignedClass;
@@ -3851,6 +4239,7 @@ async function handleSaveStudent(event) {
     name: name,
     className: className,
     gender: gender,
+    password: studentPassword,
     status: 'active',
     passwords: existingStudent?.passwords || generateStudentSubjectPasswords(nisn)
   };
@@ -4334,6 +4723,7 @@ function printExamCardsPdf() {
           </div>
           <div>
             <div style="margin-bottom: 1.5px;"><strong>No. Peserta / NISN:</strong> ${escapeHtml(st.nisn)}</div>
+            <div style="margin-bottom: 1.5px;"><strong>Password Siswa:</strong> <span style="font-family: monospace; font-weight: bold; background: #eee; padding: 1px 5px; border-radius: 3px;">${escapeHtml(st.password || '123456')}</span></div>
             <div style="margin-bottom: 1.5px;"><strong>Nama Peserta:</strong> ${escapeHtml(st.name)}</div>
             <div style="margin-bottom: 1.5px;"><strong>Kelas / Rombel:</strong> ${escapeHtml(st.className)}</div>
             <div style="margin-bottom: 1.5px;"><strong>Tahun Pelajaran:</strong> ${sch.academicYear}</div>
@@ -4418,6 +4808,7 @@ function renderExamCardsTab() {
         </div>
         <div style="font-size: 0.74rem; line-height: 1.35;">
           <div><span style="color: var(--slate-500);">No. Peserta:</span> <strong>${escapeHtml(st.nisn)}</strong></div>
+          <div><span style="color: var(--slate-500);">Password:</span> <span style="font-family: monospace; font-weight: 700; background: var(--slate-100); padding: 1px 5px; border-radius: 4px; color: var(--primary-700);">${escapeHtml(st.password || '123456')}</span></div>
           <div><span style="color: var(--slate-500);">Nama:</span> <strong>${escapeHtml(st.name)}</strong></div>
           <div><span style="color: var(--slate-500);">Kelas / Rombel:</span> <span class="badge" style="background: var(--slate-200); font-weight: 700; font-size: 0.68rem; padding: 1px 5px;">${escapeHtml(st.className)}</span></div>
           <div><span style="color: var(--slate-500);">Ruang:</span> Lab Komputer</div>
@@ -5640,6 +6031,8 @@ try {
         applySynchronizedSingleToken(ev.data, false);
       } else if (ev.data.type === 'TOKENS_UPDATED' && Array.isArray(ev.data.subjects)) {
         applySynchronizedTokens(ev.data.subjects, false);
+      } else if (ev.data.type === 'EXAM_NOTIFICATION' && ev.data.notification) {
+        receiveBroadcastNotification(ev.data.notification);
       }
     };
   }
