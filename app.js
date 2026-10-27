@@ -2304,7 +2304,7 @@ function updateConfirmScheduleGateUI() {
   if (!gateBox || !btnStart) return;
 
   // Tombol mulai selalu tampil dan langsung siap diklik secara manual oleh pengawas ruang
-  btnStart.style.display = 'inline-flex';
+  btnStart.style.display = 'flex';
 
   const result = checkExamScheduleStatus(state.student.className, state.session.subject);
   const sched = result.sched;
@@ -2315,10 +2315,11 @@ function updateConfirmScheduleGateUI() {
   }
 
   gateBox.innerHTML = `
-    <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
-      <div style="font-size: 1.6rem; line-height: 1;">👨‍🏫</div>
-      <div style="font-size: 0.83rem; color: #166534; line-height: 1.45;">
-        <strong>Verifikasi Pengawas Ruang:</strong> Identitas peserta terverifikasi${schedText}. Pastikan meja dan kartu ujian siswa telah sesuai, lalu klik tombol hijau di bawah secara manual untuk memulai sesi ujian.
+    <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: 12px; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+      <div style="font-size: 1.6rem; line-height: 1; flex-shrink: 0;">👨‍🏫</div>
+      <div style="font-size: 0.83rem; color: #166534; line-height: 1.5; flex: 1;">
+        <strong style="display: block; font-size: 0.88rem; margin-bottom: 2px;">Verifikasi Pengawas Ruang:</strong>
+        Identitas peserta terverifikasi${schedText}. Pastikan meja dan kartu ujian siswa telah sesuai, lalu klik tombol hijau di bawah secara manual untuk memulai sesi ujian.
       </div>
     </div>
   `;
