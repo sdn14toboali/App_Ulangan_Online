@@ -327,9 +327,12 @@
             </svg>
             <div>
               <strong style="display: block; margin-bottom: 0.2rem; font-size: 0.88rem;">Peringatan Anti-Curang:</strong>
-              <p style="font-size: 0.82rem; line-height: 1.4;">
+              <p style="font-size: 0.82rem; line-height: 1.4; margin-bottom: 0.35rem;">
                 Dilarang meminimalkan layar, membuka tab lain, atau beralih aplikasi. Sistem mencatat setiap pelanggaran secara otomatis dan mengirim peringatan ke pengawas.
               </p>
+              <button type="button" onclick="openExamRulesModal()" style="background: none; border: none; padding: 0; color: #b91c1c; font-weight: 700; font-size: 0.8rem; text-decoration: underline; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;">
+                📜 Baca 7 Pasal Tata Tertib &amp; Sanksi Ujian Selengkapnya &rarr;
+              </button>
             </div>
           </div>
 
@@ -379,7 +382,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
               <span>Test Seleksi</span>
             </div>
-            <div class="cbt-nav-item" title="Tata Tertib Ujian">
+            <div class="cbt-nav-item" title="Tata Tertib Ujian" onclick="openExamRulesModal()" style="cursor: pointer;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
               <span>Tata Tertib</span>
             </div>
@@ -1223,41 +1226,8 @@
         </div>
       </div>
 
-      <!-- TAB 3: PENGATURAN SESI & TOKEN PER MATA PELAJARAN -->
+      <!-- TAB 3: PENGATURAN SESI -->
       <div id="tab-session-setting" class="admin-tab-content" style="display: none;">
-        <div class="card" style="margin-bottom: 1.5rem;">
-          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h3 style="font-size: 1.05rem; font-weight: 700;">🔑 Manajemen Token Ujian per Mata Pelajaran</h3>
-              <p style="font-size: 0.8rem; color: var(--slate-500);">Token unik dirilis oleh pengawas ruang untuk masing-masing mata pelajaran yang sedang diujikan</p>
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="generateAllSubjectTokens()">
-              🎲 Acak Semua Token
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th style="width: 40px;">No</th>
-                  <th>Mata Pelajaran</th>
-                  <th style="width: 100px;">Kode</th>
-                  <th style="width: 200px;">Token Ujian (Pengawas)</th>
-                  <th style="width: 120px;">Durasi (Menit)</th>
-                </tr>
-              </thead>
-              <tbody id="table-subject-tokens-body">
-                <!-- Injected via JavaScript renderSubjectTokensTable() -->
-              </tbody>
-            </table>
-          </div>
-          <div style="padding: 1rem 1.25rem; background: var(--slate-50); border-top: 1px solid var(--slate-200); display: flex; justify-content: flex-end;">
-            <button type="button" class="btn btn-primary" onclick="saveSubjectTokensSettings()">
-              Simpan Perubahan Token Mata Pelajaran
-            </button>
-          </div>
-        </div>
-
         <div class="card" style="max-width: 700px;">
           <div class="card-header">
             <h3 style="font-size: 1.05rem; font-weight: 700;">Pengaturan Aturan Pengerjaan Siswa</h3>
@@ -2459,6 +2429,135 @@
     </div>
   </div>
 
+  <!-- MODAL: TATA TERTIB & INTEGRITAS UJIAN ONLINE RESMI -->
+  <div id="modal-exam-rules" class="modal-overlay" onclick="if(event.target === this) closeExamRulesModal()" style="display: none;">
+    <div class="modal-content" style="max-width: 680px; max-height: 88vh; display: flex; flex-direction: column; border-radius: var(--radius-lg); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid var(--slate-200); background: #ffffff;">
+      <!-- Header -->
+      <div class="modal-header" style="background: linear-gradient(135deg, #991b1b, #dc2626); color: #ffffff; padding: 1.1rem 1.4rem; border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+            📜
+          </div>
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: 0.02em;">TATA TERTIB &amp; INTEGRITAS UJIAN ONLINE</h3>
+            <p style="font-size: 0.78rem; color: #fee2e2; margin: 0; font-weight: 500;">SD NEGERI 14 TOBOALI &bull; Aturan Disiplin &amp; Sistem Anti-Curang</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeExamRulesModal()" style="color: #ffffff; border-color: rgba(255,255,255,0.4); padding: 0.3rem 0.6rem; font-weight: 700; background: rgba(0,0,0,0.15); border-radius: 6px; cursor: pointer;">✕</button>
+      </div>
+
+      <!-- Warning Banner -->
+      <div style="background: #fff1f2; border-bottom: 1px solid #fecdd3; padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 0.65rem; color: #9f1239;">
+        <span style="font-size: 1.2rem;">⚠️</span>
+        <div style="font-size: 0.8rem; line-height: 1.4;">
+          <strong>PERINGATAN KERAS BAGI SELURUH PESERTA:</strong> Seluruh pergerakan layar, perpindahan tab, dan aktivitas ujian diawasi ketat oleh <strong>Sensor Anti-Curang Realtime</strong> dan tercatat langsung ke server pengawas!
+        </div>
+      </div>
+
+      <!-- Body / 7 Pasal List -->
+      <div class="modal-body" style="padding: 1.25rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.85rem; color: var(--slate-700); line-height: 1.55;">
+        
+        <!-- Pasal 1 -->
+        <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-left: 4px solid #2563eb; border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <span style="background: #eff6ff; color: #1d4ed8; font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Pasal 1</span>
+            <strong style="color: var(--slate-900); font-size: 0.9rem;">Kemandirian &amp; Kejujuran Mutlak</strong>
+          </div>
+          <p style="margin: 0; color: var(--slate-600);">
+            Ujian ini dilaksanakan untuk mengukur kemampuan diri sendiri secara jujur dan mandiri. Segala bentuk kerja sama antar siswa, bertanya kepada teman, menyontek, menggunakan catatan ringkasan/buku, atau dibantu oleh pihak lain dilarang keras.
+          </p>
+        </div>
+
+        <!-- Pasal 2 -->
+        <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-left: 4px solid #ea580c; border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <span style="background: #fff7ed; color: #c2410c; font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Pasal 2</span>
+            <strong style="color: var(--slate-900); font-size: 0.9rem;">Larangan Pindah Tab &amp; Keluar Aplikasi</strong>
+          </div>
+          <p style="margin: 0; color: var(--slate-600);">
+            Peserta <strong>DILARANG KERAS</strong> meminimalkan jendela ujian, beralih/membuka tab peramban lain, membuka aplikasi luar (seperti WhatsApp, Google, Chat GPT / AI, kalkulator, YouTube), atau menekan tombol navigasi beranda (Home/Recent Apps).
+          </p>
+        </div>
+
+        <!-- Pasal 3 -->
+        <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-left: 4px solid #dc2626; border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <span style="background: #fef2f2; color: #b91c1c; font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Pasal 3</span>
+            <strong style="color: var(--slate-900); font-size: 0.9rem;">Sensor Otomatis &amp; Sirine Alarm Pengawas</strong>
+          </div>
+          <p style="margin: 0; color: var(--slate-600);">
+            Sistem dilengkapi <em>Page Visibility Sensor</em>. Saat layar berpindah tab atau aplikasi ditutup, sistem seketika membunyikan <strong>Sirine Alarm</strong>, memicu peringatan layar merah pada perangkat, dan langsung mengirimkan laporan pelanggaran realtime ke monitor pengawas ruang.
+          </p>
+        </div>
+
+        <!-- Pasal 4 -->
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-left: 4px solid #be123c; border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <span style="background: #ffe4e6; color: #9f1239; font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Pasal 4</span>
+            <strong style="color: #9f1239; font-size: 0.9rem;">Toleransi Maksimal 3 Kali Peringatan (Auto-Lock)</strong>
+          </div>
+          <p style="margin: 0 0 0.4rem 0; color: #881337;">
+            Sistem menerapkan batas toleransi pelanggaran maksimal <strong>3 (tiga) kali</strong>:
+          </p>
+          <ul style="margin: 0; padding-left: 1.2rem; color: #9f1239; font-size: 0.82rem;">
+            <li><strong>Pelanggaran Ke-1:</strong> Peringatan keras layar merah di perangkat peserta.</li>
+            <li><strong>Pelanggaran Ke-2:</strong> Peringatan terakhir &amp; nama siswa ditandai merah di dashboard monitor pengawas.</li>
+            <li><strong>Pelanggaran Ke-3:</strong> 🚨 <strong>SISTEM TERKUNCI OTOMATIS (AUTO-LOCK)</strong> dan lembar ujian diselesaikan paksa (<strong>AUTO-SUBMIT</strong>). Ujian dinyatakan gugur seketika!</li>
+          </ul>
+        </div>
+
+        <!-- Pasal 5 -->
+        <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-left: 4px solid #7c3aed; border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <span style="background: #f5f3ff; color: #6d28d9; font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Pasal 5</span>
+            <strong style="color: var(--slate-900); font-size: 0.9rem;">Larangan Fitur Layar Terbagi (Split-Screen)</strong>
+          </div>
+          <p style="margin: 0; color: var(--slate-600);">
+            Dilarang menggunakan fitur layar terbagi (Split Screen), pop-up view, floating app, atau dual screen pada smartphone dan tablet. Tampilan ujian harus selalu berada dalam mode layar penuh (Full-Screen).
+          </p>
+        </div>
+
+        <!-- Pasal 6 -->
+        <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-left: 4px solid #0891b2; border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <span style="background: #ecfeff; color: #0e7490; font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Pasal 6</span>
+            <strong style="color: var(--slate-900); font-size: 0.9rem;">Pemblokiran Copy-Paste, Screenshot &amp; Inspect</strong>
+          </div>
+          <p style="margin: 0; color: var(--slate-600);">
+            Sistem secara ketat memblokir fungsi klik kanan (context menu), blok seleksi teks, salin-tempel (Ctrl+C, Ctrl+V), tangkapan layar (screenshot/screen recorder), serta fitur Inspect Element/Developer Tools.
+          </p>
+        </div>
+
+        <!-- Pasal 7 -->
+        <div style="background: #fef2f2; border: 1.5px dashed #ef4444; border-radius: 8px; padding: 0.85rem 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <span style="background: #fee2e2; color: #991b1b; font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Pasal 7</span>
+            <strong style="color: #991b1b; font-size: 0.9rem;">Sanksi Diskualifikasi &amp; Pemanggilan Orang Tua</strong>
+          </div>
+          <p style="margin: 0; color: #7f1d1d; font-size: 0.83rem;">
+            Peserta yang terbukti sengaja menyontek atau melanggar tata tertib akan langsung dikenakan sanksi disiplin resmi:
+          </p>
+          <ol style="margin: 0.35rem 0 0 0; padding-left: 1.2rem; color: #7f1d1d; font-size: 0.82rem; font-weight: 600;">
+            <li>Pembatalan hasil ujian dan diberikan <strong>NILAI 0 (NOL)</strong> pada mata pelajaran bersangkutan.</li>
+            <li>Pemanggilan resmi orang tua / wali murid oleh pihak Kepala Sekolah dan Tim Ketertiban Sekolah.</li>
+            <li>Pencatatan sanksi pelanggaran moral dan disiplin pada buku rekam jejak akademik siswa.</li>
+          </ol>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer" style="border-top: 1px solid var(--slate-200); padding: 0.9rem 1.25rem; display: flex; justify-content: space-between; align-items: center; background: var(--slate-50); border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); flex-wrap: wrap; gap: 0.5rem;">
+        <span style="font-size: 0.75rem; color: var(--slate-500); display: flex; align-items: center; gap: 0.3rem;">
+          🔒 Sistem Integritas Terenkripsi &bull; SDN 14 Toboali
+        </span>
+        <button type="button" class="btn btn-primary" onclick="closeExamRulesModal()" style="padding: 0.5rem 1.4rem; font-weight: 700; font-size: 0.88rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          Saya Paham &amp; Siap Mematuhi Aturan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
@@ -2466,6 +2565,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.14.0"></script>
+  <script src="app.js?v=3.15.0"></script>
 </body>
 </html>
