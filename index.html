@@ -163,6 +163,20 @@
             </div>
 
             <div class="form-group">
+              <label class="form-label" for="login-password">Kata Sandi Siswa (Password)</label>
+              <div style="position: relative;">
+                <input type="password" id="login-password" class="form-control" placeholder="Masukkan password siswa..." required autocomplete="current-password" style="padding-right: 42px;">
+                <button type="button" onclick="toggleStudentPasswordVisibility()" title="Tampilkan / Sembunyikan Password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-500); padding: 4px;">
+                  <svg id="student-pass-eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <small style="color: var(--slate-500); font-size: 0.75rem; margin-top: 0.35rem; display: block; line-height: 1.35;">*Tercantum di Kartu Peserta Ujian (bawaan: 123456)</small>
+            </div>
+
+            <div class="form-group">
               <label class="form-label" for="login-token">Token Ujian</label>
               <input type="text" id="login-token" class="form-control" placeholder="Contoh: WKT82M" maxlength="8" style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.18em; font-size: 1.05rem;" required autocomplete="off">
               <small style="color: var(--slate-500); font-size: 0.75rem; margin-top: 0.35rem; display: block; line-height: 1.35;">*Cukup masukkan 1 Token Ujian dari papan tulis (otomatis berganti tiap 3 menit)</small>
@@ -804,13 +818,13 @@
               <span class="theme-toggle-label" id="theme-toggle-label">Mode Gelap</span>
             </button>
 
-            <!-- Notification Bell with Badge 3 -->
-            <button type="button" class="srms-notification-btn" onclick="openNotificationsModal()" title="Notifikasi Ujian">
+            <!-- Notification Bell with Dynamic Badge -->
+            <button type="button" class="srms-notification-btn" onclick="openNotificationsModal()" title="Notifikasi Ujian &amp; Aktivitas">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
               </svg>
-              <span class="srms-notification-badge">3</span>
+              <span class="srms-notification-badge" id="srms-notif-badge">0</span>
             </button>
 
             <!-- User Profile Avatar Chip -->
@@ -1716,12 +1730,13 @@
               <thead>
                 <tr>
                   <th style="width: 45px;">No</th>
-                  <th style="width: 140px;">No Peserta / NISN</th>
+                  <th style="width: 130px;">No Peserta / NISN</th>
                   <th>Nama Lengkap Siswa</th>
-                  <th style="width: 110px;">Kelas / Rombel</th>
-                  <th style="width: 100px;">Jenis Kelamin</th>
-                  <th style="width: 130px;">Status Akun</th>
-                  <th style="width: 130px;">Aksi</th>
+                  <th style="width: 105px;">Kelas / Rombel</th>
+                  <th style="width: 110px;">Password</th>
+                  <th style="width: 95px;">Jenis Kelamin</th>
+                  <th style="width: 125px;">Status Akun</th>
+                  <th style="width: 125px;">Aksi</th>
                 </tr>
               </thead>
               <tbody id="table-students-body">
@@ -2173,6 +2188,12 @@
             <input type="text" id="edit-student-name" class="form-control" placeholder="Contoh: Ahmad Rizki" required autocomplete="off">
           </div>
 
+          <div class="form-group">
+            <label class="form-label">Password Login Siswa</label>
+            <input type="text" id="edit-student-password" class="form-control" placeholder="Bawaan: 123456" autocomplete="off">
+            <small style="font-size: 0.75rem; color: var(--slate-500);">*Kata sandi siswa untuk masuk ke ruang ujian (bisa diatur bebas)</small>
+          </div>
+
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
               <label class="form-label">Kelas / Rombel</label>
@@ -2393,6 +2414,55 @@
     </div>
   </div>
 
+  <!-- MODAL: PUSAT NOTIFIKASI & LOG AKTIVITAS UJIAN REALTIME -->
+  <div id="modal-notifications-center" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 600px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--slate-200); padding-bottom: 0.85rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 36px; height: 36px; border-radius: 10px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--slate-900);">Pusat Notifikasi &amp; Log Aktivitas</h3>
+            <p style="font-size: 0.75rem; color: var(--slate-500); margin: 0;">Pantau siswa ujian, pelanggaran, selesai, dan perbaikan kendala</p>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="closeNotificationsModal()" style="padding: 0.25rem 0.55rem;">✕</button>
+      </div>
+
+      <!-- Filter Tabs & Actions -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-bottom: 1px solid var(--slate-100); background: var(--slate-50); flex-wrap: wrap; gap: 0.5rem;">
+        <div class="notif-filter-chips" style="display: flex; gap: 0.35rem;">
+          <button type="button" class="notif-chip active" onclick="filterExamNotifications('all', this)">Semua</button>
+          <button type="button" class="notif-chip" onclick="filterExamNotifications('violation', this)">🚨 Pelanggaran</button>
+          <button type="button" class="notif-chip" onclick="filterExamNotifications('submitted', this)">✅ Selesai</button>
+          <button type="button" class="notif-chip" onclick="filterExamNotifications('issue', this)">⚠️ Kendala</button>
+        </div>
+        <div style="display: flex; gap: 0.35rem;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="markAllNotificationsRead()" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">
+            Tandai Dibaca
+          </button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="clearAllNotifications()" style="font-size: 0.72rem; padding: 0.25rem 0.6rem;">
+            Bersihkan
+          </button>
+        </div>
+      </div>
+
+      <!-- Notification Body Scroll Area -->
+      <div class="modal-body" style="padding: 1rem; overflow-y: auto; flex: 1; max-height: 55vh;" id="notifications-list-container">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <div class="modal-footer" style="border-top: 1px solid var(--slate-200); padding: 0.75rem 1rem; justify-content: space-between; align-items: center;">
+        <span id="notif-counter-label" style="font-size: 0.78rem; color: var(--slate-500);">0 notifikasi tercatat</span>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeNotificationsModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
@@ -2400,6 +2470,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.9.0"></script>
+  <script src="app.js?v=3.10.0"></script>
 </body>
 </html>
