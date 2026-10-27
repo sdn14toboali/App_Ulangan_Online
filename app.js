@@ -6875,3 +6875,17 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+// Modal Tata Tertib & Integritas Ujian Online Resmi
+function openExamRulesModal() {
+  const modal = document.getElementById('modal-exam-rules');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeExamRulesModal() {
+  const modal = document.getElementById('modal-exam-rules');
+  if (modal) modal.style.display = 'none';
+}
+window.openExamRulesModal = openExamRulesModal;
+window.closeExamRulesModal = closeExamRulesModal;
+
