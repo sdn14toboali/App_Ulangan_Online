@@ -484,11 +484,11 @@ const state = {
   // Mock Active Students (Tersebar di Kelas 6A, 6B, 5A, 5B, 4A untuk Menguji Isolasi)
   liveStudents: (() => {
     const defaultLiveStudents = [
-      { nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, time: '08:45 WIB' },
-      { nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, time: '-' },
-      { nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 90, time: '08:50 WIB' },
-      { nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' },
-      { nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', answeredCount: 2, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, time: '-' }
+      { nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', subject: 'Bahasa Indonesia', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, remainingMinutes: 0, time: '08:45 WIB' },
+      { nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', subject: 'Bahasa Indonesia', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, remainingMinutes: 38, time: '-' },
+      { nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', subject: 'Matematika', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 90, remainingMinutes: 0, time: '08:50 WIB' },
+      { nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', subject: 'Matematika', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, remainingMinutes: 52, time: '-' },
+      { nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', subject: 'IPAS', answeredCount: 2, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, remainingMinutes: 65, time: '-' }
     ];
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_live_students') || 'null');
@@ -1928,12 +1928,10 @@ async function handleStudentLogin(event) {
   event.preventDefault();
 
   const nisn = document.getElementById('login-nisn').value.trim();
-  const passEl = document.getElementById('login-password');
-  const password = passEl ? passEl.value.trim() : '';
   const token = document.getElementById('login-token').value.trim().toUpperCase();
 
-  if (!nisn || !password || !token) {
-    showToast('Harap lengkapi Nomor Peserta, Password Siswa, dan Token Ujian!', 'warning');
+  if (!nisn || !token) {
+    showToast('Harap lengkapi Nomor Peserta / NISN dan Token Ujian!', 'warning');
     return;
   }
 
@@ -1954,8 +1952,7 @@ async function handleStudentLogin(event) {
         name: nisn === '123456' ? 'Peserta Ujian Uji Coba' : ('Peserta Ujian (' + nisn + ')'),
         className: '6A',
         gender: 'L',
-        status: 'active',
-        password: getDeterministicStudentPassword(nisn)
+        status: 'active'
       };
       state.students.push(student);
       try { localStorage.setItem('zettcbt_students', JSON.stringify(state.students)); } catch(e) {}
@@ -1963,43 +1960,6 @@ async function handleStudentLogin(event) {
       showToast('Nomor Peserta / NISN "' + nisn + '" belum terdaftar di sistem sekolah! Hubungi pengawas.', 'danger');
       return;
     }
-  }
-
-  // 1a. Multi-Layer Universal Password Validation (Zero-Lockout Engine)
-  const expectedPassword = (student.password || '').trim();
-  const rawNisnDigits = (student.nisn || '').replace(/\D/g, '');
-  const inputDigits = password.replace(/\D/g, '');
-  const deterministicPin = getDeterministicStudentPassword(student.nisn);
-
-  let isPasswordValid = false;
-  // Lapisan 1: Cocok dengan password unik yang tersimpan di data siswa
-  if (expectedPassword && (password === expectedPassword || password.toLowerCase() === expectedPassword.toLowerCase())) {
-    isPasswordValid = true;
-  }
-  // Lapisan 2: Cocok dengan kata sandi bawaan universal '123456' (SELALU SAH!)
-  if (password === '123456') {
-    isPasswordValid = true;
-  }
-  // Lapisan 3: Cocok dengan PIN deterministik matematis per NISN
-  if (deterministicPin && password === deterministicPin) {
-    isPasswordValid = true;
-  }
-  // Lapisan 4: Cocok dengan digit nomor NISN siswa itu sendiri
-  if (rawNisnDigits && (password === rawNisnDigits || inputDigits === rawNisnDigits)) {
-    isPasswordValid = true;
-  }
-  // Lapisan 5: Cocok dengan PIN uji coba '376891'
-  if (password === '376891') {
-    isPasswordValid = true;
-  }
-  // Lapisan 6: Cocok dengan salah satu password mapel
-  if (!isPasswordValid && student.passwords && typeof student.passwords === 'object') {
-    isPasswordValid = Object.values(student.passwords).some(p => p.trim() === password || p.trim().toLowerCase() === password.toLowerCase());
-  }
-
-  if (!isPasswordValid) {
-    showToast('Kata sandi siswa salah! Anda dapat memasukkan password unik dari kartu ujian atau gunakan password bawaan 123456.', 'danger');
-    return;
   }
 
   // 1b. Validasi Sakelar Master Pintu Login Siswa Sekolah
@@ -3213,9 +3173,9 @@ function switchAdminTab(tabId, element) {
   if (topbarTitle) {
     const titles = {
       'srms-dashboard': 'Dasbor Utama Guru & Pengawas',
-      'live-monitor': 'Jadwal Ujian & Live Monitoring',
+      'live-monitor': 'Monitor Ujian Langsung (Realtime Siswa & Sisa Waktu)',
       'question-bank': 'Bank Soal (5 Tipe ANBK)',
-      'session-setting': 'Pengaturan Sesi Ujian Aktif',
+      'session-setting': 'Jadwal & Sesi Pelaksanaan Ujian (Hari, Jam, Ruangan)',
       'manage-students': 'Kelola Data Siswa Peserta Ujian',
       'manage-teachers': 'Kelola Data Guru & Pengawas',
       'results-analysis': 'Rekapitulasi & Analisis Nilai Siswa',
@@ -3241,13 +3201,14 @@ function switchAdminTab(tabId, element) {
   if (tabId === 'srms-dashboard') renderSrmsDashboard();
   if (tabId === 'live-monitor') {
     renderLiveMonitoringTable();
-    renderTeacherExamSchedules();
-    renderProctorTokenBar();
+    startLiveMonitorInterval();
+  } else {
+    stopLiveMonitorInterval();
   }
   if (tabId === 'question-bank') renderAdminQuestionBank();
   if (tabId === 'session-setting') {
     populateSessionSettings();
-    renderSubjectTokensTable();
+    renderTeacherExamSchedules();
   }
   if (tabId === 'manage-students') renderStudentsTable();
   if (tabId === 'manage-teachers') renderTeachersTable();
@@ -3891,6 +3852,35 @@ function updateAdminMetrics() {
   if (elWarning) elWarning.textContent = warningCount;
 }
 
+let liveMonitoringFilter = 'all';
+let liveMonitorIntervalId = null;
+
+function filterLiveMonitoringStatus(filterType, btnEl) {
+  liveMonitoringFilter = filterType;
+  document.querySelectorAll('.notif-chip').forEach(b => {
+    if (b.id && b.id.startsWith('chip-live-')) b.classList.remove('active');
+  });
+  if (btnEl) btnEl.classList.add('active');
+  renderLiveMonitoringTable();
+}
+
+function startLiveMonitorInterval() {
+  if (liveMonitorIntervalId) clearInterval(liveMonitorIntervalId);
+  liveMonitorIntervalId = setInterval(() => {
+    const tab = document.getElementById('tab-live-monitor');
+    if (tab && tab.style.display !== 'none') {
+      renderLiveMonitoringTable();
+    }
+  }, 5000);
+}
+
+function stopLiveMonitorInterval() {
+  if (liveMonitorIntervalId) {
+    clearInterval(liveMonitorIntervalId);
+    liveMonitorIntervalId = null;
+  }
+}
+
 // Render Live Students Table
 function renderLiveMonitoringTable() {
   const tbody = document.getElementById('table-live-students-body');
@@ -3900,36 +3890,82 @@ function renderLiveMonitoringTable() {
   tbody.innerHTML = '';
 
   const visibleList = getVisibleLiveStudents();
-  const filtered = visibleList.filter(s => 
-    s.name.toLowerCase().includes(search) || s.nisn.toLowerCase().includes(search)
+  let filtered = visibleList.filter(s => 
+    (s.name || '').toLowerCase().includes(search) || (s.nisn || '').toLowerCase().includes(search)
   );
 
+  if (liveMonitoringFilter === 'in_progress') {
+    filtered = filtered.filter(s => s.status === 'in_progress');
+  } else if (liveMonitoringFilter === 'submitted') {
+    filtered = filtered.filter(s => s.status === 'submitted');
+  } else if (liveMonitoringFilter === 'warning') {
+    filtered = filtered.filter(s => s.warningCount > 0);
+  }
+
+  // Update counters on chips
+  const totalCount = visibleList.length;
+  const inProgCount = visibleList.filter(s => s.status === 'in_progress').length;
+  const submitCount = visibleList.filter(s => s.status === 'submitted').length;
+  const warnCount = visibleList.filter(s => s.warningCount > 0).length;
+
+  const chipAll = document.getElementById('chip-live-all');
+  const chipProg = document.getElementById('chip-live-progress');
+  const chipSub = document.getElementById('chip-live-submitted');
+  const chipWarn = document.getElementById('chip-live-warning');
+  if (chipAll) chipAll.textContent = `Semua Siswa (${totalCount})`;
+  if (chipProg) chipProg.textContent = `🟡 Sedang Mengerjakan (${inProgCount})`;
+  if (chipSub) chipSub.textContent = `🟢 Sudah Selesai (${submitCount})`;
+  if (chipWarn) chipWarn.textContent = `🚨 Ada Pelanggaran (${warnCount})`;
+
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--slate-400);">Tidak ada peserta aktif di kelas kewenangan Anda.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 2rem; color: var(--slate-400);">Tidak ada peserta aktif pada kategori filter ini.</td></tr>';
     return;
   }
 
   filtered.forEach((st, idx) => {
     const tr = document.createElement('tr');
 
-    const statusBadge = st.status === 'submitted' 
-      ? '<span class="badge badge-success">Selesai Submit</span>'
-      : '<span class="badge badge-info">Sedang Mengerjakan</span>';
+    const isDone = st.status === 'submitted';
+    const statusBadge = isDone 
+      ? '<span class="badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem;">✅ SUDAH SELESAI</span>'
+      : '<span class="badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem;"><span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #d97706;"></span> SEDANG MENGERJAKAN</span>';
+
+    // Calculate remaining minutes
+    let remainingMinutes = st.remainingMinutes;
+    if (st.nisn === state.student?.nisn && state.timeRemainingSeconds > 0) {
+      remainingMinutes = Math.max(0, Math.ceil(state.timeRemainingSeconds / 60));
+    }
+    if (remainingMinutes == null) {
+      remainingMinutes = isDone ? 0 : 45;
+    }
+
+    const timeBadge = isDone
+      ? `<span style="font-size: 0.78rem; color: var(--slate-500); font-weight: 600;">🏁 Selesai (${escapeHtml(st.time || '08:45 WIB')})</span>`
+      : `<span class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 800; font-size: 0.82rem; padding: 0.35rem 0.6rem;">⏱️ ${remainingMinutes} Menit</span>`;
 
     const warnBadge = st.warningCount > 0
-      ? '<span class="badge badge-danger">' + st.warningCount + 'x Pelanggaran</span>'
-      : '<span class="badge badge-success">0 (Bersih)</span>';
+      ? '<span class="badge badge-danger" style="font-size: 0.75rem; font-weight: 700;">🚨 ' + st.warningCount + 'x Peringatan</span>'
+      : '<span class="badge badge-success" style="font-size: 0.75rem; font-weight: 700;">🟢 Bersih</span>';
+
+    const percent = st.totalQ > 0 ? Math.round((st.answeredCount / st.totalQ) * 100) : 0;
+    const progressHtml = `
+      <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 3px;">${st.answeredCount} / ${st.totalQ} Soal (${percent}%)</div>
+      <div style="width: 100%; height: 5px; background: var(--slate-200); border-radius: 99px; overflow: hidden;">
+        <div style="width: ${percent}%; height: 100%; background: ${isDone ? '#10b981' : '#3b82f6'}; border-radius: 99px;"></div>
+      </div>
+    `;
 
     tr.innerHTML = 
-      '<td>' + (idx + 1) + '</td>' +
-      '<td><strong>' + st.nisn + '</strong></td>' +
-      '<td>' + st.name + '</td>' +
-      '<td>' + st.className + '</td>' +
-      '<td>' + st.answeredCount + ' / ' + st.totalQ + ' Soal</td>' +
-      '<td>' + warnBadge + '</td>' +
+      '<td style="text-align: center;">' + (idx + 1) + '</td>' +
+      '<td><strong style="color: var(--slate-900); font-size: 0.92rem; display: block;">' + escapeHtml(st.name) + '</strong><span style="font-size: 0.78rem; color: var(--slate-500); font-family: monospace;">' + escapeHtml(st.nisn) + '</span></td>' +
+      '<td style="text-align: center;"><span class="badge" style="background: var(--slate-200); color: var(--slate-800); font-weight: 700;">' + escapeHtml(st.className) + '</span></td>' +
+      '<td><span style="font-weight: 600; font-size: 0.85rem; color: var(--slate-700);">' + escapeHtml(st.subject || state.session?.subject || 'Bahasa Indonesia') + '</span></td>' +
       '<td>' + statusBadge + '</td>' +
-      '<td>' +
-        '<button class="btn btn-outline btn-sm" onclick="resetStudentLogin(\'' + st.nisn + '\')">Reset Login</button>' +
+      '<td style="text-align: center;">' + timeBadge + '</td>' +
+      '<td>' + progressHtml + '</td>' +
+      '<td style="text-align: center;">' + warnBadge + '</td>' +
+      '<td style="text-align: center;">' +
+        '<button class="btn btn-outline btn-sm" onclick="resetStudentLogin(\'' + escapeHtml(st.nisn) + '\')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Buka Kunci / Pulihkan Sesi Siswa">🔓 Reset</button>' +
       '</td>';
 
     tbody.appendChild(tr);
@@ -4931,12 +4967,21 @@ function printExamCardsPdf() {
 
     let subRows = '';
     subjects.forEach((sub, subIdx) => {
+      const sched = (state.schedules || []).find(sc => 
+        (sc.subjectName === sub.name || sc.subject === sub.name || sc.subjectName === sub.code) &&
+        (sc.className === 'SEMUA KELAS' || sc.className === st.className || (st.className && st.className.includes(sc.className)))
+      );
+      const dayInfo = sched ? formatIndonesianDayDate(sched.date) : { day: 'Senin', dateText: '27 Okt 2026' };
+      const timeText = sched ? `${sched.startTime || '07:30'} - ${sched.endTime || '09:00'} WIB` : '07:30 - 09:00 WIB';
+      const roomText = sched ? (sched.room || 'Lab Komputer') : 'Lab Komputer';
+
       subRows += `
         <tr>
           <td style="border: 1px solid #333; padding: 2px 4px; text-align: center; font-size: 7pt;">${subIdx + 1}</td>
           <td style="border: 1px solid #333; padding: 2px 4px; font-size: 7.5pt; font-weight: bold;">${escapeHtml(sub.name)}</td>
-          <td style="border: 1px solid #333; padding: 2px 4px; text-align: center; font-size: 7pt;">${sub.durationMinutes || 90} Menit</td>
-          <td style="border: 1px solid #333; padding: 2px 4px; font-size: 6.8pt; color: #1e40af; font-weight: bold; text-align: center;">Dirilis Pengawas</td>
+          <td style="border: 1px solid #333; padding: 2px 4px; font-size: 7pt; text-align: center;">${escapeHtml(dayInfo.day)}, ${escapeHtml(dayInfo.dateText)}</td>
+          <td style="border: 1px solid #333; padding: 2px 4px; text-align: center; font-size: 7pt;">${escapeHtml(timeText)}</td>
+          <td style="border: 1px solid #333; padding: 2px 4px; font-size: 7pt; text-align: center;">${escapeHtml(roomText)}</td>
         </tr>
       `;
     });
@@ -4958,22 +5003,22 @@ function printExamCardsPdf() {
           </div>
           <div>
             <div style="margin-bottom: 1.5px;"><strong>No. Peserta / NISN:</strong> ${escapeHtml(st.nisn)}</div>
-            <div style="margin-bottom: 1.5px;"><strong>Password Siswa:</strong> <span style="font-family: monospace; font-weight: bold; background: #eee; padding: 1px 5px; border-radius: 3px;">${escapeHtml(st.password || '123456')}</span></div>
             <div style="margin-bottom: 1.5px;"><strong>Nama Peserta:</strong> ${escapeHtml(st.name)}</div>
             <div style="margin-bottom: 1.5px;"><strong>Kelas / Rombel:</strong> ${escapeHtml(st.className)}</div>
             <div style="margin-bottom: 1.5px;"><strong>Tahun Pelajaran:</strong> ${sch.academicYear}</div>
-            <div style="margin-bottom: 1.5px;"><strong>Ruang / Sesi:</strong> Lab Komputer</div>
+            <div style="margin-bottom: 1.5px;"><strong>Ruang Ujian:</strong> Lab Komputer</div>
           </div>
         </div>
 
-        <!-- Tabel Jadwal Mata Pelajaran Ujian -->
+        <!-- Tabel Jadwal Pelaksanaan Ujian Resmi (Hari, Tanggal & Jam) -->
         <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 6px;">
           <thead>
             <tr style="background: #f0f0f0;">
               <th style="border: 1px solid #333; padding: 2px 4px; width: 20px; font-size: 7pt;">No</th>
               <th style="border: 1px solid #333; padding: 2px 4px; text-align: left; font-size: 7pt;">Mata Pelajaran</th>
-              <th style="border: 1px solid #333; padding: 2px 4px; width: 90px; font-size: 7pt;">Durasi</th>
-              <th style="border: 1px solid #333; padding: 2px 4px; width: 85px; font-size: 7pt;">Token Ujian</th>
+              <th style="border: 1px solid #333; padding: 2px 4px; width: 110px; font-size: 7pt;">Hari &amp; Tanggal Ujian</th>
+              <th style="border: 1px solid #333; padding: 2px 4px; width: 95px; font-size: 7pt;">Jam Pelaksanaan</th>
+              <th style="border: 1px solid #333; padding: 2px 4px; width: 80px; font-size: 7pt;">Ruangan</th>
             </tr>
           </thead>
           <tbody>
@@ -4982,7 +5027,7 @@ function printExamCardsPdf() {
         </table>
 
         <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 7pt; margin-top: 4px;">
-          <div style="color: #1e40af; font-weight: bold;">*Token Ujian diumumkan oleh Pengawas Ruang sebelum ujian dimulai</div>
+          <div style="color: #1e40af; font-weight: bold;">*Token Ujian diumumkan oleh Pengawas Ruang sesaat sebelum ujian dimulai</div>
           <div style="text-align: right;">
             Kepala Sekolah,<br><br>
             <strong>${sch.headmaster}</strong><br>
@@ -5017,12 +5062,21 @@ function renderExamCardsTab() {
   students.forEach((st) => {
     let subRows = '';
     subjects.forEach((sub, subIdx) => {
+      const sched = (state.schedules || []).find(sc => 
+        (sc.subjectName === sub.name || sc.subject === sub.name || sc.subjectName === sub.code) &&
+        (sc.className === 'SEMUA KELAS' || sc.className === st.className || (st.className && st.className.includes(sc.className)))
+      );
+      const dayInfo = sched ? formatIndonesianDayDate(sched.date) : { day: 'Senin', dateText: '27 Okt 2026' };
+      const timeText = sched ? `${sched.startTime || '07:30'} - ${sched.endTime || '09:00'} WIB` : '07:30 - 09:00 WIB';
+      const roomText = sched ? (sched.room || 'Lab Komputer') : 'Lab Komputer';
+
       subRows += `
         <tr>
           <td style="text-align: center; width: 22px;">${subIdx + 1}</td>
           <td><strong>${escapeHtml(sub.name)}</strong></td>
-          <td style="text-align: center; width: 85px;">${sub.durationMinutes || 90} Menit</td>
-          <td style="color: var(--primary-600); font-weight: 700; font-size: 0.68rem; text-align: center; width: 80px;">Dirilis Pengawas</td>
+          <td style="text-align: center; font-size: 0.72rem; color: #1e293b;">${escapeHtml(dayInfo.day)}, ${escapeHtml(dayInfo.dateText)}</td>
+          <td style="text-align: center; font-size: 0.72rem; font-weight: 700; color: #0f172a;">${escapeHtml(timeText)}</td>
+          <td style="text-align: center; font-size: 0.72rem; color: var(--slate-600);">${escapeHtml(roomText)}</td>
         </tr>
       `;
     });
@@ -5043,21 +5097,21 @@ function renderExamCardsTab() {
         </div>
         <div style="font-size: 0.74rem; line-height: 1.35;">
           <div><span style="color: var(--slate-500);">No. Peserta:</span> <strong>${escapeHtml(st.nisn)}</strong></div>
-          <div><span style="color: var(--slate-500);">Password:</span> <span style="font-family: monospace; font-weight: 700; background: var(--slate-100); padding: 1px 5px; border-radius: 4px; color: var(--primary-700);">${escapeHtml(st.password || '123456')}</span></div>
-          <div><span style="color: var(--slate-500);">Nama:</span> <strong>${escapeHtml(st.name)}</strong></div>
+          <div><span style="color: var(--slate-500);">Nama Peserta:</span> <strong>${escapeHtml(st.name)}</strong></div>
           <div><span style="color: var(--slate-500);">Kelas / Rombel:</span> <span class="badge" style="background: var(--slate-200); font-weight: 700; font-size: 0.68rem; padding: 1px 5px;">${escapeHtml(st.className)}</span></div>
           <div><span style="color: var(--slate-500);">Ruang:</span> Lab Komputer</div>
         </div>
       </div>
 
-      <!-- Tabel Mata Pelajaran Ujian -->
+      <!-- Tabel Jadwal Pelaksanaan Ujian -->
       <table class="exam-card-subject-table">
         <thead>
           <tr>
             <th style="width: 22px;">No</th>
             <th>Mata Pelajaran</th>
-            <th style="width: 85px; text-align: center;">Durasi</th>
-            <th style="width: 80px; text-align: center;">Token Mapel</th>
+            <th style="width: 105px; text-align: center;">Hari &amp; Tanggal</th>
+            <th style="width: 95px; text-align: center;">Jam Ujian</th>
+            <th style="width: 75px; text-align: center;">Ruang</th>
           </tr>
         </thead>
         <tbody>
@@ -6888,4 +6942,59 @@ function closeExamRulesModal() {
 }
 window.openExamRulesModal = openExamRulesModal;
 window.closeExamRulesModal = closeExamRulesModal;
+
+// Global Keyboard Shortcut: ESC key closes any active modal or prompts submit
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeAllActiveModals();
+  }
+});
+
+function closeAllActiveModals() {
+  const modalRules = document.getElementById('modal-exam-rules');
+  if (modalRules && modalRules.style.display !== 'none') {
+    closeExamRulesModal();
+    return;
+  }
+  const modalSched = document.getElementById('modal-schedule-editor');
+  if (modalSched && modalSched.style.display !== 'none') {
+    closeScheduleModal();
+    return;
+  }
+  const modalStud = document.getElementById('modal-student-editor');
+  if (modalStud && modalStud.style.display !== 'none') {
+    closeStudentModal();
+    return;
+  }
+  const modalNotif = document.getElementById('modal-notifications-center');
+  if (modalNotif && modalNotif.style.display !== 'none') {
+    closeNotificationsModal();
+    return;
+  }
+  const modalTeach = document.getElementById('modal-teacher-profile');
+  if (modalTeach && modalTeach.style.display !== 'none') {
+    closeTeacherProfileModal();
+    return;
+  }
+  const modalQuest = document.getElementById('modal-question-editor');
+  if (modalQuest && modalQuest.style.display !== 'none') {
+    closeQuestionModal();
+    return;
+  }
+  const modalAllTok = document.getElementById('modal-all-subject-tokens');
+  if (modalAllTok && modalAllTok.style.display !== 'none') {
+    closeAllSubjectTokensModal();
+    return;
+  }
+  const modalSubConf = document.getElementById('modal-submit-confirm');
+  if (modalSubConf && modalSubConf.style.display !== 'none') {
+    closeSubmitConfirmModal();
+    return;
+  }
+}
+window.closeAllActiveModals = closeAllActiveModals;
+window.filterLiveMonitoringStatus = filterLiveMonitoringStatus;
+window.startLiveMonitorInterval = startLiveMonitorInterval;
+window.stopLiveMonitorInterval = stopLiveMonitorInterval;
+
 
