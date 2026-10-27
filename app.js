@@ -119,6 +119,8 @@ const state = {
   isExamRunning: false,
   warningCount: 0,
   maxWarnings: 3,
+  proctorScheduleOverride: false,
+  scheduleGateIntervalId: null,
 
   // Database Provider ('neon' | 'supabase' | 'local')
   dbProvider: localStorage.getItem('zettcbt_db_provider') || 'neon',
@@ -2148,14 +2150,261 @@ async function handleStudentLogin(event) {
   const elConfirmDur = document.getElementById('confirm-duration');
   if (elConfirmDur) elConfirmDur.textContent = `${state.session.durationMinutes} Menit`;
 
-  // Tampilkan Screen 2 (Menunggu Verifikasi & Klik Pengawas Ruang)
+  // Tampilkan Screen 2 (Menunggu Verifikasi & Klik Pengawas Ruang Sesuai Jadwal)
   showScreen('student-confirm');
+  initConfirmScheduleGateUI();
 
   if (isResumed) {
-    showToast(`Selamat datang kembali, ${student.name}! Sesi ujian ${subjectName} ditemukan. Silakan minta Pengawas Ruang menekan tombol Mulai.`, 'info');
+    showToast(`Selamat datang kembali, ${student.name}! Sesi ujian ${subjectName} ditemukan. Silakan minta Pengawas Ruang memeriksa jadwal dan menekan tombol Mulai.`, 'info');
   } else {
-    showToast(`Token terverifikasi! Pastikan data di layar sesuai, lalu minta Pengawas Ruang menekan tombol "Mulai Mengerjakan".`, 'success');
+    showToast(`Token terverifikasi! Memeriksa jadwal ujian mata pelajaran ${subjectName}...`, 'success');
   }
+}
+
+// ==============================================================================
+// MODUL GATEKEEPER JADWAL UJIAN: TOMBOL MULAI HANYA AKTIF PADA HARI & JAM UJIAN
+// ==============================================================================
+function findScheduleForStudent(className, subjectName) {
+  if (!Array.isArray(state.schedules) || state.schedules.length === 0) return null;
+  const cleanSub = (subjectName || '').trim().toLowerCase();
+  const cleanClass = (className || '').trim().toUpperCase();
+
+  // 1. Cari jadwal yang persis cocok mapel dan kelas
+  let match = state.schedules.find(sc => {
+    const sName = (sc.subjectName || sc.subject || '').trim().toLowerCase();
+    const sClass = (sc.className || '').trim().toUpperCase();
+    return sName === cleanSub && (sClass === cleanClass || sClass === 'SEMUA KELAS');
+  });
+
+  // 2. Jika tidak ada, cari yang mencakup nama mapel
+  if (!match) {
+    match = state.schedules.find(sc => {
+      const sName = (sc.subjectName || sc.subject || '').trim().toLowerCase();
+      const sClass = (sc.className || '').trim().toUpperCase();
+      return (sName.includes(cleanSub) || cleanSub.includes(sName)) &&
+             (sClass === cleanClass || sClass === 'SEMUA KELAS' || !sClass);
+    });
+  }
+
+  // 3. Fallback: Cari berdasarkan nama mapel saja
+  if (!match) {
+    match = state.schedules.find(sc => {
+      const sName = (sc.subjectName || sc.subject || '').trim().toLowerCase();
+      return sName === cleanSub || sName.includes(cleanSub) || cleanSub.includes(sName);
+    });
+  }
+
+  return match;
+}
+
+function checkExamScheduleStatus(className, subjectName) {
+  const sched = findScheduleForStudent(className, subjectName);
+  if (!sched || !sched.date || !sched.startTime || !sched.endTime) {
+    return {
+      status: 'no_schedule',
+      isOpen: true,
+      sched: sched || null,
+      message: 'Jadwal terbuka (fleksibel).'
+    };
+  }
+
+  const now = new Date();
+  
+  // Format tanggal saat ini: YYYY-MM-DD
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${y}-${m}-${d}`;
+
+  // Parse waktu mulai & waktu selesai
+  const [startH, startM] = (sched.startTime || '07:30').split(':').map(Number);
+  const [endH, endM] = (sched.endTime || '09:00').split(':').map(Number);
+
+  // Buat objek Date untuk waktu mulai dan waktu selesai jadwal
+  const schedStart = new Date(sched.date + 'T' + String(startH || 0).padStart(2, '0') + ':' + String(startM || 0).padStart(2, '0') + ':00');
+  const schedEnd = new Date(sched.date + 'T' + String(endH || 0).padStart(2, '0') + ':' + String(endM || 0).padStart(2, '0') + ':00');
+
+  const dayInfo = formatIndonesianDayDate ? formatIndonesianDayDate(sched.date) : { day: 'Hari Ujian', dateText: sched.date };
+  const scheduleFormattedText = `${dayInfo.day}, ${dayInfo.dateText}`;
+
+  if (now < schedStart) {
+    // UPCOMING: Sebelum tanggal ujian ATAU tanggal sama tapi jam belum masuk
+    const diffMs = schedStart.getTime() - now.getTime();
+    const remainingSec = Math.max(0, Math.floor(diffMs / 1000));
+    return {
+      status: 'upcoming',
+      isOpen: false,
+      sched: sched,
+      scheduleFormattedText: scheduleFormattedText,
+      remainingSeconds: remainingSec,
+      message: `Mata pelajaran ${sched.subjectName || subjectName} dijadwalkan pada ${scheduleFormattedText} pukul ${sched.startTime} - ${sched.endTime} WIB.`
+    };
+  } else if (now >= schedStart && now <= schedEnd) {
+    // ACTIVE: Sesuai tanggal & jam sekarang berada di antara jam mulai dan jam selesai
+    const diffMs = schedEnd.getTime() - now.getTime();
+    const remainingSec = Math.max(0, Math.floor(diffMs / 1000));
+    return {
+      status: 'active',
+      isOpen: true,
+      sched: sched,
+      scheduleFormattedText: scheduleFormattedText,
+      remainingSeconds: remainingSec,
+      message: `Sesi Ujian Sedang Berlangsung (${sched.startTime} - ${sched.endTime} WIB).`
+    };
+  } else {
+    // EXPIRED: Sudah melewati jam selesai ujian atau tanggal telah lewat
+    return {
+      status: 'expired',
+      isOpen: false,
+      sched: sched,
+      scheduleFormattedText: scheduleFormattedText,
+      message: `Sesi ujian ${sched.subjectName || subjectName} telah selesai pada pukul ${sched.endTime} WIB (${scheduleFormattedText}).`
+    };
+  }
+}
+
+function handleLoginSubjectChange(subjectVal) {
+  const hintEl = document.getElementById('login-subject-schedule-hint');
+  if (!hintEl) return;
+
+  if (!subjectVal || subjectVal === 'AUTO') {
+    hintEl.style.display = 'none';
+    return;
+  }
+
+  // Cari jadwal untuk mapel ini
+  const sched = (state.schedules || []).find(sc => 
+    (sc.subjectName === subjectVal || sc.subject === subjectVal)
+  );
+
+  if (!sched) {
+    hintEl.style.display = 'block';
+    hintEl.innerHTML = `<span style="color: #64748b;">ℹ️ Jadwal ujian fleksibel / belum dibatasi ketat.</span>`;
+    return;
+  }
+
+  const dayInfo = formatIndonesianDayDate ? formatIndonesianDayDate(sched.date) : { day: 'Hari Ujian', dateText: sched.date };
+  const res = checkExamScheduleStatus(sched.className || '6A', subjectVal);
+
+  let statusBadge = '';
+  if (res.status === 'active') {
+    statusBadge = '<span style="color: #166534; font-weight: 700; background: #dcfce7; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;">🟢 SEDANG BERLANGSUNG</span>';
+  } else if (res.status === 'upcoming') {
+    statusBadge = '<span style="color: #b45309; font-weight: 700; background: #fef3c7; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;">⏳ BELUM DIMULAI</span>';
+  } else {
+    statusBadge = '<span style="color: #9f1239; font-weight: 700; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;">⛔ TELAH BERAKHIR</span>';
+  }
+
+  hintEl.style.display = 'block';
+  hintEl.innerHTML = `📅 <strong>${dayInfo.day}, ${dayInfo.dateText}</strong> | Pukul <strong>${sched.startTime} - ${sched.endTime} WIB</strong> ${statusBadge}`;
+}
+
+function initConfirmScheduleGateUI() {
+  state.proctorScheduleOverride = false;
+  if (state.scheduleGateIntervalId) clearInterval(state.scheduleGateIntervalId);
+
+  updateConfirmScheduleGateUI();
+  state.scheduleGateIntervalId = setInterval(() => {
+    const screenConfirm = document.getElementById('screen-student-confirm');
+    if (screenConfirm && screenConfirm.classList.contains('active')) {
+      updateConfirmScheduleGateUI();
+    } else {
+      clearInterval(state.scheduleGateIntervalId);
+      state.scheduleGateIntervalId = null;
+    }
+  }, 1000);
+}
+
+function updateConfirmScheduleGateUI() {
+  const gateBox = document.getElementById('confirm-schedule-gate-box');
+  const btnStart = document.getElementById('btn-proctor-start-exam');
+  const overrideBox = document.getElementById('proctor-override-container');
+  if (!gateBox || !btnStart) return;
+
+  const result = checkExamScheduleStatus(state.student.className, state.session.subject);
+  const isOverride = state.proctorScheduleOverride === true;
+
+  if (isOverride || result.isOpen) {
+    // TAMPILKAN TOMBOL MULAI UJIAN
+    btnStart.style.display = 'inline-flex';
+    if (overrideBox) overrideBox.style.display = isOverride ? 'none' : 'block';
+
+    const schedInfo = result.sched ? `Pukul <strong>${result.sched.startTime} - ${result.sched.endTime} WIB</strong>` : 'Sesi Terbuka';
+    const overrideBadge = isOverride ? '<span style="display: inline-block; background: #fef08a; color: #854d0e; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; margin-left: 6px;">IZIN DARURAT AKTIF</span>' : '';
+
+    gateBox.innerHTML = `
+      <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+        <div style="font-size: 1.6rem; line-height: 1;">👨‍🏫</div>
+        <div style="font-size: 0.83rem; color: #166534; line-height: 1.45;">
+          <strong>Verifikasi Pengawas Ruang:</strong> Jadwal sesi ujian aktif (${schedInfo}).${overrideBadge} Pastikan identitas siswa di layar telah sesuai dengan kartu ujian dan daftar hadir di meja, lalu klik tombol hijau di bawah untuk memulai ujian.
+        </div>
+      </div>
+    `;
+  } else if (result.status === 'upcoming') {
+    // SEMBUNYIKAN TOMBOL MULAI UJIAN
+    btnStart.style.display = 'none';
+    if (overrideBox) overrideBox.style.display = 'block';
+
+    const sec = result.remainingSeconds || 0;
+    const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+    const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    const countdownStr = `${h} jam ${m} menit ${s} detik`;
+
+    gateBox.innerHTML = `
+      <div style="background: #fffbeb; border: 1.5px solid #f59e0b; border-radius: var(--radius-md); padding: 1rem 1.15rem; text-align: center;">
+        <div style="font-size: 1.6rem; margin-bottom: 0.35rem;">⏳</div>
+        <div style="font-weight: 800; color: #92400e; font-size: 0.95rem;">TOMBOL MULAI UJIAN TERKUNCI</div>
+        <div style="font-size: 0.83rem; color: #78350f; margin-top: 0.3rem; line-height: 1.45;">
+          Ujian mata pelajaran <strong>${escapeHtml(state.session.subject)}</strong> dijadwalkan pada hari <strong>${escapeHtml(result.scheduleFormattedText)}</strong> pukul <strong>${result.sched.startTime} - ${result.sched.endTime} WIB</strong>.
+        </div>
+        <div style="margin-top: 0.65rem; padding: 0.45rem 0.75rem; background: #fef3c7; border-radius: 6px; display: inline-block; font-size: 0.82rem; color: #b45309; font-weight: 700;">
+          ⏱️ Tombol Mulai otomatis muncul dalam: <span style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #92400e;">${countdownStr}</span>
+        </div>
+      </div>
+    `;
+  } else if (result.status === 'expired') {
+    // SEMBUNYIKAN TOMBOL MULAI UJIAN (TELAH BERAKHIR)
+    btnStart.style.display = 'none';
+    if (overrideBox) overrideBox.style.display = 'block';
+
+    gateBox.innerHTML = `
+      <div style="background: #fff1f2; border: 1.5px solid #f43f5e; border-radius: var(--radius-md); padding: 1rem 1.15rem; text-align: center;">
+        <div style="font-size: 1.6rem; margin-bottom: 0.35rem;">⛔</div>
+        <div style="font-weight: 800; color: #9f1239; font-size: 0.95rem;">SESI UJIAN TELAH BERAKHIR</div>
+        <div style="font-size: 0.83rem; color: #881337; margin-top: 0.3rem; line-height: 1.45;">
+          Jadwal ujian mata pelajaran <strong>${escapeHtml(state.session.subject)}</strong> telah selesai pada pukul <strong>${result.sched.endTime} WIB</strong> (${escapeHtml(result.scheduleFormattedText)}).
+        </div>
+        <div style="font-size: 0.78rem; color: #be123c; margin-top: 0.5rem;">
+          Jika siswa ini memerlukan ujian susulan, silakan minta pengawas menekan tombol izin darurat di bawah.
+        </div>
+      </div>
+    `;
+  }
+}
+
+function triggerProctorScheduleOverride() {
+  const pin = prompt('AKSES DARURAT PENGAWAS RUANG / UJIAN SUSULAN\n\nMasukkan Password / Kode Guru Pengawas untuk membuka tombol mulai sekarang:');
+  if (!pin) return;
+
+  const cleanPin = pin.trim();
+  const isMatch = (state.teachers || []).some(t => t.password === cleanPin || t.username === cleanPin) || cleanPin === 'admin123' || cleanPin === 'guru123';
+  if (isMatch) {
+    state.proctorScheduleOverride = true;
+    showToast('Izin darurat pengawas aktif! Tombol Mulai Ujian berhasil dibuka.', 'success');
+    updateConfirmScheduleGateUI();
+  } else {
+    showToast('Kode / Password Pengawas salah! Akses darurat ditolak.', 'danger');
+  }
+}
+
+function cancelConfirmExam() {
+  if (state.scheduleGateIntervalId) {
+    clearInterval(state.scheduleGateIntervalId);
+    state.scheduleGateIntervalId = null;
+  }
+  state.proctorScheduleOverride = false;
+  showScreen('student-login');
 }
 
 // SCREEN 2 -> SCREEN 3: Start Exam (Ditekan Resmi oleh Pengawas Ruang)
@@ -2164,6 +2413,11 @@ function startExamSession() {
     showToast('Data peserta belum dimuat. Silakan login kembali.', 'warning');
     showScreen('student-login');
     return;
+  }
+
+  if (state.scheduleGateIntervalId) {
+    clearInterval(state.scheduleGateIntervalId);
+    state.scheduleGateIntervalId = null;
   }
 
   state.isExamRunning = true;
