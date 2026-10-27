@@ -164,6 +164,22 @@
 
 
             <div class="form-group">
+              <label class="form-label" for="login-subject">Mata Pelajaran Ujian</label>
+              <select id="login-subject" class="form-control" style="font-weight: 600;">
+                <option value="AUTO">-- Otomatis Sesuai Jadwal / Token --</option>
+                <option value="Matematika">Matematika</option>
+                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                <option value="IPAS (Ilmu Pengetahuan Alam & Sosial)">IPAS (Ilmu Pengetahuan Alam &amp; Sosial)</option>
+                <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
+                <option value="Pendidikan Agama Islam (PAI)">Pendidikan Agama Islam (PAI)</option>
+                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                <option value="PJOK / Penjaskes">PJOK / Penjaskes</option>
+                <option value="Seni dan Budaya (SBdP)">Seni dan Budaya (SBdP)</option>
+                <option value="Muatan Lokal (Bahasa Daerah)">Muatan Lokal (Bahasa Daerah)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
               <label class="form-label" for="login-token">Token Ujian</label>
               <input type="text" id="login-token" class="form-control" placeholder="Contoh: WKT82M" maxlength="8" style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.18em; font-size: 1.05rem;" required autocomplete="off">
               <small style="color: var(--slate-500); font-size: 0.75rem; margin-top: 0.35rem; display: block; line-height: 1.35;">*Cukup masukkan 1 Token Ujian dari papan tulis (otomatis berganti tiap 3 menit)</small>
@@ -323,13 +339,17 @@
             </div>
           </div>
 
+          <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: var(--radius-md); padding: 0.85rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+            <div style="font-size: 1.5rem; line-height: 1;">👨‍🏫</div>
+            <div style="font-size: 0.82rem; color: #166534; line-height: 1.45;">
+              <strong>Verifikasi Pengawas Ruang:</strong> Pastikan identitas siswa di layar telah sesuai dengan kartu ujian fisik dan daftar hadir di meja, lalu klik tombol hijau di bawah untuk memulai ujian.
+            </div>
+          </div>
+
           <div style="display: flex; gap: 0.75rem;">
             <button class="btn btn-outline" style="flex: 1;" onclick="showScreen('student-login')">Batal</button>
-            <button class="btn btn-primary" style="flex: 2;" onclick="startExamSession()">
-              Mulai Mengerjakan
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
+            <button class="btn btn-success" style="flex: 2; font-weight: 700; background: #16a34a; border-color: #16a34a;" onclick="startExamSession()">
+              🚀 Mulai Mengerjakan (Klik Pengawas Ruang)
             </button>
           </div>
         </div>
@@ -1210,6 +1230,10 @@
                 <span id="login-toggle-indicator">🟢</span>
                 <span id="login-toggle-text">Login Siswa: DIBUKA</span>
               </button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="openPrintAttendanceModal()" style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; color: #1e293b;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                📋 Cetak Daftar Hadir
+              </button>
               <button type="button" class="btn btn-outline btn-sm" onclick="renderTeacherExamSchedules()">🔄 Segarkan Jadwal</button>
               <button type="button" class="btn btn-primary btn-sm" id="btn-add-schedule-admin" onclick="openAddScheduleModal()" style="display: none;">+ Tambah Sesi Jadwal</button>
             </div>
@@ -1684,6 +1708,10 @@
                 <option value="4A">Kelas 4A</option>
                 <option value="4B">Kelas 4B</option>
               </select>
+              <button class="btn btn-outline btn-sm" onclick="openPrintAttendanceModal()" style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; color: #1e293b;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                📋 Cetak Daftar Hadir
+              </button>
               <button class="btn btn-outline btn-sm" onclick="openImportStudentsModal()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 📥 Impor dari Excel / CSV
@@ -2120,12 +2148,31 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group" id="group-teacher-class">
               <label class="form-label">Kelas Binaan</label>
-              <input type="text" id="edit-teacher-class" class="form-control" placeholder="Contoh: 4A, 4B, 5A, 5B, 6A, 6B">
+              <select id="edit-teacher-class" class="form-control">
+                <option value="SEMUA KELAS">Semua Kelas</option>
+                <option value="4A">4A</option>
+                <option value="4B">4B</option>
+                <option value="5A">5A</option>
+                <option value="5B">5B</option>
+                <option value="6A">6A</option>
+                <option value="6B">6B</option>
+              </select>
               <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Kelas</small>
             </div>
             <div class="form-group" id="group-teacher-subject">
               <label class="form-label">Mata Pelajaran Binaan</label>
-              <input type="text" id="edit-teacher-subject" class="form-control" placeholder="Contoh: Matematika, IPA, Tematik">
+              <select id="edit-teacher-subject" class="form-control">
+                <option value="SEMUA MAPEL">Semua Mata Pelajaran</option>
+                <option value="Matematika">Matematika</option>
+                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                <option value="IPAS (Ilmu Pengetahuan Alam & Sosial)">IPAS (Ilmu Pengetahuan Alam &amp; Sosial)</option>
+                <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
+                <option value="Pendidikan Agama Islam (PAI)">Pendidikan Agama Islam (PAI)</option>
+                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                <option value="PJOK / Penjaskes">PJOK / Penjaskes</option>
+                <option value="Seni dan Budaya (SBdP)">Seni dan Budaya (SBdP)</option>
+                <option value="Muatan Lokal (Bahasa Daerah)">Muatan Lokal (Bahasa Daerah)</option>
+              </select>
               <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Mapel</small>
             </div>
           </div>
@@ -2170,7 +2217,14 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
               <label class="form-label">Kelas / Rombel</label>
-              <input type="text" id="edit-student-class" class="form-control" placeholder="Contoh: 4A, 4B, 5A, 5B, 6A, 6B" required>
+              <select id="edit-student-class" class="form-control" required>
+                <option value="4A">4A</option>
+                <option value="4B">4B</option>
+                <option value="5A">5A</option>
+                <option value="5B">5B</option>
+                <option value="6A">6A</option>
+                <option value="6B">6B</option>
+              </select>
             </div>
             <div class="form-group">
               <label class="form-label">Jenis Kelamin</label>
@@ -2565,6 +2619,57 @@
     </div>
   </div>
 
+  <!-- MODAL: CETAK DAFTAR HADIR UJIAN PER MAPEL & KELAS -->
+  <div id="modal-print-attendance" class="modal-overlay" style="display: none; z-index: 9998;">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">📋 Cetak Daftar Hadir Ujian Resmi</h3>
+        <button class="btn btn-outline btn-sm" onclick="closePrintAttendanceModal()" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 1.25rem;">
+          Cetak lembar daftar hadir fisik berstandar resmi (Kop SD Negeri 14 Toboali, nama siswa terdaftar, dan kolom tanda tangan bersilang) per mata pelajaran dan kelas.
+        </p>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" style="font-weight: 700;">Pilih Kelas / Rombel</label>
+          <select id="print-attendance-class" class="form-control">
+            <option value="ALL">Semua Kelas (4A - 6B)</option>
+            <option value="4A">Kelas 4A</option>
+            <option value="4B">Kelas 4B</option>
+            <option value="5A">Kelas 5A</option>
+            <option value="5B">Kelas 5B</option>
+            <option value="6A" selected>Kelas 6A</option>
+            <option value="6B">Kelas 6B</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="font-weight: 700;">Pilih Mata Pelajaran</label>
+          <select id="print-attendance-subject" class="form-control">
+            <option value="Matematika">Matematika</option>
+            <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+            <option value="IPAS (Ilmu Pengetahuan Alam & Sosial)">IPAS (Ilmu Pengetahuan Alam &amp; Sosial)</option>
+            <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
+            <option value="Pendidikan Agama Islam (PAI)">Pendidikan Agama Islam (PAI)</option>
+            <option value="Bahasa Inggris">Bahasa Inggris</option>
+            <option value="PJOK / Penjaskes">PJOK / Penjaskes</option>
+            <option value="Seni dan Budaya (SBdP)">Seni dan Budaya (SBdP)</option>
+            <option value="Muatan Lokal (Bahasa Daerah)">Muatan Lokal (Bahasa Daerah)</option>
+          </select>
+        </div>
+
+        <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+          <button type="button" class="btn btn-outline" onclick="closePrintAttendanceModal()">Tutup</button>
+          <button type="button" class="btn btn-primary" onclick="executePrintAttendance()" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #2563eb; border-color: #2563eb;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            🖨️ Buka &amp; Cetak Lembar Hadir (PDF)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
@@ -2572,6 +2677,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.16.0"></script>
+  <script src="app.js?v=3.17.0"></script>
 </body>
 </html>
