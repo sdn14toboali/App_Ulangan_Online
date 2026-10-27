@@ -4967,7 +4967,7 @@ body.dark-mode .btn-release-exam.release-inactive {
   .cbt-greeting-meta {
     min-width: 0;
     flex: 1 1 auto;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .cbt-user-hi {
@@ -4975,27 +4975,57 @@ body.dark-mode .btn-release-exam.release-inactive {
     font-weight: 800;
     color: #0F172A;
     line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 140px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: none;
+    word-break: break-word;
   }
 
   .cbt-user-sub {
     font-size: 0.72rem;
     color: #64748B;
     font-weight: 600;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: none;
+  }
+
+  .cbt-rules-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff1f2;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
+    padding: 0.32rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 140px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .cbt-rules-header-btn:hover {
+    background: #fee2e2;
+    border-color: #f87171;
+    color: #991b1b;
+  }
+  .cbt-btn-esc-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    margin-left: 2px;
+    color: #64748b;
+    letter-spacing: 0.04em;
   }
 
   .cbt-topbar-right {
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
   }
 
   .cbt-timer-pill {
