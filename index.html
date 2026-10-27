@@ -837,14 +837,19 @@
           </div>
         </header>
 
-        <!-- TOKEN UJIAN TUNGGAL (SINGLE PROCTOR TOKEN RIBBON) -->
+        <!-- BILAH TOKEN UJIAN AKTIF PER MATA PELAJARAN (MULTI-SUBJECT TOKEN RIBBON) -->
         <div class="single-token-bar" id="global-token-ribbon">
           <div class="single-token-left">
             <div class="single-token-tag">
               <span class="token-key-icon">🔑</span>
               <span class="single-token-title">TOKEN UJIAN AKTIF:</span>
             </div>
-            <div class="single-token-display-wrap" onclick="copySingleProctorToken()" title="Klik untuk Salin Token Ujian">
+            <div class="ribbon-subject-picker-wrap">
+              <select id="ribbon-subject-select" class="ribbon-subject-select" onchange="handleActiveSubjectTokenChange(this.value)" title="Pilih mata pelajaran untuk melihat dan membagikan token aktif">
+                <!-- Dynamically populated from state.subjects -->
+              </select>
+            </div>
+            <div class="single-token-display-wrap" onclick="copyCurrentSubjectToken()" title="Klik untuk Salin Token Ujian Mata Pelajaran Ini">
               <span class="single-token-code" id="single-proctor-token-value">------</span>
               <button type="button" class="btn-copy-token-inline" title="Salin Token">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -853,25 +858,17 @@
             </div>
           </div>
 
-          <div class="single-token-center">
-            <div class="single-token-timer-box">
-              <span class="timer-clock-icon">⏳</span>
-              <span class="timer-label">Sisa Waktu:</span>
-              <strong class="timer-countdown" id="single-proctor-token-timer">03:00</strong>
-              <span class="timer-reset-note">(Berganti otomatis tiap 3 menit)</span>
-            </div>
-            <div class="single-token-progress-track">
-              <div class="single-token-progress-bar" id="single-token-progress-fill" style="width: 100%;"></div>
-            </div>
-          </div>
-
           <div class="single-token-right">
             <span class="token-status-badge active" id="single-token-status-badge">
               <span class="pulse-dot"></span> 🟢 AKTIF
             </span>
-            <button type="button" class="btn-token-ribbon-reload" onclick="forceRefreshToken(true)" title="Acak Token Baru Sekarang">
+            <button type="button" class="btn-token-ribbon-reload" onclick="refreshCurrentSubjectToken()" title="Acak Token Baru untuk Mata Pelajaran Ini">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-              <span>🎲 Acak Sekarang</span>
+              <span>🎲 Acak Mapel Ini</span>
+            </button>
+            <button type="button" class="btn-token-ribbon-project" onclick="openAllSubjectTokensModal()" title="Buka Proyektor / Tampilkan Seluruh Token Mapel Sekaligus">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              <span>📋 Proyeksikan Semua</span>
             </button>
           </div>
         </div>
@@ -1122,7 +1119,6 @@
                 <span id="login-toggle-text">Login Siswa: DIBUKA</span>
               </button>
               <button type="button" class="btn btn-outline btn-sm" onclick="renderTeacherExamSchedules()">🔄 Segarkan Jadwal</button>
-              <button type="button" class="btn btn-outline btn-sm" onclick="releaseAllExamSchedules()" title="Buka / Rilis seluruh sesi jadwal ujian agar semua siswa dapat langsung masuk">🔓 Rilis Semua Sesi</button>
               <button type="button" class="btn btn-primary btn-sm" id="btn-add-schedule-admin" onclick="openAddScheduleModal()" style="display: none;">+ Tambah Sesi Jadwal</button>
             </div>
           </div>
@@ -1131,15 +1127,13 @@
             <table class="schedule-table">
               <thead>
                 <tr>
-                  <th style="width: 35px;">No</th>
+                  <th style="width: 40px; text-align: center;">No</th>
                   <th>Mata Pelajaran</th>
-                  <th>Kelas</th>
+                  <th style="width: 80px; text-align: center;">Kelas</th>
                   <th>Hari &amp; Tanggal</th>
                   <th>Jam Pelaksanaan</th>
                   <th>Ruangan</th>
-                  <th>Token Ujian</th>
-                  <th style="text-align: center; width: 145px;">Status Rilis Ujian</th>
-                  <th style="text-align: center; width: 75px;">Atur</th>
+                  <th style="text-align: center; width: 90px;">Atur</th>
                 </tr>
               </thead>
               <tbody id="table-teacher-schedules-body">
@@ -2328,16 +2322,10 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 0.75rem;">
-            <div class="form-group">
-              <label class="form-label">Tanggal Pelaksanaan</label>
-              <input type="date" id="schedule-input-date" class="form-control" required onchange="handleScheduleDateChange(this.value)">
-              <small id="schedule-day-hint" style="color: var(--primary-600); font-weight: 700; display: block; margin-top: 4px;">Hari: -</small>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Token Ujian</label>
-              <input type="text" id="schedule-input-token" class="form-control" style="font-weight: 800; text-transform: uppercase;" required>
-            </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal Pelaksanaan</label>
+            <input type="date" id="schedule-input-date" class="form-control" required onchange="handleScheduleDateChange(this.value)">
+            <small id="schedule-day-hint" style="color: var(--primary-600); font-weight: 700; display: block; margin-top: 4px;">Hari: -</small>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
@@ -2349,14 +2337,6 @@
               <label class="form-label">Jam Selesai</label>
               <input type="time" id="schedule-input-end" class="form-control" value="09:00" required>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Status Akses Login Siswa</label>
-            <select id="schedule-input-login-status" class="form-control">
-              <option value="true">🟢 Buka Login Siswa (Aktif)</option>
-              <option value="false">🔴 Tutup Login Siswa (Nonaktif)</option>
-            </select>
           </div>
 
           <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.5rem;">
@@ -2420,6 +2400,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.7.1"></script>
+  <script src="app.js?v=3.8.0"></script>
 </body>
 </html>
