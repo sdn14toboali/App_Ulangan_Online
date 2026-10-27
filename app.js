@@ -1417,6 +1417,9 @@ function renderTeacherExamSchedules() {
       <td>${escapeHtml(sc.room || 'Lab Komputer')}</td>
       <td style="text-align: center; white-space: nowrap;">
         <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
+          <button type="button" class="btn btn-sm" onclick="toggleScheduleLoginStatus('${sc.id}')" title="Klik untuk mengaktifkan/menutup sesi ujian mapel ini secara manual" style="font-size: 0.76rem; padding: 0.25rem 0.6rem; font-weight: 700; background: ${sc.isLoginOpen !== false ? '#dcfce7' : '#f1f5f9'}; color: ${sc.isLoginOpen !== false ? '#166534' : '#475569'}; border: 1px solid ${sc.isLoginOpen !== false ? '#86efac' : '#cbd5e1'}; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;">
+            ${sc.isLoginOpen !== false ? '🟢 Buka' : '⚪ Tutup'}
+          </button>
           <button type="button" class="btn btn-outline btn-sm" onclick="openEditScheduleModal('${sc.id}')" title="Atur Jadwal Hari, Tanggal & Jam" style="font-size: 0.78rem; padding: 0.25rem 0.55rem;">
             ✏️ Atur
           </button>
@@ -2318,84 +2321,27 @@ function initConfirmScheduleGateUI() {
 function updateConfirmScheduleGateUI() {
   const gateBox = document.getElementById('confirm-schedule-gate-box');
   const btnStart = document.getElementById('btn-proctor-start-exam');
-  const overrideBox = document.getElementById('proctor-override-container');
   if (!gateBox || !btnStart) return;
 
+  // Tombol mulai selalu tampil dan langsung siap diklik secara manual oleh pengawas ruang
+  btnStart.style.display = 'inline-flex';
+
   const result = checkExamScheduleStatus(state.student.className, state.session.subject);
-  const isOverride = state.proctorScheduleOverride === true;
-
-  if (isOverride || result.isOpen) {
-    // TAMPILKAN TOMBOL MULAI UJIAN
-    btnStart.style.display = 'inline-flex';
-    if (overrideBox) overrideBox.style.display = isOverride ? 'none' : 'block';
-
-    const schedInfo = result.sched ? `Pukul <strong>${result.sched.startTime} - ${result.sched.endTime} WIB</strong>` : 'Sesi Terbuka';
-    const overrideBadge = isOverride ? '<span style="display: inline-block; background: #fef08a; color: #854d0e; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; margin-left: 6px;">IZIN DARURAT AKTIF</span>' : '';
-
-    gateBox.innerHTML = `
-      <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
-        <div style="font-size: 1.6rem; line-height: 1;">👨‍🏫</div>
-        <div style="font-size: 0.83rem; color: #166534; line-height: 1.45;">
-          <strong>Verifikasi Pengawas Ruang:</strong> Jadwal sesi ujian aktif (${schedInfo}).${overrideBadge} Pastikan identitas siswa di layar telah sesuai dengan kartu ujian dan daftar hadir di meja, lalu klik tombol hijau di bawah untuk memulai ujian.
-        </div>
-      </div>
-    `;
-  } else if (result.status === 'upcoming') {
-    // SEMBUNYIKAN TOMBOL MULAI UJIAN
-    btnStart.style.display = 'none';
-    if (overrideBox) overrideBox.style.display = 'block';
-
-    const sec = result.remainingSeconds || 0;
-    const h = String(Math.floor(sec / 3600)).padStart(2, '0');
-    const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
-    const s = String(sec % 60).padStart(2, '0');
-    const countdownStr = `${h} jam ${m} menit ${s} detik`;
-
-    gateBox.innerHTML = `
-      <div style="background: #fffbeb; border: 1.5px solid #f59e0b; border-radius: var(--radius-md); padding: 1rem 1.15rem; text-align: center;">
-        <div style="font-size: 1.6rem; margin-bottom: 0.35rem;">⏳</div>
-        <div style="font-weight: 800; color: #92400e; font-size: 0.95rem;">TOMBOL MULAI UJIAN TERKUNCI</div>
-        <div style="font-size: 0.83rem; color: #78350f; margin-top: 0.3rem; line-height: 1.45;">
-          Ujian mata pelajaran <strong>${escapeHtml(state.session.subject)}</strong> dijadwalkan pada hari <strong>${escapeHtml(result.scheduleFormattedText)}</strong> pukul <strong>${result.sched.startTime} - ${result.sched.endTime} WIB</strong>.
-        </div>
-        <div style="margin-top: 0.65rem; padding: 0.45rem 0.75rem; background: #fef3c7; border-radius: 6px; display: inline-block; font-size: 0.82rem; color: #b45309; font-weight: 700;">
-          ⏱️ Tombol Mulai otomatis muncul dalam: <span style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #92400e;">${countdownStr}</span>
-        </div>
-      </div>
-    `;
-  } else if (result.status === 'expired') {
-    // SEMBUNYIKAN TOMBOL MULAI UJIAN (TELAH BERAKHIR)
-    btnStart.style.display = 'none';
-    if (overrideBox) overrideBox.style.display = 'block';
-
-    gateBox.innerHTML = `
-      <div style="background: #fff1f2; border: 1.5px solid #f43f5e; border-radius: var(--radius-md); padding: 1rem 1.15rem; text-align: center;">
-        <div style="font-size: 1.6rem; margin-bottom: 0.35rem;">⛔</div>
-        <div style="font-weight: 800; color: #9f1239; font-size: 0.95rem;">SESI UJIAN TELAH BERAKHIR</div>
-        <div style="font-size: 0.83rem; color: #881337; margin-top: 0.3rem; line-height: 1.45;">
-          Jadwal ujian mata pelajaran <strong>${escapeHtml(state.session.subject)}</strong> telah selesai pada pukul <strong>${result.sched.endTime} WIB</strong> (${escapeHtml(result.scheduleFormattedText)}).
-        </div>
-        <div style="font-size: 0.78rem; color: #be123c; margin-top: 0.5rem;">
-          Jika siswa ini memerlukan ujian susulan, silakan minta pengawas menekan tombol izin darurat di bawah.
-        </div>
-      </div>
-    `;
+  const sched = result.sched;
+  let schedText = '';
+  if (sched) {
+    const dayInfo = formatIndonesianDayDate ? formatIndonesianDayDate(sched.date) : { day: 'Hari Ujian', dateText: sched.date };
+    schedText = ` | Jadwal: <strong>${dayInfo.day}, ${dayInfo.dateText} (${sched.startTime || '07:30'} - ${sched.endTime || '09:00'} WIB)</strong>`;
   }
-}
 
-function triggerProctorScheduleOverride() {
-  const pin = prompt('AKSES DARURAT PENGAWAS RUANG / UJIAN SUSULAN\n\nMasukkan Password / Kode Guru Pengawas untuk membuka tombol mulai sekarang:');
-  if (!pin) return;
-
-  const cleanPin = pin.trim();
-  const isMatch = (state.teachers || []).some(t => t.password === cleanPin || t.username === cleanPin) || cleanPin === 'admin123' || cleanPin === 'guru123';
-  if (isMatch) {
-    state.proctorScheduleOverride = true;
-    showToast('Izin darurat pengawas aktif! Tombol Mulai Ujian berhasil dibuka.', 'success');
-    updateConfirmScheduleGateUI();
-  } else {
-    showToast('Kode / Password Pengawas salah! Akses darurat ditolak.', 'danger');
-  }
+  gateBox.innerHTML = `
+    <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+      <div style="font-size: 1.6rem; line-height: 1;">👨‍🏫</div>
+      <div style="font-size: 0.83rem; color: #166534; line-height: 1.45;">
+        <strong>Verifikasi Pengawas Ruang:</strong> Identitas peserta terverifikasi${schedText}. Pastikan meja dan kartu ujian siswa telah sesuai, lalu klik tombol hijau di bawah secara manual untuk memulai sesi ujian.
+      </div>
+    </div>
+  `;
 }
 
 function cancelConfirmExam() {
