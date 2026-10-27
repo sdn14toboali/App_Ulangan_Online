@@ -190,8 +190,12 @@ const state = {
   teachers: (() => {
     const defaultSdTeachers = [
       { id: 't-admin', username: 'admin', password: 'admin123', fullName: 'Operator Sekolah', role: 'admin_sekolah', assignedClass: null, assignedSubject: null },
-      { id: 't-kelas6', username: 'gurukelas6', password: 'guru123', fullName: 'Siti Aminah, S.Pd (Guru Kelas 6A)', role: 'guru_kelas', assignedClass: '6A', assignedSubject: 'Tematik SD' },
-      { id: 't-kelas5', username: 'gurukelas5', password: 'guru123', fullName: 'Budi Santoso, S.Pd (Guru Kelas 5A)', role: 'guru_kelas', assignedClass: '5A', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas6a', username: 'gurukelas6a', password: 'guru123', fullName: 'Siti Aminah, S.Pd (Guru Kelas 6A)', role: 'guru_kelas', assignedClass: '6A', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas6b', username: 'gurukelas6b', password: 'guru123', fullName: 'Nurhaliza, S.Pd (Guru Kelas 6B)', role: 'guru_kelas', assignedClass: '6B', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas5a', username: 'gurukelas5a', password: 'guru123', fullName: 'Budi Santoso, S.Pd (Guru Kelas 5A)', role: 'guru_kelas', assignedClass: '5A', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas5b', username: 'gurukelas5b', password: 'guru123', fullName: 'Rina Marlina, S.Pd (Guru Kelas 5B)', role: 'guru_kelas', assignedClass: '5B', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas4a', username: 'gurukelas4a', password: 'guru123', fullName: 'Gilang Pratama, S.Pd (Guru Kelas 4A)', role: 'guru_kelas', assignedClass: '4A', assignedSubject: 'Tematik SD' },
+      { id: 't-kelas4b', username: 'gurukelas4b', password: 'guru123', fullName: 'Dewi Lestari, S.Pd (Guru Kelas 4B)', role: 'guru_kelas', assignedClass: '4B', assignedSubject: 'Tematik SD' },
       { id: 't-pai', username: 'gurupai', password: 'guru123', fullName: 'Ahmad Zaki, S.Pd.I (Guru PAI)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Pendidikan Agama Islam (PAI)' },
       { id: 't-pjok', username: 'gurupjok', password: 'guru123', fullName: 'Hendra Wijaya, S.Pd (Guru Penjaskes)', role: 'guru_mapel', assignedClass: null, assignedSubject: 'Penjaskes / PJOK' }
     ];
@@ -199,7 +203,15 @@ const state = {
       const raw = localStorage.getItem('zettcbt_teachers');
       if (raw !== null) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          let merged = [...parsed];
+          defaultSdTeachers.forEach(dt => {
+            const exists = merged.some(t => t.username === dt.username || (dt.username === 'gurukelas6a' && t.username === 'gurukelas6') || (dt.username === 'gurukelas5a' && t.username === 'gurukelas5'));
+            if (!exists) merged.push(dt);
+          });
+          localStorage.setItem('zettcbt_teachers', JSON.stringify(merged));
+          return merged;
+        }
       }
     } catch(e) {}
     localStorage.setItem('zettcbt_teachers', JSON.stringify(defaultSdTeachers));
@@ -1122,22 +1134,36 @@ function updateGlobalLoginButtonUI() {
 }
 
 // ==============================================================================
-// JADWAL PELAKSANAAN UJIAN GURU (ROLE-BASED ISOLATION)
+// MESIN ISOLASI KELAS & HAK AKSES PENGGUNA (ROLE-BASED ISOLATION ENGINE v3.9.0)
 // ==============================================================================
 
+function normalizeClassName(cls) {
+  if (!cls) return '';
+  return String(cls).toUpperCase().replace(/KELAS|\s+/g, '').trim();
+}
+
+function isClassMatch(classA, classB) {
+  if (!classA || !classB) return false;
+  return normalizeClassName(classA) === normalizeClassName(classB);
+}
+
+// JADWAL PELAKSANAAN UJIAN GURU (ROLE-BASED ISOLATION)
 function getVisibleSchedules() {
   const allSchedules = state.schedules || [];
   const teacher = state.currentTeacher;
 
+  // Operator Sekolah melihat seluruh jadwal
   if (!teacher || teacher.role === 'admin_sekolah') {
     return allSchedules;
   }
 
+  // Guru Kelas hanya melihat jadwal kelas binaannya sendiri (Guru 6A tidak melihat 6B)
   if (teacher.role === 'guru_kelas') {
     const cls = (teacher.assignedClass || '').trim();
-    return allSchedules.filter(sc => sc.className === cls || sc.className === 'SEMUA KELAS');
+    return allSchedules.filter(sc => isClassMatch(sc.className, cls));
   }
 
+  // Guru Mapel melihat jadwal mata pelajarannya
   if (teacher.role === 'guru_mapel') {
     const sub = (teacher.assignedSubject || '').toLowerCase();
     return allSchedules.filter(sc => {
@@ -1411,7 +1437,13 @@ async function handleTeacherLogin(event) {
   const password = document.getElementById('teacher-login-password').value.trim();
 
   // 1. Cek Akun Lokal Bawaan
-  let matchedTeacher = state.teachers.find(t => t.username === username && t.password === password);
+  let matchedTeacher = (state.teachers || []).find(t => t.username === username && t.password === password);
+  if (!matchedTeacher && username === 'gurukelas6') {
+    matchedTeacher = (state.teachers || []).find(t => (t.username === 'gurukelas6a' || t.username === 'gurukelas6') && t.password === password);
+  }
+  if (!matchedTeacher && username === 'gurukelas5') {
+    matchedTeacher = (state.teachers || []).find(t => (t.username === 'gurukelas5a' || t.username === 'gurukelas5') && t.password === password);
+  }
 
   // 2. Cek Akun Database Supabase jika terkonfigurasi
   if (!matchedTeacher && state.supabase.url && state.supabase.key) {
@@ -1584,6 +1616,9 @@ function applyTeacherIsolation() {
   const navTeachers = document.getElementById('tab-nav-manage-teachers');
   if (navTeachers) navTeachers.style.display = (t.role === 'admin_sekolah') ? 'flex' : 'none';
 
+  const navSchoolId = document.getElementById('tab-nav-school-identity');
+  if (navSchoolId) navSchoolId.style.display = (t.role === 'admin_sekolah') ? 'flex' : 'none';
+
   // Kunci dropdown filter siswa jika Guru Kelas
   const studentFilter = document.getElementById('filter-manage-student-class');
   if (studentFilter) {
@@ -1610,51 +1645,77 @@ function applyTeacherIsolation() {
 
 // Filter Bank Soal Terisolasi
 function getVisibleQuestions() {
-  if (!state.currentTeacher) return state.questions;
+  if (!state.currentTeacher) return state.questions || [];
   const t = state.currentTeacher;
 
   if (t.role === 'admin_sekolah') {
-    return state.questions; // Admin melihat semua
+    return state.questions || []; // Admin melihat semua
   }
 
   if (t.role === 'guru_kelas') {
     // Guru kelas hanya melihat soal kelasnya sendiri atau yang dibuatnya sendiri
-    return state.questions.filter(q => 
-      (q.targetClass && (q.targetClass === t.assignedClass || q.targetClass === 'Kelas ' + t.assignedClass)) || 
-      q.teacherId === t.id
+    return (state.questions || []).filter(q => 
+      isClassMatch(q.targetClass, t.assignedClass) || q.teacherId === t.id
     );
   }
 
   if (t.role === 'guru_mapel') {
     // Guru mapel hanya melihat soal mapelnya sendiri atau yang dibuatnya sendiri
-    return state.questions.filter(q => 
-      (q.subject && q.subject.toLowerCase() === t.assignedSubject.toLowerCase()) || 
+    const sub = (t.assignedSubject || '').toLowerCase();
+    return (state.questions || []).filter(q => 
+      (q.subject && q.subject.toLowerCase().includes(sub)) || 
+      (sub && (q.subject || '').toLowerCase().includes(sub)) || 
       q.teacherId === t.id
     );
   }
 
-  return state.questions;
+  return state.questions || [];
 }
 
 // Filter Siswa Aktif Terisolasi
 function getVisibleLiveStudents() {
-  if (!state.currentTeacher) return state.liveStudents;
+  const live = state.liveStudents || [];
+  if (!state.currentTeacher) return live;
   const t = state.currentTeacher;
 
-  if (t.role === 'admin_sekolah' || t.role === 'guru_mapel') {
-    return state.liveStudents;
+  if (t.role === 'admin_sekolah') {
+    return live;
   }
 
   if (t.role === 'guru_kelas') {
-    // Hanya tampilkan siswa di kelasnya
-    return state.liveStudents.filter(s => 
-      s.className === t.assignedClass || 
-      s.className === 'Kelas ' + t.assignedClass ||
-      s.className.includes(t.assignedClass)
-    );
+    // Hanya tampilkan siswa di kelas binaannya
+    return live.filter(s => isClassMatch(s.className, t.assignedClass));
   }
 
-  return state.liveStudents;
+  if (t.role === 'guru_mapel') {
+    const sub = (t.assignedSubject || '').toLowerCase();
+    return live.filter(s => (s.subject || '').toLowerCase().includes(sub) || sub.includes((s.subject || '').toLowerCase()));
+  }
+
+  return live;
+}
+
+// Filter Hasil Ujian Siswa Terisolasi (v3.9.0)
+function getVisibleSubmittedResults() {
+  const finishedList = (state.liveStudents || []).filter(s => s.status === 'submitted');
+  if (!state.currentTeacher) return finishedList;
+  const t = state.currentTeacher;
+
+  if (t.role === 'admin_sekolah') {
+    return finishedList; // Admin melihat seluruh hasil ujian sekolah
+  }
+
+  if (t.role === 'guru_kelas') {
+    // Guru kelas hanya melihat hasil siswa di kelas binaannya (Guru 6A tidak melihat 6B)
+    return finishedList.filter(s => isClassMatch(s.className, t.assignedClass));
+  }
+
+  if (t.role === 'guru_mapel' && t.assignedSubject) {
+    const sub = (t.assignedSubject || '').toLowerCase();
+    return finishedList.filter(s => (s.subject || '').toLowerCase().includes(sub) || sub.includes((s.subject || '').toLowerCase()));
+  }
+
+  return finishedList;
 }
 
 function toggleStudentPasswordVisibility() {
@@ -2927,7 +2988,7 @@ function renderSrmsDashboard() {
   if (headerRoleEl) headerRoleEl.textContent = teacherRole;
 
   // 2. Metrics & KPI Row (Gambar 1)
-  const submittedList = state.liveStudents.filter(s => s.status === 'submitted');
+  const submittedList = getVisibleSubmittedResults();
   const avgScore = submittedList.length > 0 
     ? (submittedList.reduce((acc, curr) => acc + (curr.score || 0), 0) / submittedList.length).toFixed(1)
     : '88.5';
@@ -2940,13 +3001,13 @@ function renderSrmsDashboard() {
   if (coursesEl) coursesEl.textContent = (state.subjects && state.subjects.length > 0) ? state.subjects.length : '6';
 
   const examsEl = document.getElementById('srms-exams-completed');
-  if (examsEl) examsEl.textContent = submittedList.length > 0 ? `${submittedList.length} Selesai` : '18 / 24';
+  if (examsEl) examsEl.textContent = `${submittedList.length} Selesai`;
 
   const rankEl = document.getElementById('srms-overall-rank');
-  if (rankEl) rankEl.textContent = '#4 / 120';
+  if (rankEl) rankEl.textContent = submittedList.length > 0 ? `#1 - #${submittedList.length}` : '-';
 
   const attEl = document.getElementById('srms-attendance-pct');
-  if (attEl) attEl.textContent = '94.2%';
+  if (attEl) attEl.textContent = '100%';
 
   // 3. Render Recent Results Table (Gambar 1)
   renderSrmsRecentResults();
@@ -2959,7 +3020,7 @@ function renderSrmsRecentResults() {
   const tbody = document.getElementById('srms-results-tbody');
   if (!tbody) return;
 
-  const submittedList = state.liveStudents.filter(s => s.status === 'submitted');
+  const submittedList = getVisibleSubmittedResults();
   
   if (submittedList.length > 0) {
     let rowsHtml = '';
@@ -2973,7 +3034,7 @@ function renderSrmsRecentResults() {
         <tr>
           <td><span class="subject-code-tag">${escapeHtml(state.session.subject || 'CBT')}</span></td>
           <td><strong>${escapeHtml(st.name)} (${escapeHtml(st.nisn)})</strong></td>
-          <td>${escapeHtml(st.assignedClass || 'Kelas 6')}</td>
+          <td>${escapeHtml(st.className || 'Kelas 6A')}</td>
           <td>${score} / 100</td>
           <td><strong>${grade}</strong></td>
           <td><span class="status-badge-srms ${badgeCls}">${badgeText}</span></td>
@@ -2981,6 +3042,8 @@ function renderSrmsRecentResults() {
       `;
     });
     tbody.innerHTML = rowsHtml;
+  } else {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--slate-400); padding: 1.5rem;">Belum ada hasil ujian yang dikumpulkan untuk rombel Anda.</td></tr>';
   }
 }
 
@@ -3229,9 +3292,10 @@ function populateDatabaseConfig() {
 }
 
 function updateAdminMetrics() {
-  const activeCount = state.liveStudents.filter(s => s.status === 'in_progress').length;
-  const submittedCount = state.liveStudents.filter(s => s.status === 'submitted').length;
-  const warningCount = state.liveStudents.filter(s => s.warningCount > 0).length;
+  const visibleLive = getVisibleLiveStudents();
+  const activeCount = visibleLive.filter(s => s.status === 'in_progress').length;
+  const submittedCount = visibleLive.filter(s => s.status === 'submitted').length;
+  const warningCount = visibleLive.filter(s => s.warningCount > 0).length;
 
   const elActive = document.getElementById('metric-active-students');
   const elSubmitted = document.getElementById('metric-submitted-students');
@@ -3240,7 +3304,10 @@ function updateAdminMetrics() {
 
   if (elActive) elActive.textContent = activeCount;
   if (elSubmitted) elSubmitted.textContent = submittedCount;
-  if (elToken) elToken.textContent = state.session.token;
+  if (elToken) {
+    const currentSub = (state.subjects || []).find(s => s.id === state.selectedTokenSubjectId) || (state.subjects || [])[0];
+    elToken.textContent = (currentSub && currentSub.token) ? currentSub.token : (state.proctorToken.token || '-');
+  }
   if (elWarning) elWarning.textContent = warningCount;
 }
 
@@ -3652,17 +3719,17 @@ function handleSaveQuestion(event) {
 // ==============================================================================
 
 function getVisibleStudents() {
-  if (!state.currentTeacher) return state.students;
+  if (!state.currentTeacher) return state.students || [];
   const t = state.currentTeacher;
   const filterClass = document.getElementById('filter-manage-student-class')?.value || 'ALL';
 
-  let list = state.students;
+  let list = state.students || [];
 
-  // Isolasi Guru Kelas
+  // Isolasi Guru Kelas: Hanya melihat siswa di kelas binaannya (Guru 6A tidak melihat 6B)
   if (t.role === 'guru_kelas' && t.assignedClass) {
-    list = list.filter(s => s.className === t.assignedClass || s.className === 'Kelas ' + t.assignedClass || s.className.includes(t.assignedClass));
+    list = list.filter(s => isClassMatch(s.className, t.assignedClass));
   } else if (filterClass !== 'ALL') {
-    list = list.filter(s => s.className === filterClass || s.className.includes(filterClass));
+    list = list.filter(s => isClassMatch(s.className, filterClass));
   }
 
   return list;
@@ -3723,7 +3790,7 @@ function openEditStudentModal(nisn) {
 
   // Proteksi Isolasi Guru Kelas
   if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
-    if (s.className !== state.currentTeacher.assignedClass && !s.className.includes(state.currentTeacher.assignedClass)) {
+    if (!isClassMatch(s.className, state.currentTeacher.assignedClass)) {
       showToast('Akses ditolak: Anda tidak memiliki hak mengedit siswa kelas lain!', 'danger');
       return;
     }
@@ -3758,8 +3825,13 @@ async function handleSaveStudent(event) {
   const originalNisn = document.getElementById('edit-student-original-nisn').value.trim();
   const nisn = document.getElementById('edit-student-nisn').value.trim();
   const name = document.getElementById('edit-student-name').value.trim();
-  const className = document.getElementById('edit-student-class').value.trim().toUpperCase();
+  let className = document.getElementById('edit-student-class').value.trim().toUpperCase();
   const gender = document.getElementById('edit-student-gender').value;
+
+  // Enforce Guru Kelas hanya bisa mendaftarkan siswa ke kelasnya sendiri
+  if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas' && state.currentTeacher.assignedClass) {
+    className = state.currentTeacher.assignedClass;
+  }
 
   if (!nisn || !name || !className) {
     showToast('Harap lengkapi seluruh isian siswa!', 'warning');
@@ -3822,6 +3894,14 @@ async function handleSaveStudent(event) {
 }
 
 async function deleteStudent(nisn) {
+  const target = (state.students || []).find(s => s.nisn === nisn);
+  if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
+    if (target && !isClassMatch(target.className, state.currentTeacher.assignedClass)) {
+      showToast('Akses ditolak: Anda tidak memiliki hak menghapus siswa kelas lain!', 'danger');
+      return;
+    }
+  }
+
   if (!confirm('Yakin ingin menghapus data siswa NISN: ' + nisn + '?')) return;
 
   state.students = state.students.filter(s => s.nisn !== nisn);
@@ -5026,10 +5106,10 @@ function renderResultsTable() {
   if (!tbody) return;
 
   tbody.innerHTML = '';
-  const finishedList = state.liveStudents.filter(s => s.status === 'submitted');
+  const finishedList = getVisibleSubmittedResults();
 
   if (finishedList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada peserta yang mengumpulkan ujian.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada peserta di kelas/kewenangan Anda yang mengumpulkan ujian.</td></tr>';
     return;
   }
 
@@ -5040,21 +5120,21 @@ function renderResultsTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = 
       '<td>' + (idx + 1) + '</td>' +
-      '<td>' + st.nisn + '</td>' +
-      '<td><strong>' + st.name + '</strong></td>' +
-      '<td>' + st.className + '</td>' +
-      '<td>' + st.answeredCount + ' / ' + st.totalQ + '</td>' +
-      '<td><strong style="color: var(--primary-600); font-size: 1.1rem;">' + st.score + '</strong></td>' +
-      '<td>' + st.time + '</td>';
+      '<td>' + escapeHtml(st.nisn) + '</td>' +
+      '<td><strong>' + escapeHtml(st.name) + '</strong></td>' +
+      '<td><span class="badge" style="background: var(--slate-200); font-weight: 700;">' + escapeHtml(st.className) + '</span></td>' +
+      '<td>' + (st.answeredCount || 0) + ' / ' + (st.totalQ || 0) + '</td>' +
+      '<td><strong style="color: var(--primary-600); font-size: 1.1rem;">' + (st.score !== undefined ? st.score : '-') + '</strong></td>' +
+      '<td>' + escapeHtml(st.time || '-') + '</td>';
     tbody.appendChild(tr);
   });
 }
 
 // Export to Excel / CSV format
 function exportResultsToExcel() {
-  const finishedList = state.liveStudents.filter(s => s.status === 'submitted');
+  const finishedList = getVisibleSubmittedResults();
   if (finishedList.length === 0) {
-    showToast('Belum ada nilai ujian yang dapat di-export!', 'warning');
+    showToast('Belum ada nilai ujian untuk rombel Anda yang dapat di-export!', 'warning');
     return;
   }
 
