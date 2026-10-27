@@ -3,6 +3,49 @@
  * Standard: Anti-AI Human Crafted Code, Zero-Deadlock, Auto-Save Realtime
  */
 
+// Generator PIN Password Siswa 6-Digit Acak & Unik (SD NEGERI 14 TOBOALI)
+function generateUniqueStudentPassword(existingStudents = null) {
+  const students = existingStudents || (state && state.students) || [];
+  const usedPasswords = new Set(
+    students
+      .map(s => (s.password || '').trim())
+      .filter(p => p && p !== '123456')
+  );
+
+  let candidate = '';
+  let attempts = 0;
+  do {
+    // 6-digit random PIN (100000 - 999999)
+    candidate = String(Math.floor(100000 + Math.random() * 900000));
+    attempts++;
+  } while (usedPasswords.has(candidate) && attempts < 100);
+
+  return candidate;
+}
+
+// Migrasi Otomatis Siswa Lama agar Mendapat Password Unik Berbeda
+function migrateStudentPasswordsToUnique() {
+  if (!state || !Array.isArray(state.students) || state.students.length === 0) return;
+  const used = new Set();
+  let changed = false;
+
+  state.students.forEach((s) => {
+    const curPass = (s.password || '').trim();
+    if (!curPass || curPass === '123456' || used.has(curPass)) {
+      const newPass = generateUniqueStudentPassword(state.students);
+      s.password = newPass;
+      used.add(newPass);
+      changed = true;
+    } else {
+      used.add(curPass);
+    }
+  });
+
+  if (changed) {
+    localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
+  }
+}
+
 // Generator Password Ujian Siswa per Mata Pelajaran (SD NEGERI 14 TOBOALI)
 function generateStudentSubjectPasswords(nisn) {
   const map = {};
@@ -222,31 +265,31 @@ const state = {
   students: (() => {
     const defaultSdStudents = [
       { 
-        id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active', password: '123456',
+        id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active', password: '482915',
         passwords: { 'Bahasa Indonesia': 'BIN-4821', 'Matematika': 'MTK-9314', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-5720', 'Pendidikan Pancasila (PPKn)': 'PKN-1648', 'Pendidikan Agama Islam (PAI)': 'PAI-8293', 'PJOK / Penjaskes': 'PJK-3047', 'Seni dan Budaya (SBdP)': 'SBD-5921', 'Muatan Lokal (Bahasa Daerah)': 'MLK-8142', 'Bahasa Inggris': 'BIG-3765' }
       },
       { 
-        id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active', password: '123456',
+        id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active', password: '731804',
         passwords: { 'Bahasa Indonesia': 'BIN-5192', 'Matematika': 'MTK-2840', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-6173', 'Pendidikan Pancasila (PPKn)': 'PKN-4921', 'Pendidikan Agama Islam (PAI)': 'PAI-3850', 'PJOK / Penjaskes': 'PJK-7419', 'Seni dan Budaya (SBdP)': 'SBD-6292', 'Muatan Lokal (Bahasa Daerah)': 'MLK-8513', 'Bahasa Inggris': 'BIG-4136' }
       },
       { 
-        id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active', password: '123456',
+        id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active', password: '920536',
         passwords: { 'Bahasa Indonesia': 'BIN-6340', 'Matematika': 'MTK-1972', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-4829', 'Pendidikan Pancasila (PPKn)': 'PKN-3715', 'Pendidikan Agama Islam (PAI)': 'PAI-6204', 'PJOK / Penjaskes': 'PJK-8531', 'Seni dan Budaya (SBdP)': 'SBD-7440', 'Muatan Lokal (Bahasa Daerah)': 'MLK-9661', 'Bahasa Inggris': 'BIG-5284' }
       },
       { 
-        id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active', password: '123456',
+        id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active', password: '614982',
         passwords: { 'Bahasa Indonesia': 'BIN-7815', 'Matematika': 'MTK-3406', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-7931', 'Pendidikan Pancasila (PPKn)': 'PKN-2580', 'Pendidikan Agama Islam (PAI)': 'PAI-9147', 'PJOK / Penjaskes': 'PJK-4628', 'Seni dan Budaya (SBdP)': 'SBD-8915', 'Muatan Lokal (Bahasa Daerah)': 'MLK-2136', 'Bahasa Inggris': 'BIG-6759' }
       },
       { 
-        id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active', password: '123456',
+        id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active', password: '358271',
         passwords: { 'Bahasa Indonesia': 'BIN-2904', 'Matematika': 'MTK-8153', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-3694', 'Pendidikan Pancasila (PPKn)': 'PKN-6402', 'Pendidikan Agama Islam (PAI)': 'PAI-1758', 'PJOK / Penjaskes': 'PJK-5283', 'Seni dan Budaya (SBdP)': 'SBD-4004', 'Muatan Lokal (Bahasa Daerah)': 'MLK-6225', 'Bahasa Inggris': 'BIG-1848' }
       },
       { 
-        id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active', password: '123456',
+        id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active', password: '849163',
         passwords: { 'Bahasa Indonesia': 'BIN-3481', 'Matematika': 'MTK-7629', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-8205', 'Pendidikan Pancasila (PPKn)': 'PKN-5137', 'Pendidikan Agama Islam (PAI)': 'PAI-4920', 'PJOK / Penjaskes': 'PJK-6371', 'Seni dan Budaya (SBdP)': 'SBD-4581', 'Muatan Lokal (Bahasa Daerah)': 'MLK-6802', 'Bahasa Inggris': 'BIG-2425' }
       },
       { 
-        id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active', password: '123456',
+        id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active', password: '527409',
         passwords: { 'Bahasa Indonesia': 'BIN-4592', 'Matematika': 'MTK-6318', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-9451', 'Pendidikan Pancasila (PPKn)': 'PKN-7824', 'Pendidikan Agama Islam (PAI)': 'PAI-5039', 'PJOK / Penjaskes': 'PJK-2184', 'Seni dan Budaya (SBdP)': 'SBD-5692', 'Muatan Lokal (Bahasa Daerah)': 'MLK-7913', 'Bahasa Inggris': 'BIG-3536' }
       }
     ];
@@ -258,8 +301,8 @@ const state = {
           let changed = false;
           parsed.forEach((st, idx) => {
             const fresh = generateStudentSubjectPasswords(st.nisn || ('2026-0' + (idx + 1)));
-            if (!st.password) {
-              st.password = '123456';
+            if (!st.password || st.password === '123456') {
+              st.password = defaultSdStudents[idx] ? defaultSdStudents[idx].password : String(Math.floor(100000 + Math.random() * 900000));
               changed = true;
             }
             if (!st.passwords) {
@@ -447,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSavedState();
   initAntiCheatProtection();
   applySchoolBrandingUI();
+  migrateStudentPasswordsToUnique();
   renderAdminQuestionBank();
   renderLiveMonitoringTable();
   renderTeacherExamSchedules();
@@ -938,6 +982,80 @@ function generateCleanExamToken() {
   return res;
 }
 
+// ==============================================================================
+// TIME-SYNCHRONIZED EPOCH TOKEN ENGINE (180 DETIK - IDENTIK DI PC & HP)
+// ==============================================================================
+
+function getEpochRemainingSeconds() {
+  const remainderSec = Math.floor((Date.now() % 180000) / 1000);
+  return 180 - remainderSec;
+}
+
+function formatCountdownMMSS(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+// Menghasilkan Token 6-Karakter yang 100% Identik di Semua Perangkat berdasarkan Waktu Dunia
+function getSynchronizedEpochToken(subjectCode = 'CBT', cycleOffset = 0) {
+  const cycle = Math.floor(Date.now() / 180000) + cycleOffset;
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Bebas ambiguitas
+  const seedStr = 'SDN14_' + (subjectCode || 'CBT').toUpperCase() + '_' + cycle;
+  
+  let hash = 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    hash = (hash * 31 + seedStr.charCodeAt(i)) >>> 0;
+  }
+
+  let token = '';
+  for (let j = 0; j < 6; j++) {
+    hash = (hash * 1664525 + 1013904223) >>> 0;
+    token += chars[hash % chars.length];
+  }
+  return token;
+}
+
+let proctorTimerInterval = null;
+
+function startProctorTokenTimer() {
+  if (proctorTimerInterval) clearInterval(proctorTimerInterval);
+
+  renderSingleProctorTokenRibbon();
+
+  proctorTimerInterval = setInterval(() => {
+    updateSynchronizedTokenClock();
+  }, 1000);
+}
+
+function updateSynchronizedTokenClock() {
+  const countdownEl = document.getElementById('ribbon-token-countdown');
+  const progressFill = document.getElementById('ribbon-token-progress');
+  const tokenValEl = document.getElementById('single-proctor-token-value');
+  const metricToken = document.getElementById('metric-active-token');
+
+  const remaining = getEpochRemainingSeconds();
+  const timeFormatted = formatCountdownMMSS(remaining);
+
+  if (countdownEl) countdownEl.textContent = timeFormatted;
+  if (progressFill) progressFill.style.width = ((remaining / 180) * 100).toFixed(1) + '%';
+
+  const subjects = state.subjects || [];
+  const currentSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0] || { code: 'BIN' };
+  const currentEpochToken = getSynchronizedEpochToken(currentSub.code || 'CBT', 0);
+
+  // Jika token di layar berbeda atau berganti siklus (remaining === 180)
+  if (tokenValEl && tokenValEl.textContent !== currentEpochToken) {
+    tokenValEl.textContent = currentEpochToken;
+    state.proctorToken.token = currentEpochToken;
+    state.proctorToken.previousToken = getSynchronizedEpochToken(currentSub.code || 'CBT', -1);
+    localStorage.setItem('zettcbt_active_proctor_token', currentEpochToken);
+    localStorage.setItem('zettcbt_previous_proctor_token', state.proctorToken.previousToken);
+
+    if (metricToken) metricToken.textContent = currentEpochToken;
+  }
+}
+
 function renderSingleProctorTokenRibbon() {
   const valEl = document.getElementById('single-proctor-token-value');
   const selectEl = document.getElementById('ribbon-subject-select');
@@ -945,7 +1063,6 @@ function renderSingleProctorTokenRibbon() {
 
   if (subjects.length === 0) return;
 
-  // Pastikan selectedTokenSubjectId valid
   if (!state.selectedTokenSubjectId || !subjects.some(s => s.id === state.selectedTokenSubjectId)) {
     const savedSubId = localStorage.getItem('zettcbt_selected_token_sub');
     if (savedSubId && subjects.some(s => s.id === savedSubId)) {
@@ -955,7 +1072,6 @@ function renderSingleProctorTokenRibbon() {
     }
   }
 
-  // Populate dropdown select jika ada
   if (selectEl) {
     let opts = '';
     subjects.forEach(s => {
@@ -966,21 +1082,24 @@ function renderSingleProctorTokenRibbon() {
   }
 
   const currentSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0];
-  const activeToken = (currentSub && currentSub.token) ? currentSub.token : 'BIN26A';
+  const activeToken = getSynchronizedEpochToken(currentSub.code || 'CBT', 0);
+  const prevToken = getSynchronizedEpochToken(currentSub.code || 'CBT', -1);
 
   if (valEl) {
     valEl.textContent = activeToken;
   }
 
-  // Update token proctor global state agar sinkron
   state.proctorToken.token = activeToken;
+  state.proctorToken.previousToken = prevToken;
   localStorage.setItem('zettcbt_active_proctor_token', activeToken);
+  localStorage.setItem('zettcbt_previous_proctor_token', prevToken);
 
-  // Update metrik token aktif di dasbor guru jika elemen ada
   const metricToken = document.getElementById('metric-active-token');
   if (metricToken) {
     metricToken.textContent = activeToken;
   }
+
+  updateSynchronizedTokenClock();
 }
 
 function handleActiveSubjectTokenChange(subId) {
@@ -989,20 +1108,21 @@ function handleActiveSubjectTokenChange(subId) {
   renderSingleProctorTokenRibbon();
   const sub = (state.subjects || []).find(s => s.id === subId);
   if (sub) {
-    showToast(`Token Aktif beralih ke: ${sub.name} [${sub.token}]`, 'info');
+    const token = getSynchronizedEpochToken(sub.code || 'CBT', 0);
+    showToast(`Token Aktif ${sub.name}: [${token}] (Sinkron Realtime PC & HP)`, 'info');
   }
 }
 
 function copyCurrentSubjectToken() {
   const subjects = state.subjects || [];
   const currentSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0];
-  const token = (currentSub && currentSub.token) ? currentSub.token : (state.proctorToken.token || '');
+  const token = getSynchronizedEpochToken(currentSub ? currentSub.code : 'CBT', 0);
   const subName = currentSub ? currentSub.name : 'Mata Pelajaran';
 
   if (!token) return;
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(token).then(() => {
-      showToast(`📋 Token ${subName} "${token}" berhasil disalin! Bagikan ke papan tulis atau siswa.`, 'success');
+      showToast(`📋 Token ${subName} "${token}" berhasil disalin! (Sinkron di PC & HP)`, 'success');
     });
   } else {
     prompt(`Salin Token Ujian ${subName} berikut:`, token);
@@ -1014,10 +1134,10 @@ function copySingleProctorToken() {
 }
 
 function refreshCurrentSubjectToken() {
-  const subId = state.selectedTokenSubjectId;
-  if (!subId) return;
-  randomizeSingleSubjectToken(subId);
   renderSingleProctorTokenRibbon();
+  const sub = (state.subjects || []).find(s => s.id === state.selectedTokenSubjectId) || (state.subjects || [])[0];
+  const token = getSynchronizedEpochToken(sub ? sub.code : 'CBT', 0);
+  showToast(`Token ${sub ? sub.name : ''} disinkronkan: [${token}] (Timer 3 Menit)`, 'info');
 }
 
 // Kompatibilitas mundur
@@ -1035,20 +1155,16 @@ function updateActiveSubjectTokenUI() {
   renderSingleProctorTokenRibbon();
 }
 
-function startProctorTokenTimer() {
+function rotateProctorToken(showToastMsg = true) {
   renderSingleProctorTokenRibbon();
 }
 
-function rotateProctorToken(showToastMsg = true) {
-  refreshCurrentSubjectToken();
-}
-
 function forceRefreshToken(showToastMsg = true) {
-  refreshCurrentSubjectToken();
+  renderSingleProctorTokenRibbon();
 }
 
 function generateNewProctorToken(showToastMsg = true) {
-  refreshCurrentSubjectToken();
+  renderSingleProctorTokenRibbon();
 }
 
 // ==============================================================================
@@ -1801,15 +1917,20 @@ async function handleStudentLogin(event) {
   }
 
   // 1a. Validasi Kata Sandi Siswa
-  const expectedPassword = (student.password || '123456').trim();
+  const expectedPassword = (student.password || '').trim();
   const rawNisnDigits = (student.nisn || '').replace(/\D/g, '');
-  let isPasswordValid = (password === expectedPassword) || (password === '123456') || (rawNisnDigits && password === rawNisnDigits);
+  let isPasswordValid = false;
+  if (expectedPassword) {
+    isPasswordValid = (password === expectedPassword);
+  } else {
+    isPasswordValid = (password === '123456') || (rawNisnDigits && password === rawNisnDigits);
+  }
   if (!isPasswordValid && student.passwords && typeof student.passwords === 'object') {
     isPasswordValid = Object.values(student.passwords).some(p => p.trim() === password || p.trim().toLowerCase() === password.toLowerCase());
   }
 
   if (!isPasswordValid) {
-    showToast('Kata sandi siswa salah! Periksa password di Kartu Peserta Ujian Anda (bawaan: 123456).', 'danger');
+    showToast('Kata sandi siswa salah! Periksa password unik Anda di Kartu Peserta Ujian.', 'danger');
     return;
   }
 
@@ -1819,15 +1940,28 @@ async function handleStudentLogin(event) {
     return;
   }
 
-  // 2. Validasi Token Ujian: Menerima Master Proctor Token (3 Menit), Token Per-Mapel, maupun Token Sesi Sekolah
+  // 2. Validasi Token Ujian: Menerima Token Synchronized Epoch (Siklus 0 & -1), Token Proctor Aktif, Token Mapel, dll.
   const activeTok = (state.proctorToken.token || localStorage.getItem('zettcbt_active_proctor_token') || '').trim().toUpperCase();
   const prevTok = (state.proctorToken.previousToken || localStorage.getItem('zettcbt_previous_proctor_token') || '').trim().toUpperCase();
   const sessionTok = ((state.session && state.session.token) || 'PAS2026').trim().toUpperCase();
 
-  // Cek apakah cocok dengan token proktor aktif saat ini, token siklus sebelumnya, atau token umum sekolah
   let isTokenValid = (token === activeTok) || (prevTok && token === prevTok) || 
                      (token === sessionTok) || (token === 'PAS26A') || (token === 'PAS2026') || 
                      (token === 'SDN14') || (token === 'UJIAN2026');
+
+  // Cek kecocokan dengan seluruh mata pelajaran pada siklus epoch saat ini maupun sebelumnya (grace period)
+  if (!isTokenValid) {
+    for (const subItem of (state.subjects || [])) {
+      const sCode = subItem.code || 'CBT';
+      const curEpoch = getSynchronizedEpochToken(sCode, 0);
+      const prevEpoch = getSynchronizedEpochToken(sCode, -1);
+      const subTok = (subItem.token || '').trim().toUpperCase();
+      if (token === curEpoch || token === prevEpoch || token === subTok) {
+        isTokenValid = true;
+        break;
+      }
+    }
+  }
 
   // Cek apakah cocok dengan token spesifik per mata pelajaran atau jadwal
   const matchedSubByToken = (state.subjects || []).find(s => (s.token || '').trim().toUpperCase() === token);
@@ -4151,7 +4285,7 @@ function openAddStudentModal() {
   document.getElementById('form-student-editor').reset();
 
   const passInput = document.getElementById('edit-student-password');
-  if (passInput) passInput.value = '123456';
+  if (passInput) passInput.value = generateUniqueStudentPassword(state.students);
 
   const classInput = document.getElementById('edit-student-class');
   if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
@@ -4184,7 +4318,7 @@ function openEditStudentModal(nisn) {
   document.getElementById('edit-student-name').value = s.name;
 
   const passInput = document.getElementById('edit-student-password');
-  if (passInput) passInput.value = s.password || '123456';
+  if (passInput) passInput.value = s.password || generateUniqueStudentPassword(state.students);
   
   const classInput = document.getElementById('edit-student-class');
   if (classInput) {
@@ -4205,6 +4339,39 @@ function closeStudentModal() {
   if (modal) modal.style.display = 'none';
 }
 
+function randomizeCurrentStudentModalPassword() {
+  const input = document.getElementById('edit-student-password');
+  if (input) {
+    const newPass = generateUniqueStudentPassword(state.students);
+    input.value = newPass;
+    showToast('Kata sandi acak baru: ' + newPass, 'info');
+  }
+}
+
+function randomizeAllStudentPasswords() {
+  const teacher = state.currentTeacher;
+  const roleName = (teacher && teacher.role === 'guru_kelas') ? `Kelas ${teacher.assignedClass}` : 'seluruh kelas binaan';
+
+  if (!confirm(`Apakah Anda yakin ingin mengacak ulang password seluruh siswa di ${roleName}? Seluruh siswa akan mendapatkan PIN unik baru yang berbeda.`)) {
+    return;
+  }
+
+  const visible = getVisibleStudents();
+  if (visible.length === 0) {
+    showToast('Tidak ada data siswa untuk diacak passwordnya.', 'warning');
+    return;
+  }
+
+  visible.forEach(s => {
+    s.password = generateUniqueStudentPassword(state.students);
+  });
+
+  localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
+  renderStudentsTable();
+  if (typeof renderExamCardsTab === 'function') renderExamCardsTab();
+  showToast(`Berhasil mengacak password unik untuk ${visible.length} siswa!`, 'success');
+}
+
 async function handleSaveStudent(event) {
   event.preventDefault();
   const originalNisn = document.getElementById('edit-student-original-nisn').value.trim();
@@ -4213,8 +4380,9 @@ async function handleSaveStudent(event) {
   let className = document.getElementById('edit-student-class').value.trim().toUpperCase();
   const gender = document.getElementById('edit-student-gender').value;
 
+  const existingStudent = originalNisn ? state.students.find(s => s.nisn === originalNisn) : null;
   const passInput = document.getElementById('edit-student-password');
-  const studentPassword = passInput && passInput.value.trim() ? passInput.value.trim() : (existingStudent?.password || '123456');
+  const studentPassword = passInput && passInput.value.trim() ? passInput.value.trim() : (existingStudent?.password || generateUniqueStudentPassword(state.students));
 
   // Enforce Guru Kelas hanya bisa mendaftarkan siswa ke kelasnya sendiri
   if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas' && state.currentTeacher.assignedClass) {
@@ -4232,7 +4400,6 @@ async function handleSaveStudent(event) {
     return;
   }
 
-  const existingStudent = originalNisn ? state.students.find(s => s.nisn === originalNisn) : null;
   const studentObj = {
     id: originalNisn ? (existingStudent?.id || 'st-' + Date.now()) : 'st-' + Date.now(),
     nisn: nisn,
