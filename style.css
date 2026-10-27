@@ -5535,6 +5535,53 @@ body:has(#screen-student-exam.active) #global-header,
   color: #0F172A;
 }
 
+.ribbon-subject-picker-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ribbon-subject-select {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ribbon-subject-select:hover, .ribbon-subject-select:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.btn-token-ribbon-project {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: #2563eb;
+  color: #ffffff;
+  border: 1px solid #1d4ed8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.btn-token-ribbon-project:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
   .single-token-bar {
     padding: 0.65rem 0.85rem !important;
@@ -5543,15 +5590,20 @@ body:has(#screen-student-exam.active) #global-header,
   .single-token-left {
     width: 100%;
     justify-content: space-between;
+    gap: 0.5rem !important;
   }
-  .single-token-center {
-    width: 100%;
-    min-width: 0;
+  .ribbon-subject-select {
+    max-width: 160px;
+    font-size: 0.78rem;
+    padding: 0.35rem 0.6rem;
   }
   .single-token-right {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.5rem !important;
   }
 }
+
 
 
