@@ -909,40 +909,87 @@ function generateCleanExamToken() {
 
 function renderSingleProctorTokenRibbon() {
   const valEl = document.getElementById('single-proctor-token-value');
-  const timerEl = document.getElementById('single-proctor-token-timer');
-  const progressFill = document.getElementById('single-token-progress-fill');
+  const selectEl = document.getElementById('ribbon-subject-select');
+  const subjects = state.subjects || [];
 
-  // Pastikan token terisi
-  if (!state.proctorToken.token || state.proctorToken.token === '------') {
-    state.proctorToken.token = localStorage.getItem('zettcbt_active_proctor_token') || generateCleanExamToken();
-    localStorage.setItem('zettcbt_active_proctor_token', state.proctorToken.token);
+  if (subjects.length === 0) return;
+
+  // Pastikan selectedTokenSubjectId valid
+  if (!state.selectedTokenSubjectId || !subjects.some(s => s.id === state.selectedTokenSubjectId)) {
+    const savedSubId = localStorage.getItem('zettcbt_selected_token_sub');
+    if (savedSubId && subjects.some(s => s.id === savedSubId)) {
+      state.selectedTokenSubjectId = savedSubId;
+    } else {
+      state.selectedTokenSubjectId = subjects[0].id;
+    }
   }
+
+  // Populate dropdown select jika ada
+  if (selectEl) {
+    let opts = '';
+    subjects.forEach(s => {
+      opts += `<option value="${escapeHtml(s.id)}" ${s.id === state.selectedTokenSubjectId ? 'selected' : ''}>${escapeHtml(s.name)} (${escapeHtml(s.code || 'CBT')})</option>`;
+    });
+    selectEl.innerHTML = opts;
+    selectEl.value = state.selectedTokenSubjectId;
+  }
+
+  const currentSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0];
+  const activeToken = (currentSub && currentSub.token) ? currentSub.token : 'BIN26A';
 
   if (valEl) {
-    valEl.textContent = state.proctorToken.token;
+    valEl.textContent = activeToken;
   }
 
-  const mins = Math.floor(state.proctorToken.remainingSeconds / 60);
-  const secs = state.proctorToken.remainingSeconds % 60;
-  const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-
-  if (timerEl) {
-    timerEl.textContent = timeStr;
-  }
-
-  if (progressFill) {
-    const pct = Math.max(0, Math.min(100, (state.proctorToken.remainingSeconds / 180) * 100));
-    progressFill.style.width = pct + '%';
-  }
+  // Update token proctor global state agar sinkron
+  state.proctorToken.token = activeToken;
+  localStorage.setItem('zettcbt_active_proctor_token', activeToken);
 
   // Update metrik token aktif di dasbor guru jika elemen ada
   const metricToken = document.getElementById('metric-active-token');
   if (metricToken) {
-    metricToken.textContent = state.proctorToken.token;
+    metricToken.textContent = activeToken;
   }
 }
 
-// Kompatibilitas mundur jika fungsi lama dipanggil
+function handleActiveSubjectTokenChange(subId) {
+  state.selectedTokenSubjectId = subId;
+  localStorage.setItem('zettcbt_selected_token_sub', subId);
+  renderSingleProctorTokenRibbon();
+  const sub = (state.subjects || []).find(s => s.id === subId);
+  if (sub) {
+    showToast(`Token Aktif beralih ke: ${sub.name} [${sub.token}]`, 'info');
+  }
+}
+
+function copyCurrentSubjectToken() {
+  const subjects = state.subjects || [];
+  const currentSub = subjects.find(s => s.id === state.selectedTokenSubjectId) || subjects[0];
+  const token = (currentSub && currentSub.token) ? currentSub.token : (state.proctorToken.token || '');
+  const subName = currentSub ? currentSub.name : 'Mata Pelajaran';
+
+  if (!token) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(token).then(() => {
+      showToast(`📋 Token ${subName} "${token}" berhasil disalin! Bagikan ke papan tulis atau siswa.`, 'success');
+    });
+  } else {
+    prompt(`Salin Token Ujian ${subName} berikut:`, token);
+  }
+}
+
+function copySingleProctorToken() {
+  copyCurrentSubjectToken();
+}
+
+function refreshCurrentSubjectToken() {
+  const subId = state.selectedTokenSubjectId;
+  if (!subId) return;
+  randomizeSingleSubjectToken(subId);
+  renderSingleProctorTokenRibbon();
+}
+
+// Kompatibilitas mundur
 function renderHorizontalTokenRibbon() {
   renderSingleProctorTokenRibbon();
 }
@@ -950,72 +997,27 @@ function renderProctorTokenBar() {
   renderSingleProctorTokenRibbon();
 }
 function scrollTokenPills(dir) {}
-function selectTokenSubject(subId) {}
+function selectTokenSubject(subId) {
+  handleActiveSubjectTokenChange(subId);
+}
 function updateActiveSubjectTokenUI() {
   renderSingleProctorTokenRibbon();
 }
 
-function copySingleProctorToken() {
-  const token = state.proctorToken.token || '';
-  if (!token) return;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(token).then(() => {
-      showToast(`📋 Token Ujian "${token}" berhasil disalin! Bagikan ke papan tulis atau siswa.`, 'info');
-    });
-  } else {
-    prompt('Salin Token Ujian berikut:', token);
-  }
-}
-
-// Mesin Token Dinamis 3 Menit (180 Detik)
 function startProctorTokenTimer() {
-  if (state.proctorToken.interval) clearInterval(state.proctorToken.interval);
-
-  // Pastikan token terinisialisasi
-  if (!state.proctorToken.token || state.proctorToken.token === '------') {
-    state.proctorToken.token = localStorage.getItem('zettcbt_active_proctor_token') || generateCleanExamToken();
-    localStorage.setItem('zettcbt_active_proctor_token', state.proctorToken.token);
-  }
-
   renderSingleProctorTokenRibbon();
-
-  state.proctorToken.interval = setInterval(() => {
-    state.proctorToken.remainingSeconds--;
-
-    // RESET & BERGANTIAN SETIAP 3 MENIT SEKALI (180 DETIK)
-    if (state.proctorToken.remainingSeconds <= 0) {
-      rotateProctorToken(false);
-    } else {
-      renderSingleProctorTokenRibbon();
-    }
-  }, 1000);
 }
 
 function rotateProctorToken(showToastMsg = true) {
-  state.proctorToken.previousToken = state.proctorToken.token;
-  state.proctorToken.token = generateCleanExamToken();
-  state.proctorToken.remainingSeconds = 180;
-  state.proctorToken.lastRotatedAt = Date.now();
-
-  localStorage.setItem('zettcbt_active_proctor_token', state.proctorToken.token);
-  localStorage.setItem('zettcbt_previous_proctor_token', state.proctorToken.previousToken);
-
-  // CATATAN v3.7.1: Master Proctor Token terisolasi murni untuk ribbon & papan tulis pengawas.
-  // Token per mata pelajaran (BIN26A, MTK26B, dll) dan jadwal ujian tetap tersimpan aman.
-  renderSingleProctorTokenRibbon();
-  syncSingleTokenToNeonCloud();
-
-  if (showToastMsg) {
-    showToast(`🎲 Token Ujian berganti baru: ${state.proctorToken.token} (Aktif 3 Menit)`, 'info');
-  }
+  refreshCurrentSubjectToken();
 }
 
 function forceRefreshToken(showToastMsg = true) {
-  rotateProctorToken(showToastMsg);
+  refreshCurrentSubjectToken();
 }
 
 function generateNewProctorToken(showToastMsg = true) {
-  rotateProctorToken(showToastMsg);
+  refreshCurrentSubjectToken();
 }
 
 // ==============================================================================
@@ -1198,18 +1200,17 @@ function renderTeacherExamSchedules() {
   tbody.innerHTML = '';
 
   if (schedules.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: var(--slate-400);">Tidak ada jadwal ujian yang sesuai dengan kewenangan akun Anda saat ini.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--slate-400);">Tidak ada jadwal ujian yang sesuai dengan kewenangan akun Anda saat ini.</td></tr>';
     return;
   }
 
   schedules.forEach((sc, idx) => {
     const dayInfo = formatIndonesianDayDate(sc.date);
-    const isReleased = sc.isLoginOpen !== false;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="text-align: center;">${idx + 1}</td>
       <td><strong>${escapeHtml(sc.subjectName)}</strong></td>
-      <td><span class="badge" style="background: var(--slate-200); color: var(--slate-800); font-weight: 700;">${escapeHtml(sc.className)}</span></td>
+      <td style="text-align: center;"><span class="badge" style="background: var(--slate-200); color: var(--slate-800); font-weight: 700;">${escapeHtml(sc.className)}</span></td>
       <td>
         <div style="display: flex; flex-direction: column; gap: 2px;">
           <span class="badge" style="background: #eff6ff; color: #1d4ed8; font-weight: 800; font-size: 0.74rem; width: fit-content; padding: 2px 7px; border: 1px solid #bfdbfe;">${escapeHtml(dayInfo.day)}</span>
@@ -1223,15 +1224,6 @@ function renderTeacherExamSchedules() {
         <div style="font-size: 0.74rem; color: #64748b;">(${sc.durationMinutes || 90} menit)</div>
       </td>
       <td>${escapeHtml(sc.room || 'Lab Komputer')}</td>
-      <td>
-        <span class="pwd-badge" style="color: #1e40af; background: #eff6ff; font-weight: 800; font-size: 0.9rem;">${escapeHtml(sc.token || '-')}</span>
-      </td>
-      <td style="text-align: center; white-space: nowrap;">
-        <button type="button" class="btn-release-exam ${isReleased ? 'release-active' : 'release-inactive'}" onclick="toggleScheduleLoginStatus('${sc.id}')" title="Klik untuk ${isReleased ? 'menutup/mengunci' : 'merilis/membuka'} akses ujian bagi siswa">
-          <span class="release-indicator">${isReleased ? '🟢' : '🔴'}</span>
-          <span class="release-text">${isReleased ? 'DIRILIS (Buka)' : 'DITUTUP (Kunci)'}</span>
-        </button>
-      </td>
       <td style="text-align: center; white-space: nowrap;">
         <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
           <button type="button" class="btn btn-outline btn-sm" onclick="openEditScheduleModal('${sc.id}')" title="Atur Jadwal Hari, Tanggal & Jam" style="font-size: 0.78rem; padding: 0.25rem 0.55rem;">
@@ -1311,10 +1303,8 @@ function openAddScheduleModal() {
   const defaultDate = new Date().toISOString().split('T')[0];
   document.getElementById('schedule-input-date').value = defaultDate;
   handleScheduleDateChange(defaultDate);
-  document.getElementById('schedule-input-token').value = 'BIN26A';
   document.getElementById('schedule-input-start').value = '07:30';
   document.getElementById('schedule-input-end').value = '09:00';
-  document.getElementById('schedule-input-login-status').value = 'true';
 
   modal.style.display = 'flex';
 }
@@ -1335,10 +1325,8 @@ function openEditScheduleModal(scheduleId) {
   const targetDate = sc.date || new Date().toISOString().split('T')[0];
   document.getElementById('schedule-input-date').value = targetDate;
   handleScheduleDateChange(targetDate);
-  document.getElementById('schedule-input-token').value = sc.token || '';
   document.getElementById('schedule-input-start').value = sc.startTime || '07:30';
   document.getElementById('schedule-input-end').value = sc.endTime || '09:00';
-  document.getElementById('schedule-input-login-status').value = (sc.isLoginOpen !== false) ? 'true' : 'false';
 
   modal.style.display = 'flex';
 }
@@ -1349,11 +1337,7 @@ function closeScheduleModal() {
 }
 
 function handleScheduleSubjectSelect(subjectName) {
-  const subj = (state.subjects || []).find(s => s.name === subjectName);
-  const tokenInput = document.getElementById('schedule-input-token');
-  if (subj && tokenInput) {
-    tokenInput.value = subj.token || 'TOKEN1';
-  }
+  // Mapel terpilih di modal jadwal
 }
 
 function handleSaveSchedule(event) {
@@ -1364,10 +1348,8 @@ function handleSaveSchedule(event) {
   const className = document.getElementById('schedule-input-class').value;
   const room = document.getElementById('schedule-input-room').value.trim();
   const date = document.getElementById('schedule-input-date').value;
-  const token = document.getElementById('schedule-input-token').value.trim().toUpperCase();
   const startTime = document.getElementById('schedule-input-start').value;
   const endTime = document.getElementById('schedule-input-end').value;
-  const isLoginOpen = document.getElementById('schedule-input-login-status').value === 'true';
 
   const teacher = state.currentTeacher;
   const teacherName = teacher ? teacher.fullName : 'Operator Sekolah';
@@ -1379,13 +1361,11 @@ function handleSaveSchedule(event) {
       className,
       room,
       date,
-      token,
       startTime,
       endTime,
       durationMinutes: 90,
       teacherName,
-      status: 'active',
-      isLoginOpen
+      status: 'active'
     };
     state.schedules.push(newSchedule);
     showToast('Jadwal ujian berhasil ditambahkan!', 'success');
@@ -1396,21 +1376,9 @@ function handleSaveSchedule(event) {
       sc.className = className;
       sc.room = room;
       sc.date = date;
-      sc.token = token;
       sc.startTime = startTime;
       sc.endTime = endTime;
-      sc.isLoginOpen = isLoginOpen;
       showToast('Jadwal ujian berhasil diperbarui!', 'success');
-    }
-  }
-
-  // Sinkronkan juga token baru ke data master mata pelajaran (state.subjects)
-  if (token && subjectName) {
-    const matchingSub = (state.subjects || []).find(s => s.name === subjectName || s.code === subjectName);
-    if (matchingSub) {
-      matchingSub.token = token;
-      localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
-      renderSubjectTokensTable();
     }
   }
 
@@ -1781,7 +1749,7 @@ async function handleStudentLogin(event) {
   }
 
   if (!isTokenValid) {
-    showToast(`Token Ujian "${token}" salah atau telah kedaluwarsa! Silakan periksa token mata pelajaran di jadwal atau token 6-karakter aktif proktor di papan tulis.`, 'danger');
+    showToast(`Token Ujian "${token}" salah atau tidak aktif! Periksa Token Ujian Aktif untuk mata pelajaran yang sedang diujikan di depan kelas.`, 'danger');
     return;
   }
 
@@ -1796,17 +1764,16 @@ async function handleStudentLogin(event) {
       name: matchedSchedByToken.subjectName || matchedSchedByToken.subject,
       durationMinutes: matchedSchedByToken.durationMinutes || 90
     };
-  } else if (Array.isArray(state.schedules)) {
-    // Prioritas 2: Jika siswa memasukkan Master Proctor Token (misal E5Z85N), arahkan ke jadwal ujian aktif kelasnya
+  } else if (Array.isArray(state.schedules) && state.schedules.length > 0) {
+    // Prioritas 2: Arahkan ke jadwal kelas siswa
     const matchingSchedules = state.schedules.filter(sc => 
       sc.className === 'SEMUA KELAS' || sc.className === student.className || (student.className && student.className.includes(sc.className))
     );
-    // Prioritaskan jadwal yang berstatus buka/aktif hari ini, atau jadwal pertama kelasnya
-    const activeSched = matchingSchedules.find(sc => sc.isLoginOpen !== false) || matchingSchedules[0];
-    if (activeSched) {
-      subj = (state.subjects || []).find(s => s.name === activeSched.subjectName || s.name === activeSched.subject) || {
-        name: activeSched.subjectName || activeSched.subject,
-        durationMinutes: activeSched.durationMinutes || 90
+    const targetSched = matchingSchedules[0];
+    if (targetSched) {
+      subj = (state.subjects || []).find(s => s.name === targetSched.subjectName || s.name === targetSched.subject) || {
+        name: targetSched.subjectName || targetSched.subject,
+        durationMinutes: targetSched.durationMinutes || 90
       };
     }
   }
