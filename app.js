@@ -5464,7 +5464,19 @@ function applySchoolBrandingUI() {
     teacherFormLogo.alt = schoolName;
   }
 
-  // 6. Modal Profil Guru - Sekolah
+  // 6. Logo Sidebar Hijau Ruang Ujian Siswa
+  const cbtSidebarLogo = document.getElementById('cbt-sidebar-school-logo') || document.querySelector('.cbt-sidebar-logo');
+  if (cbtSidebarLogo && logo) {
+    cbtSidebarLogo.src = logo;
+    cbtSidebarLogo.alt = schoolName;
+    cbtSidebarLogo.onerror = function() {
+      if (defaultLogo && !this.src.startsWith('data:image') && this.src !== defaultLogo) {
+        this.src = defaultLogo;
+      }
+    };
+  }
+
+  // 7. Modal Profil Guru - Sekolah
   const profileSchoolInput = document.getElementById('teacher-profile-input-school');
   if (profileSchoolInput) profileSchoolInput.value = schoolName;
 }
