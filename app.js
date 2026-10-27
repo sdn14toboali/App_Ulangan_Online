@@ -1835,27 +1835,50 @@ function getVisibleQuestions() {
   return state.questions || [];
 }
 
-// Filter Siswa Aktif Terisolasi
+// Filter Siswa Aktif Terisolasi (Hanya Siswa Resmi di Master Data Siswa)
 function getVisibleLiveStudents() {
-  const live = state.liveStudents || [];
-  if (!state.currentTeacher) return live;
+  const masterStudents = state.students || [];
+  const masterMap = new Map();
+  masterStudents.forEach(m => {
+    if (m && m.nisn) {
+      masterMap.set(String(m.nisn).trim().toLowerCase(), m);
+    }
+  });
+
+  const rawLive = state.liveStudents || [];
+  // Hanya tampilkan siswa yang NISN-nya valid dan terdaftar resmi di master state.students
+  const syncedLive = [];
+  rawLive.forEach(s => {
+    if (!s || !s.nisn) return;
+    const cleanNisn = String(s.nisn).trim().toLowerCase();
+    const master = masterMap.get(cleanNisn);
+    if (master) {
+      syncedLive.push({
+        ...s,
+        name: master.name || s.name,
+        className: master.className || s.className
+      });
+    }
+  });
+
+  if (!state.currentTeacher) return syncedLive;
   const t = state.currentTeacher;
 
   if (t.role === 'admin_sekolah') {
-    return live;
+    return syncedLive;
   }
 
   if (t.role === 'guru_kelas') {
     // Hanya tampilkan siswa di kelas binaannya
-    return live.filter(s => isClassMatch(s.className, t.assignedClass));
+    return syncedLive.filter(s => isClassMatch(s.className, t.assignedClass));
   }
 
   if (t.role === 'guru_mapel') {
     const sub = (t.assignedSubject || '').toLowerCase();
-    return live.filter(s => (s.subject || '').toLowerCase().includes(sub) || sub.includes((s.subject || '').toLowerCase()));
+    return syncedLive.filter(s => (s.subject || '').toLowerCase().includes(sub) || sub.includes((s.subject || '').toLowerCase()));
   }
 
-  return live;
+  return syncedLive;
 }
 
 // Filter Hasil Ujian Siswa Terisolasi (v3.9.0)
@@ -2027,11 +2050,15 @@ async function handleStudentLogin(event) {
     return;
   }
 
-  // 3. Deteksi Otomatis Mata Pelajaran Sesuai Token atau Jadwal Kelas Siswa
+  // 3. Deteksi Mata Pelajaran Sesuai Pilihan Dropdown / Token / Jadwal Kelas
   let subj = null;
-
-  // Prioritas 1: Jika siswa memasukkan Token Spesifik Mapel (misal BIN26A, MTK26B), arahkan langsung ke mapel tersebut!
-  if (matchedSubByToken) {
+  const selectedLoginSubj = (document.getElementById('login-subject')?.value || 'AUTO').trim();
+  if (selectedLoginSubj && selectedLoginSubj !== 'AUTO') {
+    subj = (state.subjects || []).find(s => s.name === selectedLoginSubj) || {
+      name: selectedLoginSubj,
+      durationMinutes: 90
+    };
+  } else if (matchedSubByToken) {
     subj = matchedSubByToken;
   } else if (matchedSchedByToken) {
     subj = (state.subjects || []).find(s => s.name === matchedSchedByToken.subjectName || s.code === matchedSchedByToken.subject) || {
@@ -2060,7 +2087,7 @@ async function handleStudentLogin(event) {
 
   const subjectName = subj.name;
 
-  // 3. Status Ujian Langsung Dimulai
+  // 3. Siapkan Status Ujian Siswa
   state.student.nisn = student.nisn;
   state.student.name = student.name;
   state.student.className = student.className;
@@ -2107,27 +2134,63 @@ async function handleStudentLogin(event) {
     return;
   }
 
-  // Populate UI Header Ujian Siswa
+  // Populate Layar Konfirmasi Peserta (Screen 2)
+  const elConfirmNisn = document.getElementById('confirm-nisn');
+  if (elConfirmNisn) elConfirmNisn.textContent = student.nisn;
+  const elConfirmName = document.getElementById('confirm-name');
+  if (elConfirmName) elConfirmName.textContent = student.name;
+  const elConfirmClass = document.getElementById('confirm-class');
+  if (elConfirmClass) elConfirmClass.textContent = student.className;
+  const elConfirmSubj = document.getElementById('confirm-subject');
+  if (elConfirmSubj) elConfirmSubj.textContent = subjectName;
+  const elConfirmQ = document.getElementById('confirm-total-q');
+  if (elConfirmQ) elConfirmQ.textContent = `${state.activeExamQuestions.length} Butir Soal`;
+  const elConfirmDur = document.getElementById('confirm-duration');
+  if (elConfirmDur) elConfirmDur.textContent = `${state.session.durationMinutes} Menit`;
+
+  // Tampilkan Screen 2 (Menunggu Verifikasi & Klik Pengawas Ruang)
+  showScreen('student-confirm');
+
+  if (isResumed) {
+    showToast(`Selamat datang kembali, ${student.name}! Sesi ujian ${subjectName} ditemukan. Silakan minta Pengawas Ruang menekan tombol Mulai.`, 'info');
+  } else {
+    showToast(`Token terverifikasi! Pastikan data di layar sesuai, lalu minta Pengawas Ruang menekan tombol "Mulai Mengerjakan".`, 'success');
+  }
+}
+
+// SCREEN 2 -> SCREEN 3: Start Exam (Ditekan Resmi oleh Pengawas Ruang)
+function startExamSession() {
+  if (!state.student || !state.student.nisn) {
+    showToast('Data peserta belum dimuat. Silakan login kembali.', 'warning');
+    showScreen('student-login');
+    return;
+  }
+
+  state.isExamRunning = true;
+  state.student.startTime = new Date();
+  state.initialExamHeight = window.innerHeight;
+
+  // Banner Header Ujian Siswa
   const elAvatar = document.getElementById('exam-avatar');
-  if (elAvatar) elAvatar.textContent = (student.name || 'S').charAt(0).toUpperCase();
+  if (elAvatar) elAvatar.textContent = (state.student.name || 'S').charAt(0).toUpperCase();
   const elName = document.getElementById('exam-student-name');
-  if (elName) elName.textContent = student.name;
+  if (elName) elName.textContent = state.student.name;
   const elSubj = document.getElementById('exam-subject-name');
-  if (elSubj) elSubj.textContent = subjectName;
+  if (elSubj) elSubj.textContent = state.session.subject;
   const elClass = document.getElementById('exam-class-name');
-  if (elClass) elClass.textContent = student.className;
+  if (elClass) elClass.textContent = state.student.className;
 
   // Catat Langsung ke Live Monitoring (Status: in_progress)
   const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-  const existingIdx = state.liveStudents.findIndex(s => s.nisn === student.nisn);
+  const existingIdx = state.liveStudents.findIndex(s => s.nisn === state.student.nisn);
   const liveEntry = {
-    nisn: student.nisn,
-    name: student.name,
-    className: student.className,
-    subject: subjectName,
+    nisn: state.student.nisn,
+    name: state.student.name,
+    className: state.student.className,
+    subject: state.session.subject,
     answeredCount: Object.keys(state.student.answers || {}).length,
-    totalQ: state.activeExamQuestions.length,
-    warningCount: 0,
+    totalQ: (state.activeExamQuestions || state.questions).length,
+    warningCount: state.warningCount || 0,
     status: 'in_progress',
     score: 0,
     time: nowStr
@@ -2141,61 +2204,8 @@ async function handleStudentLogin(event) {
   updateAdminMetrics();
   renderLiveMonitoringTable();
 
-  // Aktifkan Sesi Ujian & Timer Langsung
-  state.isExamRunning = true;
-  if (!isResumed) state.currentQuestionIndex = 0;
-  state.initialExamHeight = window.innerHeight;
-  enterMobileFullscreen();
-  startTimerCountdown();
-  renderQuestionGrid();
-  renderCurrentQuestion();
-  showScreen('student-exam');
-
-  if (isResumed) {
-    showToast(`Selamat datang kembali, ${student.name}! Sesi ujian ${subjectName} dilanjutkan. Jawaban Anda tersimpan aman.`, 'success');
-  } else {
-    showToast(`Token terverifikasi! Ujian ${subjectName} resmi dimulai dalam mode layar penuh. Selamat mengerjakan!`, 'success');
-  }
-}
-
-// SCREEN 2 -> SCREEN 3: Start Exam
-function startExamSession() {
-  state.isExamRunning = true;
-  state.student.startTime = new Date();
-  state.timeRemainingSeconds = state.session.durationMinutes * 60;
-  state.currentQuestionIndex = 0;
-  state.initialExamHeight = window.innerHeight;
-
-  // Populate Banner
-  document.getElementById('exam-avatar').textContent = (state.student.name || 'S').charAt(0).toUpperCase();
-  document.getElementById('exam-student-name').textContent = state.student.name;
-  document.getElementById('exam-subject-name').textContent = state.session.subject;
-  document.getElementById('exam-class-name').textContent = state.student.className;
-
   // Enter Fullscreen on Mobile/Desktop
   enterMobileFullscreen();
-
-  // Register in live students list
-  const existingIndex = state.liveStudents.findIndex(s => s.nisn === state.student.nisn);
-  const studentEntry = {
-    nisn: state.student.nisn,
-    name: state.student.name,
-    className: state.student.className,
-    answeredCount: 0,
-    totalQ: state.questions.length,
-    warningCount: 0,
-    status: 'in_progress',
-    score: 0,
-    time: '-'
-  };
-
-  if (existingIndex >= 0) {
-    state.liveStudents[existingIndex] = studentEntry;
-  } else {
-    state.liveStudents.unshift(studentEntry);
-  }
-  updateAdminMetrics();
-  renderLiveMonitoringTable();
 
   // Start Countdown Timer
   startTimerCountdown();
@@ -2205,7 +2215,7 @@ function startExamSession() {
   renderCurrentQuestion();
 
   showScreen('student-exam');
-  showToast('Ujian dimulai! Mode layar penuh aktif.', 'info');
+  showToast(`Ujian ${state.session.subject} resmi dimulai oleh Pengawas Ruang dalam mode layar penuh!`, 'success');
 }
 
 // Timer Engine with Pulsating Warning
@@ -4396,9 +4406,13 @@ function openAddStudentModal() {
     if (classInput) {
       classInput.value = state.currentTeacher.assignedClass || '';
       classInput.readOnly = true;
+      classInput.disabled = true;
     }
   } else {
-    if (classInput) classInput.readOnly = false;
+    if (classInput) {
+      classInput.readOnly = false;
+      classInput.disabled = false;
+    }
   }
 
   document.getElementById('modal-student-editor').style.display = 'flex';
@@ -4429,8 +4443,10 @@ function openEditStudentModal(nisn) {
     classInput.value = s.className;
     if (state.currentTeacher && state.currentTeacher.role === 'guru_kelas') {
       classInput.readOnly = true;
+      classInput.disabled = true;
     } else {
       classInput.readOnly = false;
+      classInput.disabled = false;
     }
   }
 
@@ -5041,6 +5057,185 @@ function printExamCardsPdf() {
   cardsHtml += '</div>';
 
   container.innerHTML = cardsHtml;
+  window.print();
+}
+
+// 4. Cetak Daftar Hadir Ujian Resmi per Mata Pelajaran & Kelas (v3.17.0)
+function openPrintAttendanceModal() {
+  const modal = document.getElementById('modal-print-attendance');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closePrintAttendanceModal() {
+  const modal = document.getElementById('modal-print-attendance');
+  if (modal) modal.style.display = 'none';
+}
+
+function executePrintAttendance() {
+  const targetClass = document.getElementById('print-attendance-class')?.value || 'ALL';
+  const targetSubject = document.getElementById('print-attendance-subject')?.value || 'Matematika';
+  closePrintAttendanceModal();
+  printAttendanceSheetPdf(targetClass, targetSubject);
+}
+
+function printAttendanceSheetPdf(targetClass = 'ALL', targetSubject = 'Matematika') {
+  const container = document.getElementById('print-container');
+  if (!container) return;
+
+  const sch = state.school || {};
+  let students = state.students || [];
+
+  if (targetClass !== 'ALL') {
+    students = students.filter(s => s.className === targetClass);
+  }
+
+  // Urutkan berdasarkan Kelas lalu Nama Siswa
+  students = [...students].sort((a, b) => {
+    if (a.className !== b.className) return (a.className || '').localeCompare(b.className || '');
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  if (students.length === 0) {
+    showToast(`Tidak ada siswa terdaftar untuk ${targetClass === 'ALL' ? 'semua kelas' : 'Kelas ' + targetClass}!`, 'warning');
+    return;
+  }
+
+  // Cari Jadwal Ujian yang cocok jika ada
+  const sched = (state.schedules || []).find(sc => 
+    (sc.subjectName === targetSubject || sc.subject === targetSubject) &&
+    (sc.className === 'SEMUA KELAS' || targetClass === 'ALL' || sc.className === targetClass)
+  );
+
+  let dayDateStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  let timeStr = '07.30 - 09.00 WIB';
+  let roomStr = targetClass === 'ALL' ? 'Ruang Ujian Sekolah' : `Ruang Kelas ${targetClass}`;
+
+  if (sched) {
+    if (sched.date) {
+      const d = new Date(sched.date);
+      if (!isNaN(d.getTime())) {
+        dayDateStr = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      }
+    }
+    if (sched.startTime && sched.endTime) {
+      timeStr = `${sched.startTime} - ${sched.endTime} WIB`;
+    }
+    if (sched.room) {
+      roomStr = sched.room;
+    }
+  }
+
+  // Bangun Baris Siswa dengan Kolom Tanda Tangan Zig-Zag
+  let rowsHtml = '';
+  students.forEach((st, idx) => {
+    const num = idx + 1;
+    const isOdd = num % 2 !== 0;
+    
+    // Zigzag Tanda Tangan: nomor ganjil di kolom kiri, nomor genap di kolom kanan
+    const signCol1 = isOdd 
+      ? `<div style="font-size: 8pt; color: #333; text-align: left; padding-left: 4px;">${num}. ....................</div>` 
+      : '&nbsp;';
+    const signCol2 = !isOdd 
+      ? `<div style="font-size: 8pt; color: #333; text-align: left; padding-left: 4px;">${num}. ....................</div>` 
+      : '&nbsp;';
+
+    rowsHtml += `
+      <tr style="height: 32px;">
+        <td style="border: 1px solid #000; text-align: center; font-size: 9pt;">${num}</td>
+        <td style="border: 1px solid #000; text-align: center; font-size: 9pt; font-family: monospace; font-weight: bold;">${escapeHtml(st.nisn)}</td>
+        <td style="border: 1px solid #000; padding: 4px 8px; font-size: 9.5pt; font-weight: 600;">${escapeHtml(st.name)}</td>
+        <td style="border: 1px solid #000; text-align: center; font-size: 9pt;">${escapeHtml(st.gender || 'L')}</td>
+        <td style="border: 1px solid #000; text-align: center; font-size: 9pt; font-weight: bold;">${escapeHtml(st.className)}</td>
+        <td style="border: 1px solid #000; width: 95px; padding: 3px; vertical-align: middle;">${signCol1}</td>
+        <td style="border: 1px solid #000; width: 95px; padding: 3px; vertical-align: middle;">${signCol2}</td>
+        <td style="border: 1px solid #000; text-align: center; font-size: 8.5pt;">&nbsp;</td>
+      </tr>
+    `;
+  });
+
+  const teacherSignerName = sch.teacherSigner || (state.currentTeacher ? state.currentTeacher.fullName : 'Pengawas Ruang Ujian');
+  const teacherSignerNip = sch.teacherSignerNip ? `NIP. ${sch.teacherSignerNip}` : 'NIP. ........................................';
+
+  const fullHtml = `
+    <div style="font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.25; padding: 10px 0;">
+      ${generateKopSuratHtml()}
+      
+      <div style="text-align: center; margin-bottom: 12px;">
+        <div style="font-size: 12pt; font-weight: bold; text-transform: uppercase; text-decoration: underline; letter-spacing: 0.04em;">
+          DAFTAR HADIR PESERTA UJIAN SEKOLAH
+        </div>
+        <div style="font-size: 10pt; font-weight: bold; text-transform: uppercase; margin-top: 3px;">
+          TAHUN PELAJARAN ${escapeHtml(sch.academicYear || '2026/2027')}
+        </div>
+      </div>
+
+      <!-- Metadata Box -->
+      <table style="width: 100%; border: none; font-size: 9.5pt; margin-bottom: 12px; border-collapse: collapse;">
+        <tr>
+          <td style="width: 16%; padding: 2px 0; font-weight: bold;">Mata Pelajaran</td>
+          <td style="width: 2%; padding: 2px 0;">:</td>
+          <td style="width: 36%; padding: 2px 0; font-weight: bold; color: #1e3a8a;">${escapeHtml(targetSubject)}</td>
+          <td style="width: 16%; padding: 2px 0; font-weight: bold;">Hari / Tanggal</td>
+          <td style="width: 2%; padding: 2px 0;">:</td>
+          <td style="width: 28%; padding: 2px 0;">${escapeHtml(dayDateStr)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 2px 0; font-weight: bold;">Kelas / Rombel</td>
+          <td style="padding: 2px 0;">:</td>
+          <td style="padding: 2px 0; font-weight: bold;">${targetClass === 'ALL' ? 'Semua Kelas (4A - 6B)' : 'Kelas ' + escapeHtml(targetClass)}</td>
+          <td style="padding: 2px 0; font-weight: bold;">Waktu / Sesi</td>
+          <td style="padding: 2px 0;">:</td>
+          <td style="padding: 2px 0;">${escapeHtml(timeStr)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 2px 0; font-weight: bold;">Jumlah Peserta</td>
+          <td style="padding: 2px 0;">:</td>
+          <td style="padding: 2px 0;">${students.length} Orang Terdaftar</td>
+          <td style="padding: 2px 0; font-weight: bold;">Ruang Ujian</td>
+          <td style="padding: 2px 0;">:</td>
+          <td style="padding: 2px 0;">${escapeHtml(roomStr)}</td>
+        </tr>
+      </table>
+
+      <!-- Tabel Daftar Hadir Siswa -->
+      <table style="width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 24px;">
+        <thead>
+          <tr style="background-color: #f1f5f9; text-align: center;">
+            <th style="border: 1px solid #000; width: 32px; padding: 6px 2px;">No</th>
+            <th style="border: 1px solid #000; width: 110px; padding: 6px 4px;">No. Peserta / NISN</th>
+            <th style="border: 1px solid #000; padding: 6px 8px; text-align: left;">Nama Lengkap Siswa</th>
+            <th style="border: 1px solid #000; width: 45px; padding: 6px 2px;">L/P</th>
+            <th style="border: 1px solid #000; width: 55px; padding: 6px 2px;">Kelas</th>
+            <th style="border: 1px solid #000; width: 190px; padding: 6px 4px;" colspan="2">Tanda Tangan Siswa</th>
+            <th style="border: 1px solid #000; width: 65px; padding: 6px 2px;">Ket.</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+
+      <!-- Lembar Tanda Tangan -->
+      <table style="width: 100%; border: none; font-size: 9.5pt; margin-top: 18px; border-collapse: collapse;">
+        <tr>
+          <td style="width: 50%; vertical-align: top; text-align: left;">
+            Mengetahui,<br>
+            Kepala Sekolah ${escapeHtml(sch.name || 'SD NEGERI 14 TOBOALI')}<br><br><br><br><br>
+            <strong>${escapeHtml(sch.headmaster || 'H. Suhardi, S.Pd., M.Pd')}</strong><br>
+            NIP. ${escapeHtml(sch.headmasterNip || '19750312 199903 1 004')}
+          </td>
+          <td style="width: 50%; vertical-align: top; text-align: left; padding-left: 20px;">
+            Toboali, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>
+            Pengawas Ruang Ujian,<br><br><br><br><br>
+            <strong>${escapeHtml(teacherSignerName)}</strong><br>
+            ${escapeHtml(teacherSignerNip)}
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
+
+  container.innerHTML = fullHtml;
   window.print();
 }
 
