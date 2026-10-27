@@ -340,27 +340,20 @@
             </div>
           </div>
 
-          <!-- DYNAMIC SCHEDULE GATE BOX (TAMPIL PADA TANGGAL & JAM MATA PELAJARAN TERSEBUT) -->
+          <!-- BOX VERIFIKASI PENGAWAS RUANG & INFO JADWAL RESMI -->
           <div id="confirm-schedule-gate-box" style="margin-bottom: 1.25rem;">
             <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
-              <div style="font-size: 1.5rem; line-height: 1;">👨‍🏫</div>
-              <div style="font-size: 0.82rem; color: #166534; line-height: 1.45;">
-                <strong>Verifikasi Pengawas Ruang:</strong> Pastikan identitas siswa di layar telah sesuai dengan kartu ujian fisik dan daftar hadir di meja, lalu klik tombol hijau di bawah untuk memulai ujian.
+              <div style="font-size: 1.6rem; line-height: 1;">👨‍🏫</div>
+              <div style="font-size: 0.83rem; color: #166534; line-height: 1.45;">
+                <strong>Verifikasi Pengawas Ruang:</strong> Pastikan identitas siswa di layar telah sesuai dengan kartu ujian fisik dan daftar hadir di meja, lalu klik tombol hijau di bawah secara manual untuk memulai ujian.
               </div>
             </div>
           </div>
 
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
             <button class="btn btn-outline" style="flex: 1; min-width: 100px;" onclick="cancelConfirmExam()">Batal</button>
-            <button id="btn-proctor-start-exam" class="btn btn-success" style="flex: 2; font-weight: 700; background: #16a34a; border-color: #16a34a; display: none;" onclick="startExamSession()">
+            <button id="btn-proctor-start-exam" class="btn btn-success" style="flex: 2; font-weight: 700; background: #16a34a; border-color: #16a34a; display: inline-flex; justify-content: center; align-items: center; gap: 0.4rem;" onclick="startExamSession()">
               🚀 Mulai Mengerjakan (Klik Pengawas Ruang)
-            </button>
-          </div>
-
-          <!-- PROCTOR OVERRIDE / UJIAN SUSULAN TOGGLE -->
-          <div id="proctor-override-container" style="text-align: center; margin-top: 0.85rem; display: none;">
-            <button type="button" onclick="triggerProctorScheduleOverride()" style="background: none; border: none; color: #64748b; font-size: 0.75rem; text-decoration: underline; cursor: pointer;">
-              🔓 Akses Darurat Pengawas: Izinkan Mulai di Luar Jam (Ujian Susulan)
             </button>
           </div>
         </div>
@@ -2688,6 +2681,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.18.0"></script>
+  <script src="app.js?v=3.19.0"></script>
 </body>
 </html>
