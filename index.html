@@ -55,7 +55,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=3.7.1">
+  <link rel="stylesheet" href="style.css?v=3.22.0">
 </head>
 <body>
 
@@ -335,37 +335,41 @@
             </div>
           </div>
 
-          <div class="cheat-alert-box">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
+          <div class="cheat-alert-box" style="margin-bottom: 1rem; padding: 0.85rem 1rem; border-radius: 12px; background: #fef2f2; border: 1.5px solid #fecaca; display: flex; gap: 0.75rem; align-items: flex-start;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
               <line x1="12" y1="9" x2="12" y2="13"></line>
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
-            <div>
-              <strong style="display: block; margin-bottom: 0.2rem; font-size: 0.88rem;">Peringatan Anti-Curang:</strong>
-              <p style="font-size: 0.82rem; line-height: 1.4; margin-bottom: 0.35rem;">
+            <div style="flex: 1;">
+              <strong style="display: block; margin-bottom: 0.2rem; font-size: 0.88rem; color: #991b1b;">Peringatan Anti-Curang:</strong>
+              <p style="font-size: 0.82rem; line-height: 1.45; margin-bottom: 0.45rem; color: #7f1d1d;">
                 Dilarang meminimalkan layar, membuka tab lain, atau beralih aplikasi. Sistem mencatat setiap pelanggaran secara otomatis dan mengirim peringatan ke pengawas.
               </p>
-              <button type="button" onclick="openExamRulesModal()" style="background: none; border: none; padding: 0; color: #b91c1c; font-weight: 700; font-size: 0.8rem; text-decoration: underline; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem;">
-                📜 Baca 7 Pasal Tata Tertib &amp; Sanksi Ujian Selengkapnya &rarr;
+              <button type="button" onclick="openExamRulesModal()" style="background: #fee2e2; border: 1px solid #fca5a5; padding: 0.35rem 0.75rem; border-radius: 8px; color: #991b1b; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; transition: background 0.15s ease;">
+                📜 Baca 7 Pasal Tata Tertib &amp; Sanksi Ujian &rarr;
               </button>
             </div>
           </div>
 
           <!-- BOX VERIFIKASI PENGAWAS RUANG & INFO JADWAL RESMI -->
           <div id="confirm-schedule-gate-box" style="margin-bottom: 1.25rem;">
-            <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
-              <div style="font-size: 1.6rem; line-height: 1;">👨‍🏫</div>
-              <div style="font-size: 0.83rem; color: #166534; line-height: 1.45;">
-                <strong>Verifikasi Pengawas Ruang:</strong> Pastikan identitas siswa di layar telah sesuai dengan kartu ujian fisik dan daftar hadir di meja, lalu klik tombol hijau di bawah secara manual untuk memulai ujian.
+            <div style="background: #f0fdf4; border: 1.5px dashed #22c55e; border-radius: 12px; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+              <div style="font-size: 1.6rem; line-height: 1; flex-shrink: 0;">👨‍🏫</div>
+              <div style="font-size: 0.83rem; color: #166534; line-height: 1.5; flex: 1;">
+                <strong style="display: block; font-size: 0.88rem; margin-bottom: 2px;">Verifikasi Pengawas Ruang:</strong>
+                Pastikan identitas siswa di layar telah sesuai dengan kartu ujian fisik dan daftar hadir di meja, lalu klik tombol hijau di bawah secara manual untuk memulai ujian.
               </div>
             </div>
           </div>
 
-          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <button class="btn btn-outline" style="flex: 1; min-width: 100px;" onclick="cancelConfirmExam()">Batal</button>
-            <button id="btn-proctor-start-exam" class="btn btn-success" style="flex: 2; font-weight: 700; background: #16a34a; border-color: #16a34a; display: inline-flex; justify-content: center; align-items: center; gap: 0.4rem;" onclick="startExamSession()">
-              🚀 Mulai Mengerjakan (Klik Pengawas Ruang)
+          <div class="confirm-actions-stack">
+            <button id="btn-proctor-start-exam" class="btn btn-success btn-proctor-start" onclick="startExamSession()">
+              <span class="btn-proctor-title">🚀 Mulai Mengerjakan Ujian</span>
+              <span class="btn-proctor-subtitle">(Klik Manual Pengawas Ruang)</span>
+            </button>
+            <button type="button" class="btn btn-outline btn-confirm-cancel" onclick="cancelConfirmExam()">
+              ← Batal &amp; Kembali
             </button>
           </div>
         </div>
@@ -440,7 +444,7 @@
               <div class="cbt-mobile-user-greeting">
                 <div class="student-avatar" id="exam-avatar">S</div>
                 <div class="cbt-greeting-meta">
-                  <div class="cbt-user-hi">Hi <span id="exam-student-name">Peserta</span>,</div>
+                  <div class="cbt-user-hi"><span id="exam-student-name">Peserta Ujian</span></div>
                   <div class="cbt-user-sub"><span id="exam-subject-name">Matematika</span> • Kelas <span id="exam-class-name">6A</span></div>
                 </div>
               </div>
@@ -2693,6 +2697,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.21.0"></script>
+  <script src="app.js?v=3.22.0"></script>
 </body>
 </html>
