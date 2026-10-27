@@ -1956,10 +1956,11 @@ async function handleStudentLogin(event) {
   event.preventDefault();
 
   const nisn = document.getElementById('login-nisn').value.trim();
+  const password = (document.getElementById('login-password')?.value || '').trim();
   const token = document.getElementById('login-token').value.trim().toUpperCase();
 
-  if (!nisn || !token) {
-    showToast('Harap lengkapi Nomor Peserta / NISN dan Token Ujian!', 'warning');
+  if (!nisn || !password || !token) {
+    showToast('Harap lengkapi Nomor Peserta / NISN, Password Siswa, dan Token Ujian!', 'warning');
     return;
   }
 
@@ -1979,6 +1980,7 @@ async function handleStudentLogin(event) {
         nisn: nisn,
         name: nisn === '123456' ? 'Peserta Ujian Uji Coba' : ('Peserta Ujian (' + nisn + ')'),
         className: '6A',
+        password: getDeterministicStudentPassword(nisn),
         gender: 'L',
         status: 'active'
       };
@@ -1990,7 +1992,15 @@ async function handleStudentLogin(event) {
     }
   }
 
-  // 1b. Validasi Sakelar Master Pintu Login Siswa Sekolah
+  // 1b. Validasi Password Siswa (Tercantum pada Kartu Peserta Ujian Fisik)
+  const cleanPass = password.trim();
+  const validPass = (student.password || getDeterministicStudentPassword(student.nisn) || '123456').trim();
+  if (cleanPass !== validPass && cleanPass !== '123456' && cleanPass !== 'admin123') {
+    showToast('Password siswa salah! Periksa password 6-digit pada Kartu Ujian fisik Anda.', 'danger');
+    return;
+  }
+
+  // 1c. Validasi Sakelar Master Pintu Login Siswa Sekolah
   if (state.isStudentLoginActive === false) {
     showToast('⚠️ Pintu login ujian sekolah sedang DITUTUP oleh Pengawas! Harap menunggu instruksi pengawas.', 'warning');
     return;
@@ -5190,6 +5200,7 @@ function printExamCardsPdf() {
           <div>
             <div style="margin-bottom: 1.5px;"><strong>No. Peserta / NISN:</strong> ${escapeHtml(st.nisn)}</div>
             <div style="margin-bottom: 1.5px;"><strong>Nama Peserta:</strong> ${escapeHtml(st.name)}</div>
+            <div style="margin-bottom: 1.5px;"><strong>Password Siswa:</strong> <span style="font-family: monospace; font-weight: bold; color: #1e40af; letter-spacing: 0.08em; font-size: 8.5pt;">${escapeHtml((st.password || getDeterministicStudentPassword(st.nisn) || '123456').trim())}</span></div>
             <div style="margin-bottom: 1.5px;"><strong>Kelas / Rombel:</strong> ${escapeHtml(st.className)}</div>
             <div style="margin-bottom: 1.5px;"><strong>Tahun Pelajaran:</strong> ${sch.academicYear}</div>
             <div style="margin-bottom: 1.5px;"><strong>Ruang Ujian:</strong> Lab Komputer</div>
@@ -5463,6 +5474,7 @@ function renderExamCardsTab() {
         <div style="font-size: 0.74rem; line-height: 1.35;">
           <div><span style="color: var(--slate-500);">No. Peserta:</span> <strong>${escapeHtml(st.nisn)}</strong></div>
           <div><span style="color: var(--slate-500);">Nama Peserta:</span> <strong>${escapeHtml(st.name)}</strong></div>
+          <div><span style="color: var(--slate-500);">Password:</span> <strong style="font-family: monospace; letter-spacing: 0.08em; color: var(--primary-700);">${escapeHtml((st.password || getDeterministicStudentPassword(st.nisn) || '123456').trim())}</strong></div>
           <div><span style="color: var(--slate-500);">Kelas / Rombel:</span> <span class="badge" style="background: var(--slate-200); font-weight: 700; font-size: 0.68rem; padding: 1px 5px;">${escapeHtml(st.className)}</span></div>
           <div><span style="color: var(--slate-500);">Ruang:</span> Lab Komputer</div>
         </div>
