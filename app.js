@@ -2267,39 +2267,9 @@ function checkExamScheduleStatus(className, subjectName) {
 }
 
 function handleLoginSubjectChange(subjectVal) {
+  // Mode tulisan merah dan peringatan jam dimatikan karena sistem menggunakan kendali klik manual sepenuhnya
   const hintEl = document.getElementById('login-subject-schedule-hint');
-  if (!hintEl) return;
-
-  if (!subjectVal || subjectVal === 'AUTO') {
-    hintEl.style.display = 'none';
-    return;
-  }
-
-  // Cari jadwal untuk mapel ini
-  const sched = (state.schedules || []).find(sc => 
-    (sc.subjectName === subjectVal || sc.subject === subjectVal)
-  );
-
-  if (!sched) {
-    hintEl.style.display = 'block';
-    hintEl.innerHTML = `<span style="color: #64748b;">ℹ️ Jadwal ujian fleksibel / belum dibatasi ketat.</span>`;
-    return;
-  }
-
-  const dayInfo = formatIndonesianDayDate ? formatIndonesianDayDate(sched.date) : { day: 'Hari Ujian', dateText: sched.date };
-  const res = checkExamScheduleStatus(sched.className || '6A', subjectVal);
-
-  let statusBadge = '';
-  if (res.status === 'active') {
-    statusBadge = '<span style="color: #166534; font-weight: 700; background: #dcfce7; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;">🟢 SEDANG BERLANGSUNG</span>';
-  } else if (res.status === 'upcoming') {
-    statusBadge = '<span style="color: #b45309; font-weight: 700; background: #fef3c7; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;">⏳ BELUM DIMULAI</span>';
-  } else {
-    statusBadge = '<span style="color: #9f1239; font-weight: 700; background: #ffe4e6; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;">⛔ TELAH BERAKHIR</span>';
-  }
-
-  hintEl.style.display = 'block';
-  hintEl.innerHTML = `📅 <strong>${dayInfo.day}, ${dayInfo.dateText}</strong> | Pukul <strong>${sched.startTime} - ${sched.endTime} WIB</strong> ${statusBadge}`;
+  if (hintEl) hintEl.style.display = 'none';
 }
 
 function initConfirmScheduleGateUI() {
