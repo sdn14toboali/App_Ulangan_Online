@@ -4702,13 +4702,14 @@ function renderStudentsTable() {
   }
 
   students.forEach((s, idx) => {
+    const displayPass = (s.password || getDeterministicStudentPassword(s.nisn) || '123456').trim();
     const tr = document.createElement('tr');
     tr.innerHTML = 
       '<td>' + (idx + 1) + '</td>' +
       '<td><strong>' + escapeHtml(s.nisn) + '</strong></td>' +
       '<td>' + escapeHtml(s.name) + '</td>' +
       '<td><span class="badge badge-info">' + escapeHtml(s.className) + '</span></td>' +
-      '<td><span style="font-family: monospace; font-size: 0.82rem; font-weight: 700; background: var(--slate-100); padding: 2px 7px; border-radius: 4px; color: var(--slate-700);">' + escapeHtml(s.password || '123456') + '</span></td>' +
+      '<td><span style="font-family: monospace; font-size: 0.82rem; font-weight: 700; background: var(--slate-100); padding: 2px 7px; border-radius: 4px; color: var(--slate-700);">' + escapeHtml(displayPass) + '</span></td>' +
       '<td>' + (s.gender === 'P' ? 'Perempuan (P)' : 'Laki-laki (L)') + '</td>' +
       '<td><span class="badge badge-success">Terdaftar (Aktif)</span></td>' +
       '<td>' +
@@ -4764,7 +4765,7 @@ function openEditStudentModal(nisn) {
   document.getElementById('edit-student-name').value = s.name;
 
   const passInput = document.getElementById('edit-student-password');
-  if (passInput) passInput.value = s.password || generateUniqueStudentPassword(state.students);
+  if (passInput) passInput.value = (s.password || getDeterministicStudentPassword(s.nisn) || generateUniqueStudentPassword(state.students)).trim();
   
   const classInput = document.getElementById('edit-student-class');
   if (classInput) {
@@ -4871,17 +4872,27 @@ async function handleSaveStudent(event) {
   // Sinkronisasi Realtime Seketika ke Neon Cloud Database
   const creds = parseNeonCredentials();
   if (creds && creds.host) {
-    executeNeonSql(
-      `INSERT INTO students (nisn, full_name, class_name, gender)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (nisn) DO UPDATE
-       SET full_name = EXCLUDED.full_name, class_name = EXCLUDED.class_name, gender = EXCLUDED.gender, updated_at = NOW();`,
-      [studentObj.nisn, studentObj.name, studentObj.className, studentObj.gender || 'L']
-    ).then(() => {
-      console.log('✅ Realtime write student ke Neon:', studentObj.nisn);
-    }).catch(e => {
-      console.warn('Realtime write student ke Neon deferred:', e.message);
-    });
+    (async () => {
+      try {
+        await ensureNeonStudentPasswordSchema();
+        await executeNeonSql(
+          `INSERT INTO students (nisn, full_name, class_name, gender, password, passwords)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (nisn) DO UPDATE
+           SET full_name = EXCLUDED.full_name,
+               class_name = EXCLUDED.class_name,
+               gender = EXCLUDED.gender,
+               password = EXCLUDED.password,
+               passwords = EXCLUDED.passwords,
+               updated_at = NOW();`,
+          [studentObj.nisn, studentObj.name, studentObj.className, studentObj.gender || 'L', studentObj.password, JSON.stringify(studentObj.passwords || {})]
+        );
+        await syncStudentPasswordVaultToNeon();
+        console.log('✅ Realtime write student & password ke Neon:', studentObj.nisn, studentObj.password);
+      } catch (e) {
+        console.warn('Realtime write student ke Neon deferred:', e.message);
+      }
+    })();
   }
 
   // Sinkronisasi ke Supabase jika aktif
@@ -6243,18 +6254,27 @@ async function executeBatchImportStudents() {
   localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
 
   // Sinkronisasi massal seketika ke Neon Cloud Database
-  if (state.neon && state.neon.endpoint) {
+  const creds = parseNeonCredentials();
+  if (creds && creds.host) {
     (async () => {
       try {
+        await ensureNeonStudentPasswordSchema();
         for (const st of importedList) {
+          const pass = (st.password || getDeterministicStudentPassword(st.nisn) || '123456').trim();
           await executeNeonSql(
-            `INSERT INTO students (nisn, full_name, class_name, gender)
-             VALUES ($1, $2, $3, $4)
+            `INSERT INTO students (nisn, full_name, class_name, gender, password, passwords)
+             VALUES ($1, $2, $3, $4, $5, $6)
              ON CONFLICT (nisn) DO UPDATE
-             SET full_name = EXCLUDED.full_name, class_name = EXCLUDED.class_name, gender = EXCLUDED.gender, updated_at = NOW();`,
-            [st.nisn, st.name, st.className, st.gender || 'L']
+             SET full_name = EXCLUDED.full_name,
+                 class_name = EXCLUDED.class_name,
+                 gender = EXCLUDED.gender,
+                 password = EXCLUDED.password,
+                 passwords = EXCLUDED.passwords,
+                 updated_at = NOW();`,
+            [st.nisn, st.name, st.className, st.gender || 'L', pass, JSON.stringify(st.passwords || {})]
           );
         }
+        await syncStudentPasswordVaultToNeon();
         console.log(`✅ ${importedList.length} siswa impor berhasil disinkronkan ke Neon Cloud`);
       } catch (errNeon) {
         console.warn('Gagal sinkron massal ke Neon:', errNeon.message);
@@ -6743,6 +6763,49 @@ function quickPasteConnectionString() {
   testNeonConnection();
 }
 
+// Skema Auto-Migration & Password Vault Sync untuk Penyelarasan PC ⇄ HP
+let _neonMigrationChecked = false;
+async function ensureNeonStudentPasswordSchema() {
+  if (_neonMigrationChecked) return;
+  const creds = parseNeonCredentials();
+  if (!creds || !creds.host) return;
+
+  try {
+    await executeNeonSql(`
+      ALTER TABLE students ADD COLUMN IF NOT EXISTS password VARCHAR(50) DEFAULT '123456';
+      ALTER TABLE students ADD COLUMN IF NOT EXISTS passwords JSONB;
+    `);
+    _neonMigrationChecked = true;
+    console.log('✅ Neon student password schema checked & ready');
+  } catch (e) {
+    console.warn('Neon student password schema check deferred:', e.message);
+  }
+}
+
+async function syncStudentPasswordVaultToNeon() {
+  if (!state || !Array.isArray(state.students) || state.students.length === 0) return;
+  const creds = parseNeonCredentials();
+  if (!creds || !creds.host) return;
+
+  const vaultMap = {};
+  state.students.forEach(s => {
+    if (s.nisn) {
+      vaultMap[s.nisn] = (s.password || getDeterministicStudentPassword(s.nisn) || '123456').trim();
+    }
+  });
+
+  const q = `INSERT INTO app_settings (setting_key, setting_value, updated_at)
+             VALUES ('student_passwords_vault', $1, NOW())
+             ON CONFLICT (setting_key) DO UPDATE
+             SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
+  try {
+    await executeNeonSql(q, [JSON.stringify(vaultMap)]);
+    console.log('✅ Student passwords vault synced to Neon Cloud');
+  } catch (e) {
+    console.warn('Sync student passwords vault deferred:', e.message);
+  }
+}
+
 // Execute SQL via Neon Serverless HTTP API
 async function executeNeonSql(query, params = []) {
   const creds = parseNeonCredentials();
@@ -6953,15 +7016,23 @@ async function exportLocalDataToNeonCloud(options = {}) {
       teachersCount++;
     }
 
+    await ensureNeonStudentPasswordSchema();
     let studentsCount = 0;
     for (const s of state.students || []) {
-      const q = `INSERT INTO students (nisn, full_name, class_name, gender)
-                 VALUES ($1, $2, $3, $4)
+      const pass = (s.password || getDeterministicStudentPassword(s.nisn) || '123456').trim();
+      const q = `INSERT INTO students (nisn, full_name, class_name, gender, password, passwords)
+                 VALUES ($1, $2, $3, $4, $5, $6)
                  ON CONFLICT (nisn) DO UPDATE
-                 SET full_name = EXCLUDED.full_name, class_name = EXCLUDED.class_name, gender = EXCLUDED.gender, updated_at = NOW();`;
-      await executeNeonSql(q, [s.nisn, s.name, s.className, s.gender || 'L']);
+                 SET full_name = EXCLUDED.full_name,
+                     class_name = EXCLUDED.class_name,
+                     gender = EXCLUDED.gender,
+                     password = COALESCE(EXCLUDED.password, students.password),
+                     passwords = COALESCE(EXCLUDED.passwords, students.passwords),
+                     updated_at = NOW();`;
+      await executeNeonSql(q, [s.nisn, s.name, s.className, s.gender || 'L', pass, JSON.stringify(s.passwords || {})]);
       studentsCount++;
     }
+    await syncStudentPasswordVaultToNeon();
 
     // Sync Sesi Ujian Aktif
     const ses = state.session || {};
@@ -7508,13 +7579,54 @@ async function importDataFromNeonCloud(options = {}) {
       console.warn('Tarik guru gagal atau tabel belum ada:', eTeacher.message);
     }
 
-    // 2. Tarik Data Siswa (Students)
+    // 2. Tarik Data Siswa (Students) & Penyelarasan Password PC ⇄ HP
     try {
-      const rawStudents = await executeNeonSql('SELECT nisn, full_name, class_name, gender FROM students WHERE is_active = true ORDER BY class_name, full_name;');
+      await ensureNeonStudentPasswordSchema();
+      // Tarik vault password terlebih dahulu sebagai fail-safe
+      let vaultPasswords = {};
+      try {
+        const vaultRaw = await executeNeonSql("SELECT setting_value FROM app_settings WHERE setting_key = 'student_passwords_vault' LIMIT 1;");
+        const vaultRows = (vaultRaw && vaultRaw.rows) ? vaultRaw.rows : (Array.isArray(vaultRaw) ? vaultRaw : []);
+        if (vaultRows.length > 0 && vaultRows[0].setting_value) {
+          vaultPasswords = typeof vaultRows[0].setting_value === 'string' ? JSON.parse(vaultRows[0].setting_value) : vaultRows[0].setting_value;
+        }
+      } catch(eVault) {}
+
+      let rawStudents = null;
+      try {
+        rawStudents = await executeNeonSql('SELECT nisn, full_name, class_name, gender, password, passwords FROM students WHERE is_active = true ORDER BY class_name, full_name;');
+      } catch (eCols) {
+        rawStudents = await executeNeonSql('SELECT * FROM students WHERE is_active = true ORDER BY class_name, full_name;');
+      }
       const studentRows = (rawStudents && rawStudents.rows) ? rawStudents.rows : (Array.isArray(rawStudents) ? rawStudents : []);
       if (Array.isArray(studentRows)) {
+        const needNeonUpdate = [];
         const importedStudents = studentRows.map((r, idx) => {
           const existing = (state.students || []).find(s => s.nisn === r.nisn);
+          const resolvedPassword = (
+            (r.password && r.password.trim() && r.password.trim() !== '123456' ? r.password.trim() : '') ||
+            (existing && existing.password && existing.password.trim() && existing.password.trim() !== '123456' ? existing.password.trim() : '') ||
+            (vaultPasswords[r.nisn] ? String(vaultPasswords[r.nisn]).trim() : '') ||
+            (r.password && r.password.trim() ? r.password.trim() : '') ||
+            (existing && existing.password && existing.password.trim() ? existing.password.trim() : '') ||
+            getDeterministicStudentPassword(r.nisn) ||
+            '123456'
+          );
+
+          // Jika lokal memiliki password kustom (misal Desktop punya 138691) tapi di server masih 123456/kosong, queue untuk update server
+          if (existing && existing.password && existing.password.trim() && existing.password.trim() !== '123456' && (!r.password || r.password.trim() === '123456')) {
+            needNeonUpdate.push({ nisn: r.nisn, password: resolvedPassword });
+          }
+
+          let studentSubjectPasswords = null;
+          if (r.passwords && typeof r.passwords === 'object' && Object.keys(r.passwords).length > 0) {
+            studentSubjectPasswords = r.passwords;
+          } else if (existing && existing.passwords && typeof existing.passwords === 'object' && Object.keys(existing.passwords).length > 0) {
+            studentSubjectPasswords = existing.passwords;
+          } else {
+            studentSubjectPasswords = generateStudentSubjectPasswords(r.nisn || ('2026-0' + (idx + 1)));
+          }
+
           return {
             id: existing ? existing.id : ('st-' + Math.random().toString(36).substr(2, 9)),
             nisn: r.nisn,
@@ -7522,7 +7634,8 @@ async function importDataFromNeonCloud(options = {}) {
             className: r.class_name,
             gender: r.gender || 'L',
             status: 'active',
-            passwords: (existing && existing.passwords) ? existing.passwords : generateStudentSubjectPasswords(r.nisn || ('2026-0' + (idx + 1)))
+            password: resolvedPassword,
+            passwords: studentSubjectPasswords
           };
         });
         state.students = importedStudents;
@@ -7531,6 +7644,16 @@ async function importDataFromNeonCloud(options = {}) {
         renderExamCardsTab();
         updateAdminMetrics();
         studentsCount = importedStudents.length;
+
+        // Sync ke Neon jika ada password kustom yang perlu di-update dari Desktop
+        if (needNeonUpdate.length > 0) {
+          (async () => {
+            for (const item of needNeonUpdate) {
+              await executeNeonSql('UPDATE students SET password = $1 WHERE nisn = $2;', [item.password, item.nisn]).catch(() => {});
+            }
+            await syncStudentPasswordVaultToNeon();
+          })();
+        }
       }
     } catch (eStudent) {
       console.warn('Tarik siswa gagal:', eStudent.message);
