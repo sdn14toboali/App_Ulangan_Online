@@ -126,10 +126,27 @@ const state = {
   dbProvider: localStorage.getItem('zettcbt_db_provider') || 'neon',
 
   // Neon.tech Serverless PostgreSQL (Kapasitas 200+ Siswa)
-  neon: {
-    endpoint: localStorage.getItem('zettcbt_neon_endpoint') || '',
-    apiKey: localStorage.getItem('zettcbt_neon_key') || '',
-  },
+  neon: (() => {
+    let ep = '';
+    let key = '';
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      ep = urlParams.get('ep') || urlParams.get('neon_host') || urlParams.get('host') || '';
+      key = urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass') || '';
+      if (ep) localStorage.setItem('zettcbt_neon_endpoint', ep);
+      if (key) localStorage.setItem('zettcbt_neon_key', key);
+    } catch(e) {}
+    if (!ep) ep = localStorage.getItem('zettcbt_neon_endpoint') || '';
+    if (!key) key = localStorage.getItem('zettcbt_neon_key') || '';
+    if ((!ep || !key) && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG) {
+      if (!ep && window.DEFAULT_NEON_CONFIG.host) ep = window.DEFAULT_NEON_CONFIG.host;
+      if (!key && window.DEFAULT_NEON_CONFIG.password) key = window.DEFAULT_NEON_CONFIG.password;
+    }
+    return {
+      endpoint: ep,
+      apiKey: key,
+    };
+  })(),
 
   // Supabase Configuration
   supabase: {
@@ -141,7 +158,7 @@ const state = {
   school: (() => {
     const defaultSchoolLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 100) 
       ? window.OFFICIAL_SDN14_LOGO 
-      : "assets/logo-sdn14.png";
+      : "assets/icon-192.png";
     const defaultSchool = {
       name: 'SD NEGERI 14 TOBOALI',
       npsn: '10901234',
@@ -162,6 +179,11 @@ const state = {
       const saved = JSON.parse(localStorage.getItem('zettcbt_school') || '{}');
       const customSource = (vault && (vault.isCustomLogo || vault.isCustomName || vault.name)) ? { ...saved, ...vault } : saved;
       const merged = { ...defaultSchool, ...customSource };
+
+      // Sanitasi jika logoUrl sebelumnya merujuk ke berkas rusak assets/logo-sdn14.png
+      if (merged.logoUrl && typeof merged.logoUrl === 'string' && merged.logoUrl.includes('logo-sdn14.png')) {
+        merged.logoUrl = defaultSchoolLogo;
+      }
 
       // Hanya gunakan fallback jika logoUrl kosong sama sekali
       if (!merged.logoUrl || typeof merged.logoUrl !== 'string' || merged.logoUrl.trim() === '') {
@@ -754,10 +776,45 @@ function loadSavedState() {
       const savedObj = savedSchool ? JSON.parse(savedSchool) : null;
       const combined = Object.assign({}, state.school, savedObj || {}, vaultObj || {});
       if (combined && combined.name) {
+        if (combined.logoUrl && typeof combined.logoUrl === 'string' && combined.logoUrl.includes('logo-sdn14.png')) {
+          combined.logoUrl = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO) ? window.OFFICIAL_SDN14_LOGO : 'assets/icon-192.png';
+        }
         state.school = combined;
       }
     } catch (e) {
       console.error('Failed to parse saved school', e);
+    }
+  }
+
+  // Sinkronisasi otomatis kredensial Neon dari URL (1-klik tautan HP / QR Code)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlEp = urlParams.get('ep') || urlParams.get('neon_host') || urlParams.get('host');
+    const urlKey = urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass');
+    if (urlEp) {
+      state.neon.endpoint = decodeURIComponent(urlEp);
+      localStorage.setItem('zettcbt_neon_endpoint', state.neon.endpoint);
+      state.dbProvider = 'neon';
+      localStorage.setItem('zettcbt_db_provider', 'neon');
+    }
+    if (urlKey) {
+      state.neon.apiKey = decodeURIComponent(urlKey);
+      localStorage.setItem('zettcbt_neon_key', state.neon.apiKey);
+    }
+    if (urlEp || urlKey) {
+      // Bersihkan query string dari address bar demi keamanan kredensial tanpa refresh
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  } catch(e) {}
+
+  // Fallback kredensial database bawaan (DEFAULT_NEON_CONFIG) jika penyimpanan lokal kosong
+  if (typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG) {
+    if (!state.neon.endpoint && window.DEFAULT_NEON_CONFIG.host) {
+      state.neon.endpoint = window.DEFAULT_NEON_CONFIG.host;
+    }
+    if (!state.neon.apiKey && window.DEFAULT_NEON_CONFIG.password) {
+      state.neon.apiKey = window.DEFAULT_NEON_CONFIG.password;
     }
   }
 
@@ -5697,10 +5754,13 @@ function handleSaveSchoolIdentity(event) {
 
   const defaultLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 100)
     ? window.OFFICIAL_SDN14_LOGO
-    : "assets/logo-sdn14.png";
+    : "assets/icon-192.png";
 
-  const finalLogo = inputLogo ? inputLogo : (state.school.logoUrl || defaultLogo);
-  const isCustomLogo = !!(finalLogo && finalLogo !== defaultLogo && !finalLogo.includes('assets/logo-sdn14.png'));
+  let finalLogo = inputLogo ? inputLogo : (state.school.logoUrl || defaultLogo);
+  if (finalLogo && typeof finalLogo === 'string' && finalLogo.includes('logo-sdn14.png')) {
+    finalLogo = defaultLogo;
+  }
+  const isCustomLogo = !!(finalLogo && finalLogo !== defaultLogo && !finalLogo.includes('icon-192.png') && !finalLogo.includes('icon-512.png'));
   const isCustomName = !!(inputName && inputName !== 'SD NEGERI 14 TOBOALI');
 
   state.school = {
@@ -5739,11 +5799,14 @@ function applySchoolBrandingUI() {
   const sch = state.school || {};
   const defaultLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 100)
     ? window.OFFICIAL_SDN14_LOGO
-    : "assets/logo-sdn14.png";
+    : "assets/icon-192.png";
   // Gunakan logo kustom jika ada dan tidak kosong; jika tidak ada, gunakan default
-  const logo = (sch.logoUrl && typeof sch.logoUrl === 'string' && sch.logoUrl.trim().length > 0)
+  let logo = (sch.logoUrl && typeof sch.logoUrl === 'string' && sch.logoUrl.trim().length > 0)
     ? sch.logoUrl.trim()
     : defaultLogo;
+  if (logo && typeof logo === 'string' && logo.includes('logo-sdn14.png')) {
+    logo = defaultLogo;
+  }
   sch.logoUrl = logo;
   const schoolName = sch.name || 'SD NEGERI 14 TOBOALI';
   const examType = sch.examType || 'UAS';
@@ -5757,7 +5820,7 @@ function applySchoolBrandingUI() {
   const headerIcon = document.querySelector('.brand-icon');
   if (headerIcon) {
     if (logo) {
-      headerIcon.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&!this.src.startsWith('data:image')&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
+      headerIcon.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(this.src!=='assets/icon-192.png'&&!this.src.includes('icon-192.png')){this.src='assets/icon-192.png';}else if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
     } else {
       headerIcon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
     }
@@ -5779,7 +5842,9 @@ function applySchoolBrandingUI() {
     sidebarLogo.src = logo;
     sidebarLogo.alt = schoolName;
     sidebarLogo.onerror = function() {
-      if (defaultLogo && !this.src.startsWith('data:image') && this.src !== defaultLogo) {
+      if (this.src !== 'assets/icon-192.png' && !this.src.includes('icon-192.png')) {
+        this.src = 'assets/icon-192.png';
+      } else if (defaultLogo && this.src !== defaultLogo) {
         this.src = defaultLogo;
       }
     };
@@ -5805,7 +5870,7 @@ function applySchoolBrandingUI() {
     const heroLogo = studentScreen.querySelector('.split-hero-logo');
     if (heroLogo) {
       if (logo) {
-        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&!this.src.startsWith('data:image')&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
+        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(this.src!=='assets/icon-192.png'&&!this.src.includes('icon-192.png')){this.src='assets/icon-192.png';}else if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
       } else {
         heroLogo.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
       }
@@ -5815,7 +5880,9 @@ function applySchoolBrandingUI() {
       studentFormLogo.src = logo;
       studentFormLogo.alt = schoolName;
       studentFormLogo.onerror = function() {
-        if (defaultLogo && !this.src.startsWith('data:image') && this.src !== defaultLogo) {
+        if (this.src !== 'assets/icon-192.png' && !this.src.includes('icon-192.png')) {
+          this.src = 'assets/icon-192.png';
+        } else if (defaultLogo && this.src !== defaultLogo) {
           this.src = defaultLogo;
         }
       };
@@ -5839,7 +5906,7 @@ function applySchoolBrandingUI() {
     const heroLogo = teacherScreen.querySelector('.split-hero-logo');
     if (heroLogo) {
       if (logo) {
-        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(window.OFFICIAL_SDN14_LOGO&&!this.src.startsWith('data:image')&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
+        heroLogo.innerHTML = `<img src="${logo}" alt="Logo Sekolah" onerror="if(this.src!=='assets/icon-192.png'&&!this.src.includes('icon-192.png')){this.src='assets/icon-192.png';}else if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}">`;
       } else {
         heroLogo.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
       }
@@ -5849,7 +5916,9 @@ function applySchoolBrandingUI() {
       teacherFormLogo.src = logo;
       teacherFormLogo.alt = schoolName;
       teacherFormLogo.onerror = function() {
-        if (defaultLogo && !this.src.startsWith('data:image') && this.src !== defaultLogo) {
+        if (this.src !== 'assets/icon-192.png' && !this.src.includes('icon-192.png')) {
+          this.src = 'assets/icon-192.png';
+        } else if (defaultLogo && this.src !== defaultLogo) {
           this.src = defaultLogo;
         }
       };
@@ -5902,7 +5971,9 @@ function applySchoolBrandingUI() {
     cbtSidebarLogo.src = logo;
     cbtSidebarLogo.alt = schoolName;
     cbtSidebarLogo.onerror = function() {
-      if (defaultLogo && !this.src.startsWith('data:image') && this.src !== defaultLogo) {
+      if (this.src !== 'assets/icon-192.png' && !this.src.includes('icon-192.png')) {
+        this.src = 'assets/icon-192.png';
+      } else if (defaultLogo && this.src !== defaultLogo) {
         this.src = defaultLogo;
       }
     };
@@ -6287,10 +6358,27 @@ function populateDatabaseConfig() {
   if (optSb && provider === 'supabase') optSb.checked = true;
   if (optLoc && provider === 'local') optLoc.checked = true;
 
+  let ep = state.neon.endpoint || localStorage.getItem('zettcbt_neon_endpoint') || '';
+  let key = state.neon.apiKey || localStorage.getItem('zettcbt_neon_key') || '';
+
+  if ((!ep || !key) && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG) {
+    if (!ep && window.DEFAULT_NEON_CONFIG.host) ep = window.DEFAULT_NEON_CONFIG.host;
+    if (!key && window.DEFAULT_NEON_CONFIG.password) key = window.DEFAULT_NEON_CONFIG.password;
+  }
+
+  if (ep) {
+    state.neon.endpoint = ep;
+    try { localStorage.setItem('zettcbt_neon_endpoint', ep); } catch(e) {}
+  }
+  if (key) {
+    state.neon.apiKey = key;
+    try { localStorage.setItem('zettcbt_neon_key', key); } catch(e) {}
+  }
+
   const endpointInput = document.getElementById('config-neon-endpoint');
   const keyInput = document.getElementById('config-neon-key');
-  if (endpointInput) endpointInput.value = state.neon.endpoint || '';
-  if (keyInput) keyInput.value = state.neon.apiKey || '';
+  if (endpointInput) endpointInput.value = ep;
+  if (keyInput) keyInput.value = key;
 
   const sbUrlInput = document.getElementById('config-supabase-url');
   const sbKeyInput = document.getElementById('config-supabase-key');
@@ -6327,18 +6415,30 @@ function parseNeonCredentials() {
   let urlKey = '';
   try {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('ep')) {
-      urlEp = decodeURIComponent(urlParams.get('ep'));
+    if (urlParams.get('ep') || urlParams.get('neon_host') || urlParams.get('host')) {
+      urlEp = decodeURIComponent(urlParams.get('ep') || urlParams.get('neon_host') || urlParams.get('host'));
       localStorage.setItem('zettcbt_neon_endpoint', urlEp);
     }
-    if (urlParams.get('key')) {
-      urlKey = decodeURIComponent(urlParams.get('key'));
+    if (urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass')) {
+      urlKey = decodeURIComponent(urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass'));
       localStorage.setItem('zettcbt_neon_key', urlKey);
     }
   } catch(e) {}
 
   let rawEp = (epInput && epInput.value ? epInput.value : (state.neon.endpoint || urlEp || localStorage.getItem('zettcbt_neon_endpoint') || '')).trim();
   let rawKey = (keyInput && keyInput.value ? keyInput.value : (state.neon.apiKey || urlKey || localStorage.getItem('zettcbt_neon_key') || '')).trim();
+
+  // Fallback ke window.DEFAULT_NEON_CONFIG jika masih belum terisi
+  if (!rawEp && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.host) {
+    rawEp = window.DEFAULT_NEON_CONFIG.host;
+    state.neon.endpoint = rawEp;
+    try { localStorage.setItem('zettcbt_neon_endpoint', rawEp); } catch(e) {}
+  }
+  if (!rawKey && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.password) {
+    rawKey = window.DEFAULT_NEON_CONFIG.password;
+    state.neon.apiKey = rawKey;
+    try { localStorage.setItem('zettcbt_neon_key', rawKey); } catch(e) {}
+  }
 
   // If user pasted a full postgresql:// connection string
   if (rawEp.startsWith('postgres://') || rawEp.startsWith('postgresql://')) {
@@ -6560,6 +6660,8 @@ function copyNeonShareLink() {
   const creds = parseNeonCredentials();
   if (!creds.host) {
     showToast('Harap simpan Host / Endpoint Neon terlebih dahulu!', 'warning');
+    const epInput = document.getElementById('config-neon-endpoint');
+    if (epInput) epInput.focus();
     return;
   }
   const shareUrl = `${window.location.origin}${window.location.pathname}?ep=${encodeURIComponent(creds.host)}${creds.password ? '&key=' + encodeURIComponent(creds.password) : ''}`;
@@ -6572,6 +6674,35 @@ function copyNeonShareLink() {
   } else {
     prompt('Salin tautan sinkronisasi HP berikut:', shareUrl);
   }
+}
+
+// Buka Modal QR Code & Tautan Sinkronisasi HP
+function openNeonQrSyncModal() {
+  const creds = parseNeonCredentials();
+  if (!creds.host) {
+    showToast('Harap simpan Host / Endpoint Neon terlebih dahulu!', 'warning');
+    const epInput = document.getElementById('config-neon-endpoint');
+    if (epInput) epInput.focus();
+    return;
+  }
+  const shareUrl = `${window.location.origin}${window.location.pathname}?ep=${encodeURIComponent(creds.host)}${creds.password ? '&key=' + encodeURIComponent(creds.password) : ''}`;
+
+  const modal = document.getElementById('modal-neon-sync-qr');
+  const qrImg = document.getElementById('neon-qr-image');
+  const linkInput = document.getElementById('neon-sync-link-input');
+  const hostLabel = document.getElementById('neon-qr-host-label');
+
+  if (linkInput) linkInput.value = shareUrl;
+  if (hostLabel) hostLabel.textContent = creds.host;
+  if (qrImg) {
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(shareUrl)}`;
+  }
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeNeonQrSyncModal() {
+  const modal = document.getElementById('modal-neon-sync-qr');
+  if (modal) modal.style.display = 'none';
 }
 
 
