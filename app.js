@@ -6341,12 +6341,12 @@ function closeImportStudentsModal() {
 }
 
 function downloadStudentTemplateCsv() {
-  const csvContent = "NISN,Nama Lengkap,Kelas,Jenis Kelamin\n" +
-    "2026-001,Ahmad Rizki Pratama,6,L\n" +
-    "2026-002,Bella Anggraini Putri,6,P\n" +
-    "2026-003,Dimas Aditya Nugraha,5,L\n" +
-    "2026-004,Fatimah Az-Zahra,5,P\n" +
-    "2026-005,Rian Hidayat,4,L\n";
+  const csvContent = "No,No Peserta / NISN,Nama Lengkap Siswa,Kelas / Rombel,Password\n" +
+    "1,123456,NOVRI,5A,358271\n" +
+    "2,123457,BELLA ANGGRAINI,5A,482910\n" +
+    "3,123458,DIMAS ADITYA,5B,619284\n" +
+    "4,123459,FATIMAH AZ-ZAHRA,5B,739102\n" +
+    "5,123460,RIAN HIDAYAT,6A,840291\n";
 
   const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -6383,8 +6383,18 @@ function parseStudentDataFromText(rawText) {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    // Abaikan header jika ada
-    if (i === 0 && (line.toLowerCase().includes('nisn') || line.toLowerCase().includes('nama'))) {
+    const lowerLine = line.toLowerCase();
+    
+    // Abaikan baris header tabel jika terdeteksi kata kunci header
+    if (i === 0 && (
+      lowerLine.includes('nisn') ||
+      lowerLine.includes('peserta') ||
+      lowerLine.includes('nama') ||
+      lowerLine.includes('password') ||
+      lowerLine.startsWith('no\t') ||
+      lowerLine.startsWith('no,') ||
+      lowerLine.startsWith('no;')
+    )) {
       continue;
     }
 
@@ -6398,17 +6408,72 @@ function parseStudentDataFromText(rawText) {
       tokens = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
     }
 
-    tokens = tokens.map(t => t.replace(/^["']|["']$/g, '').trim());
+    tokens = tokens.map(t => t.replace(/^["']|["']$/g, '').trim()).filter(t => t.length > 0);
 
     if (tokens.length >= 2) {
-      const nisn = tokens[0] || '';
-      const name = tokens[1] || '';
-      const defaultClass = (state.currentTeacher && state.currentTeacher.assignedClass) ? state.currentTeacher.assignedClass : '6';
-      const className = tokens[2] || defaultClass;
-      let gender = (tokens[3] || 'L').toUpperCase();
-      if (gender !== 'L' && gender !== 'P') {
-        gender = gender.startsWith('P') ? 'P' : 'L';
+      let nisn = '';
+      let name = '';
+      let className = '';
+      let password = '';
+      let gender = 'L';
+
+      const defaultClass = (state.currentTeacher && state.currentTeacher.assignedClass) ? state.currentTeacher.assignedClass : '5A';
+
+      // SKENARIO 1: Format 5 Kolom Sesuai Gambar: [No, No Peserta / NISN, Nama Lengkap Siswa, Kelas / Rombel, Password]
+      if (tokens.length >= 5) {
+        // Cek apakah kolom pertama adalah nomor urut (angka 1, 2, 3...)
+        const isFirstTokenSeqNumber = /^\d{1,4}$/.test(tokens[0]) && (tokens[1].length > 0);
+        const isFourthTokenGender = /^[LP]$/i.test(tokens[3]);
+
+        if (isFirstTokenSeqNumber && !isFourthTokenGender) {
+          // Format Gambar: [No, NISN, Nama, Kelas, Password]
+          nisn = tokens[1];
+          name = tokens[2];
+          className = tokens[3];
+          password = tokens[4];
+          if (tokens[5] && /^[LP]$/i.test(tokens[5])) gender = tokens[5].toUpperCase();
+        } else if (isFourthTokenGender) {
+          // Format Lama 5 Kolom: [NISN, Nama, Kelas, Gender, Password]
+          nisn = tokens[0];
+          name = tokens[1];
+          className = tokens[2];
+          gender = tokens[3].toUpperCase();
+          password = tokens[4];
+        } else {
+          // Fallback umum 5 kolom: anggap [No, NISN, Nama, Kelas, Password]
+          nisn = tokens[1];
+          name = tokens[2];
+          className = tokens[3];
+          password = tokens[4];
+        }
       }
+      // SKENARIO 2: Format 4 Kolom: [No Peserta / NISN, Nama Lengkap Siswa, Kelas / Rombel, Password/Gender]
+      else if (tokens.length === 4) {
+        nisn = tokens[0];
+        name = tokens[1];
+        className = tokens[2];
+        const lastCol = tokens[3];
+        if (/^[LP]$/i.test(lastCol) || lastCol.toLowerCase().startsWith('laki') || lastCol.toLowerCase().startsWith('perempuan')) {
+          gender = lastCol.toUpperCase().startsWith('P') ? 'P' : 'L';
+          password = '';
+        } else {
+          password = lastCol;
+        }
+      }
+      // SKENARIO 3: Format 3 Kolom: [NISN, Nama, Kelas]
+      else if (tokens.length === 3) {
+        nisn = tokens[0];
+        name = tokens[1];
+        className = tokens[2];
+      }
+      // SKENARIO 4: Format 2 Kolom: [NISN, Nama]
+      else if (tokens.length === 2) {
+        nisn = tokens[0];
+        name = tokens[1];
+      }
+
+      if (!className) className = defaultClass;
+      if (!password) password = getDeterministicStudentPassword(nisn) || '123456';
 
       if (nisn && name) {
         parsed.push({
@@ -6417,6 +6482,7 @@ function parseStudentDataFromText(rawText) {
           name: name,
           className: className,
           gender: gender,
+          password: password,
           status: 'active'
         });
       }
@@ -6450,14 +6516,20 @@ async function executeBatchImportStudents() {
 
   importedList.forEach(imp => {
     const existingIndex = state.students.findIndex(s => s.nisn.toLowerCase() === imp.nisn.toLowerCase());
+    const finalPass = (imp.password && imp.password.trim()) ? imp.password.trim() : (getDeterministicStudentPassword(imp.nisn) || '123456');
+
     if (existingIndex >= 0) {
       // Update data siswa yang sudah ada
       state.students[existingIndex].name = imp.name;
       state.students[existingIndex].className = imp.className;
-      state.students[existingIndex].gender = imp.gender;
+      if (imp.gender) state.students[existingIndex].gender = imp.gender;
+      if (imp.password && imp.password.trim()) {
+        state.students[existingIndex].password = imp.password.trim();
+      }
       updatedCount++;
     } else {
       // Siswa baru
+      imp.password = finalPass;
       state.students.push(imp);
       addedCount++;
     }
