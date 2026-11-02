@@ -3126,6 +3126,21 @@ body.dark-mode .srms-quick-logout-btn:hover {
   color: #3b82f6;
 }
 
+.srms-grade-badge.grade-b {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.srms-grade-badge.grade-c {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.srms-grade-badge.grade-d {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .srms-notices-feed {
   display: flex;
   flex-direction: column;
@@ -4764,6 +4779,41 @@ body.dark-mode .btn-release-exam.release-inactive {
   animation: pulse-danger 1s infinite alternate;
 }
 
+/* Tombol Tata Tertib Ujian Modern Vector Pill */
+.cbt-rules-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #ffffff;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  padding: 0.45rem 0.85rem;
+  border-radius: 99px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  white-space: nowrap;
+}
+
+.cbt-rules-header-btn svg {
+  color: #f59e0b;
+  transition: transform 0.2s ease;
+}
+
+.cbt-rules-header-btn:hover {
+  background: #fffbeb;
+  border-color: #f59e0b;
+  color: #b45309;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+  transform: translateY(-1px);
+}
+
+.cbt-rules-header-btn:hover svg {
+  transform: scale(1.12) rotate(-4deg);
+}
+
 /* 5. Mobile Progress Banner */
 .cbt-mobile-hero-progress {
   display: none;
@@ -5044,14 +5094,39 @@ body.dark-mode .btn-release-exam.release-inactive {
   font-size: 0.92rem;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 4px 14px rgba(15, 169, 127, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .cbt-btn-submit-green:hover {
   background-color: #0D8F6C;
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(15, 169, 127, 0.4);
+}
+
+.cbt-btn-next-action {
+  background-color: #2563EB;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.6rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.cbt-btn-next-action:hover {
+  background-color: #1D4ED8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
 }
 
 /* Grid button styling inside Tarakarta shell */
@@ -5261,11 +5336,11 @@ body.dark-mode .btn-release-exam.release-inactive {
   .cbt-rules-header-btn {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 3px !important;
-    background: #FFF1F2 !important;
-    color: #B91C1C !important;
-    border: 1px solid #FECDD3 !important;
-    padding: 0.25rem 0.5rem !important;
+    gap: 0.35rem !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.25rem 0.55rem !important;
     border-radius: 9999px !important;
     font-size: 0.7rem !important;
     font-weight: 700 !important;
@@ -5274,10 +5349,14 @@ body.dark-mode .btn-release-exam.release-inactive {
     flex-shrink: 0 !important;
   }
 
+  .cbt-rules-header-btn svg {
+    color: #f59e0b !important;
+  }
+
   .cbt-rules-header-btn:hover {
-    background: #fee2e2 !important;
-    border-color: #f87171 !important;
-    color: #991b1b !important;
+    background: #fffbeb !important;
+    border-color: #f59e0b !important;
+    color: #b45309 !important;
   }
 
   .cbt-btn-esc-label {
