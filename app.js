@@ -512,21 +512,27 @@ const state = {
     return defaultQuestions;
   })(),
 
-  // Mock Active Students (Tersebar di Kelas 6A, 6B, 5A, 5B, 4A untuk Menguji Isolasi)
+  // Live Active Students & Exam Progress (Sinkron Bersih dengan Database Neon & Sesi Berjalan)
   liveStudents: (() => {
-    const defaultLiveStudents = [
-      { nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', subject: 'Bahasa Indonesia', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 100, remainingMinutes: 0, time: '08:45 WIB' },
-      { nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', subject: 'Bahasa Indonesia', answeredCount: 4, totalQ: 5, warningCount: 1, status: 'in_progress', score: 0, remainingMinutes: 38, time: '-' },
-      { nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', subject: 'Matematika', answeredCount: 5, totalQ: 5, warningCount: 0, status: 'submitted', score: 90, remainingMinutes: 0, time: '08:50 WIB' },
-      { nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', subject: 'Matematika', answeredCount: 3, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, remainingMinutes: 52, time: '-' },
-      { nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', subject: 'IPAS', answeredCount: 2, totalQ: 5, warningCount: 0, status: 'in_progress', score: 0, remainingMinutes: 65, time: '-' }
-    ];
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_live_students') || 'null');
-      if (saved && Array.isArray(saved)) return saved;
+      if (Array.isArray(saved)) {
+        // Bersihkan data dummy mock (Ahmad Rizki Pratama, Bella, Dimas Aditya, Fatimah, Gilang)
+        const cleaned = saved.filter(s => {
+          if (!s || !s.nisn) return false;
+          const isMock = (s.nisn === '2026-001' && s.score === 100 && s.subject === 'Bahasa Indonesia' && s.time === '08:45 WIB') ||
+                         (s.nisn === '2026-003' && s.score === 90 && s.subject === 'Matematika' && s.time === '08:50 WIB') ||
+                         (s.nisn === '2026-002' && s.remainingMinutes === 38) ||
+                         (s.nisn === '2026-004' && s.remainingMinutes === 52) ||
+                         (s.nisn === '2026-005' && s.remainingMinutes === 65);
+          return !isMock;
+        });
+        localStorage.setItem('zettcbt_live_students', JSON.stringify(cleaned));
+        return cleaned;
+      }
     } catch(e) {}
-    localStorage.setItem('zettcbt_live_students', JSON.stringify(defaultLiveStudents));
-    return defaultLiveStudents;
+    localStorage.setItem('zettcbt_live_students', JSON.stringify([]));
+    return [];
   })(),
 
   // Pusat Notifikasi & Log Aktivitas Ujian Realtime (Pelanggaran, Selesai, Kendala)
@@ -3578,11 +3584,11 @@ function renderSrmsDashboard() {
   const submittedList = getVisibleSubmittedResults();
   const avgScore = submittedList.length > 0 
     ? (submittedList.reduce((acc, curr) => acc + (curr.score || 0), 0) / submittedList.length).toFixed(1)
-    : '88.5';
+    : '0';
   const cgpaValue = avgScore;
 
   const cgpaEl = document.getElementById('srms-cgpa-val');
-  if (cgpaEl) cgpaEl.textContent = cgpaValue > 0 ? cgpaValue : '88.5';
+  if (cgpaEl) cgpaEl.textContent = cgpaValue > 0 ? cgpaValue : '0';
 
   const coursesEl = document.getElementById('srms-courses-count');
   if (coursesEl) coursesEl.textContent = (state.subjects && state.subjects.length > 0) ? state.subjects.length : '6';
@@ -6460,6 +6466,35 @@ function exportResultsToExcel() {
   showToast('File nilai Excel/CSV berhasil diunduh!', 'success');
 }
 
+// Konfirmasi Pembersihan Data Hasil Ujian Dummy / Reset Sesi
+async function confirmClearAllResults() {
+  const confirmed = confirm('Apakah Anda yakin ingin membersihkan seluruh data hasil ujian dan riwayat peserta di tabel ini? Seluruh data nilai akan di-reset menjadi bersih.');
+  if (confirmed) {
+    await clearAllExamResults();
+  }
+}
+
+async function clearAllExamResults() {
+  state.liveStudents = [];
+  localStorage.setItem('zettcbt_live_students', JSON.stringify([]));
+  renderResultsTable();
+  renderLiveMonitoringTable();
+  renderSrmsRecentResults();
+  updateAdminMetrics();
+
+  // Jika terhubung ke Neon, bersihkan juga riwayat attempt dan jawaban di database cloud
+  const creds = parseNeonCredentials();
+  if (creds && creds.host) {
+    try {
+      await executeNeonSql('DELETE FROM student_answers; DELETE FROM student_attempts;');
+    } catch(e) {
+      console.warn('Neon clear attempts/answers deferred:', e.message);
+    }
+  }
+
+  showToast('✅ Seluruh data hasil ujian berhasil dibersihkan!', 'success');
+}
+
 // ==============================================================================
 // CLOUD DATABASE ENGINE (NEON.TECH SERVERLESS POSTGRESQL & SUPABASE)
 // ==============================================================================
@@ -7485,6 +7520,43 @@ async function pullRealtimeUpdatesFromNeon(options = {}) {
     // Jika di dashboard guru/admin, periksa juga perubahan master soal
     if (state.currentTeacher) {
       await fetchQuestionsFromNeonCloud();
+
+      // Sinkronkan status ujian siswa (student_attempts) dengan Neon Cloud
+      if (!state.isExamRunning) {
+        try {
+          const rawAttempts = await executeNeonSql('SELECT participant_number, student_name, class_name, status, warning_count, total_score, updated_at FROM student_attempts ORDER BY updated_at DESC;');
+          const attemptRows = (rawAttempts && rawAttempts.rows) ? rawAttempts.rows : (Array.isArray(rawAttempts) ? rawAttempts : []);
+          if (attemptRows.length === 0) {
+            // Jika di Neon tabel student_attempts kosong (0 rows), bersihkan entri dummy
+            const hasMock = (state.liveStudents || []).some(s => s.nisn === '2026-001' || s.nisn === '2026-003' || s.status === 'submitted');
+            if (hasMock) {
+              state.liveStudents = [];
+              localStorage.setItem('zettcbt_live_students', JSON.stringify([]));
+              renderResultsTable();
+              renderLiveMonitoringTable();
+              renderSrmsRecentResults();
+              updateAdminMetrics();
+            }
+          } else {
+            // Ada rekaman riil di Neon, sinkronkan ke liveStudents
+            const syncedFromCloud = attemptRows.map(r => ({
+              nisn: r.participant_number,
+              name: r.student_name,
+              className: r.class_name,
+              status: r.status,
+              warningCount: parseInt(r.warning_count) || 0,
+              score: r.total_score !== null ? parseInt(r.total_score) : 0,
+              time: r.updated_at ? new Date(r.updated_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB' : '-'
+            }));
+            state.liveStudents = syncedFromCloud;
+            localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
+            renderResultsTable();
+            renderLiveMonitoringTable();
+            renderSrmsRecentResults();
+            updateAdminMetrics();
+          }
+        } catch(eAtt) {}
+      }
     }
 
     const badge = document.getElementById('db-status-badge');
