@@ -2,11 +2,9 @@
  * ZettCBT Pro - Centralized Database Configuration Vault
  * Instansi: SD NEGERI 14 TOBOALI
  * 
- * Berkas ini berfungsi memastikan kredensial database Neon PostgreSQL 
- * otomatis aktif dan seragam di seluruh perangkat (Laptop Guru, PC Lab, dan Smartphone HP Siswa).
- * 
- * Pengguna dapat menempelkan Host & Password Neon resmi di bawah ini agar 
- * seluruh perangkat langsung tersambung otomatis tanpa perlu konfigurasi manual.
+ * Berkas ini diletakkan di root (folder utama) repository projek Anda.
+ * Berfungsi menghubungkan HP Siswa, Laptop Guru, dan PC Lab secara seragam
+ * langsung ke Database Neon Cloud (PostgreSQL).
  */
 
 window.DEFAULT_NEON_CONFIG = {
