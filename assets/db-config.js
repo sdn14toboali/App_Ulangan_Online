@@ -11,8 +11,8 @@
   var existing = window.DEFAULT_NEON_CONFIG || {};
 
   window.DEFAULT_NEON_CONFIG = {
-    // Host / HTTP Endpoint Neon (Contoh: ep-cool-fog-123456.ap-southeast-1.aws.neon.tech)
-    host: (existing.host && existing.host.trim().length > 0) ? existing.host.trim() : "",
+    // Host / HTTP Endpoint Neon Resmi SD Negeri 14 Toboali
+    host: "ep-soft-dust-aozrpt7t-pooler.c-2.ap-southeast-1.aws.neon.tech",
     
     // Database Password role neondb_owner atau Token API
     password: (existing.password && existing.password.trim().length > 0) ? existing.password.trim() : "",
