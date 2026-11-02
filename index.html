@@ -103,7 +103,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=3.37.0">
+  <link rel="stylesheet" href="style.css?v=3.38.0">
 </head>
 <body>
 
@@ -508,7 +508,8 @@
 
               <!-- Tombol Cepat: Lihat Tata Tertib Ujian -->
               <button type="button" class="cbt-rules-header-btn" onclick="openExamRulesModal()" title="Lihat 7 Pasal Tata Tertib Ujian">
-                📜 Aturan Ujian
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Tata Tertib Ujian</span>
               </button>
 
               <!-- Live Countdown Timer Pill -->
@@ -528,7 +529,10 @@
           <div class="cbt-mobile-hero-progress">
             <div class="cbt-progress-header">
               <span class="cbt-progress-label" id="cbt-mobile-progress-label">Progres Jawaban Soal</span>
-              <span class="cbt-progress-count" id="cbt-mobile-progress-count">0 dari 0 Soal (0%)</span>
+              <div style="display: inline-flex; align-items: center; gap: 0.45rem;">
+                <span class="badge" id="cbt-mobile-duration-badge" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 99px;">⏱️ Limit: 90m</span>
+                <span class="cbt-progress-count" id="cbt-mobile-progress-count">0 dari 0 Soal (0%)</span>
+              </div>
             </div>
             <div class="cbt-progress-bar-track">
               <div class="cbt-progress-bar-fill" id="cbt-mobile-progress-bar" style="width: 0%;"></div>
@@ -546,13 +550,16 @@
                 <div class="cbt-card-tag">Test</div>
                 <div class="cbt-card-val" id="cbt-card-subject-val">Matematika</div>
                 <div class="cbt-card-sub" id="cbt-card-class-val">Kelas 6A • UAS Resmi</div>
+                <div style="margin-top: 0.35rem;">
+                  <span class="badge" id="cbt-card-duration-badge" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;">⏱️ Batas Waktu: 90 Menit</span>
+                </div>
               </div>
 
               <!-- Card 2: Sisa Waktu -->
               <div class="cbt-stacked-card">
                 <div class="cbt-card-tag">Sisa Waktu</div>
                 <div class="cbt-card-val cbt-mono-timer" id="cbt-desktop-timer-val">00 : 00 : 00</div>
-                <div class="cbt-card-sub">Sinkronisasi Server Otomatis</div>
+                <div class="cbt-card-sub" id="cbt-desktop-timer-sub">Batas Pengerjaan: 90 Menit</div>
               </div>
 
               <!-- Card 3: Soal (Grid Nomor) -->
@@ -622,8 +629,9 @@
                   <span>Ragu-ragu</span>
                 </label>
 
-                <button type="button" class="cbt-btn-submit-green" id="btn-submit-exam-tarakarta" onclick="openSubmitConfirmModal()">
-                  Submit Jawaban
+                <button type="button" class="cbt-btn-next-action" id="btn-submit-exam-tarakarta" onclick="navigateQuestion(1)">
+                  <span>Soal Selanjutnya</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
               </div>
 
@@ -2924,6 +2932,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.37.0"></script>
+  <script src="app.js?v=3.38.0"></script>
 </body>
 </html>
