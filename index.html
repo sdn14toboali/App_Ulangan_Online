@@ -2388,8 +2388,8 @@
       <div class="modal-body">
         <div style="background-color: var(--primary-50); border: 1px solid var(--primary-100); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1rem; font-size: 0.82rem; color: var(--primary-800); line-height: 1.5;">
           💡 <strong>Petunjuk Impor Massal (Sesuai Format Resmi):</strong><br>
-          Format kolom: <strong>No, No Peserta / NISN, Nama Lengkap Siswa, Kelas / Rombel, Password</strong>.<br>
-          <em>(Kolom 'No' bersifat opsional. Anda dapat memilih file <code>.csv</code> atau <strong>langsung copy-paste baris tabel dari Microsoft Excel</strong> ke kotak di bawah).</em>
+          Format kolom: <strong>No, No Peserta / NISN, Nama Lengkap Siswa, Kelas / Rombel</strong>.<br>
+          <em>(Kolom 'No' bersifat opsional. <strong>Password tidak perlu diisi pada Excel</strong> karena akan <strong>dibuatkan otomatis (PIN unik 6-digit)</strong> oleh sistem saat data diimpor!)</em>
         </div>
 
         <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
@@ -2398,13 +2398,9 @@
             Pilih File Excel / CSV
             <input type="file" id="import-student-file-input" accept=".xlsx, .xls, .csv, .txt, .tsv" onchange="handleStudentImportFile(event)" style="display: none;">
           </label>
-          <button type="button" class="btn btn-outline btn-sm" onclick="downloadStudentTemplateExcel(event)" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+          <a href="assets/template_data_siswa.xls" download="template_data_siswa_sdn14.xls" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600; color: var(--slate-800); text-decoration: none;" title="Unduh berkas format contoh Excel resmi (.xls)">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Unduh Format Contoh Excel (.XLSX)
-          </button>
-          <a href="assets/template_data_siswa.xls" download="template_data_siswa_sdn14.xls" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; color: var(--slate-700); text-decoration: none;" title="Unduh cadangan langsung berkas Excel resmi tanpa JavaScript">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-            Cadangan (.XLS)
+            Unduh Format Contoh Excel (.XLS)
           </a>
         </div>
 
@@ -2413,7 +2409,7 @@
             <span>Atau Salin & Tempel (Paste) Baris Excel ke Sini:</span>
             <span id="import-preview-count" style="font-size: 0.8rem; font-weight: 700; color: var(--emerald-600);">Terdeteksi: 0 siswa</span>
           </label>
-          <textarea id="import-students-raw-text" class="form-control" rows="5" placeholder="Contoh baris Excel (Sesuai Format Resmi):&#10;1	123456	NOVRI	5A	358271&#10;2	123457	BELLA ANGGRAINI	5A	482910&#10;3	123458	DIMAS ADITYA	5B	619284" oninput="updateImportTextPreview()"></textarea>
+          <textarea id="import-students-raw-text" class="form-control" rows="5" placeholder="Contoh baris Excel (4 Kolom Sesuai Format Resmi):&#10;1	123456	NOVRI	5A&#10;2	123457	BELLA ANGGRAINI	5A&#10;3	123458	DIMAS ADITYA	5B" oninput="updateImportTextPreview()"></textarea>
           <small style="font-size: 0.75rem; color: var(--slate-500); display: block; margin-top: 0.25rem;">*Pemisah bisa menggunakan Tab (hasil copy-paste langsung dari tabel Microsoft Excel), Koma (,), atau Titik Koma (;).</small>
 
           <!-- Pratinjau Visual Tabel Mini Data Siswa yang Terdeteksi -->
@@ -2430,7 +2426,7 @@
                     <th style="padding: 4px 8px; text-align: center;">No Peserta / NISN</th>
                     <th style="padding: 4px 8px; text-align: left;">Nama Lengkap Siswa</th>
                     <th style="padding: 4px 8px; text-align: center;">Kelas</th>
-                    <th style="padding: 4px 8px; text-align: center;">Password</th>
+                    <th style="padding: 4px 8px; text-align: center;">Password (PIN Otomatis)</th>
                   </tr>
                 </thead>
                 <tbody id="import-preview-tbody">
@@ -2969,6 +2965,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.40.2"></script>
+  <script src="app.js?v=3.41.0"></script>
 </body>
 </html>
