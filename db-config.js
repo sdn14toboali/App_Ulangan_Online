@@ -12,10 +12,10 @@
 
   window.DEFAULT_NEON_CONFIG = {
     // Host / HTTP Endpoint Neon Resmi SD Negeri 14 Toboali
-    host: "ep-soft-dust-aozrpt7t-pooler.c-2.ap-southeast-1.aws.neon.tech",
+    host: (existing.host && existing.host.trim().length > 0) ? existing.host.trim() : "ep-soft-dust-aozrpt7t-pooler.c-2.ap-southeast-1.aws.neon.tech",
     
     // Database Password role neondb_owner atau Token API
-    password: (existing.password && existing.password.trim().length > 0) ? existing.password.trim() : "",
+    password: (existing.password && existing.password.trim().length > 0) ? existing.password.trim() : "npg_Mo95jCucEpDa",
     
     // Database Name & Role Default
     database: existing.database || "neondb",
