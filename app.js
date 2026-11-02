@@ -3455,10 +3455,11 @@ function submitFinalExam(forced = false) {
 
   state.student.endTime = new Date();
 
-  // Calculate Score
+  // Calculate Score & Correct Answers Accurately
   let totalScore = 0;
   let correctCount = 0;
-  state.questions.forEach((q) => {
+  const examQuestions = (state.activeExamQuestions && state.activeExamQuestions.length > 0) ? state.activeExamQuestions : state.questions;
+  examQuestions.forEach((q) => {
     const ans = state.student.answers[q.id];
     if (ans && ans.selected === q.correctKey) {
       totalScore += (q.scoreWeight || 20);
@@ -3466,12 +3467,17 @@ function submitFinalExam(forced = false) {
     }
   });
   state.student.score = totalScore;
+  state.student.correctCount = correctCount;
+  state.student.totalQ = examQuestions.length;
 
   // Update Live Monitoring Entry
   const target = state.liveStudents.find(s => s.nisn === state.student.nisn);
   if (target) {
     target.status = 'submitted';
     target.score = totalScore;
+    target.correctCount = correctCount;
+    target.totalQ = examQuestions.length;
+    target.answeredCount = Object.keys(state.student.answers || {}).length;
     target.time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
     localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
   }
@@ -3671,7 +3677,7 @@ function renderSrmsRecentResults() {
   if (submittedList.length > 0) {
     let rowsHtml = '';
     submittedList.slice(0, 5).forEach(st => {
-      const score = st.score || 85;
+      const score = (st.score !== undefined && st.score !== null) ? st.score : 0;
       const grade = score >= 90 ? 'A+' : (score >= 80 ? 'A' : (score >= 70 ? 'B' : 'C'));
       const badgeCls = score >= 75 ? 'badge-pass' : 'badge-remedial';
       const badgeText = score >= 75 ? 'Tuntas' : 'Remedial';
@@ -4341,9 +4347,11 @@ function renderLiveMonitoringTable() {
       ? '<span class="badge badge-danger" style="font-size: 0.75rem; font-weight: 700;">🚨 ' + st.warningCount + 'x Peringatan</span>'
       : '<span class="badge badge-success" style="font-size: 0.75rem; font-weight: 700;">🟢 Bersih</span>';
 
-    const percent = st.totalQ > 0 ? Math.round((st.answeredCount / st.totalQ) * 100) : 0;
+    const totalQ = st.totalQ || (state.questions && state.questions.length > 0 ? state.questions.length : 5);
+    const answered = typeof st.answeredCount === 'number' ? st.answeredCount : (st.status === 'submitted' ? totalQ : 0);
+    const percent = totalQ > 0 ? Math.round((answered / totalQ) * 100) : 0;
     const progressHtml = `
-      <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 3px;">${st.answeredCount} / ${st.totalQ} Soal (${percent}%)</div>
+      <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 3px;">${answered} / ${totalQ} Soal (${percent}%)</div>
       <div style="width: 100%; height: 5px; background: var(--slate-200); border-radius: 99px; overflow: hidden;">
         <div style="width: ${percent}%; height: 100%; background: ${isDone ? '#10b981' : '#3b82f6'}; border-radius: 99px;"></div>
       </div>
@@ -6469,14 +6477,26 @@ function renderResultsTable() {
   finishedList.sort((a, b) => b.score - a.score);
 
   finishedList.forEach((st, idx) => {
+    const qCount = st.totalQ || (state.questions && state.questions.length > 0 ? state.questions.length : 5);
+    let correct = 0;
+    if (typeof st.correctCount === 'number' && st.correctCount > 0) {
+      correct = st.correctCount;
+    } else if (typeof st.score === 'number' && st.score > 0) {
+      correct = Math.min(qCount, Math.round(st.score / 20));
+    }
+    const percent = qCount > 0 ? Math.round((correct / qCount) * 100) : 0;
+    const badgeColor = percent >= 75 ? '#15803d' : (percent >= 50 ? '#b45309' : '#b91c1c');
+    const badgeBg = percent >= 75 ? '#f0fdf4' : (percent >= 50 ? '#fffbeb' : '#fef2f2');
+    const badgeBorder = percent >= 75 ? '#bbf7d0' : (percent >= 50 ? '#fde68a' : '#fecaca');
+
     const tr = document.createElement('tr');
     tr.innerHTML = 
       '<td>' + (idx + 1) + '</td>' +
       '<td>' + escapeHtml(st.nisn) + '</td>' +
       '<td><strong>' + escapeHtml(st.name) + '</strong></td>' +
       '<td><span class="badge" style="background: var(--slate-200); font-weight: 700;">' + escapeHtml(st.className) + '</span></td>' +
-      '<td>' + (st.answeredCount || 0) + ' / ' + (st.totalQ || 0) + '</td>' +
-      '<td><strong style="color: var(--primary-600); font-size: 1.1rem;">' + (st.score !== undefined ? st.score : '-') + '</strong></td>' +
+      '<td><span style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; color: ' + badgeColor + '; background: ' + badgeBg + '; border: 1px solid ' + badgeBorder + '; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.82rem;">🎯 ' + correct + ' / ' + qCount + ' Benar</span></td>' +
+      '<td><strong style="color: var(--primary-600); font-size: 1.15rem;">' + (st.score !== undefined ? st.score : '-') + '</strong></td>' +
       '<td>' + escapeHtml(st.time || '-') + '</td>' +
       '<td style="text-align: center;">' +
         '<button type="button" class="btn btn-outline btn-xs" style="color: var(--rose-600); border-color: var(--rose-300); padding: 0.2rem 0.55rem; font-size: 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;" onclick="confirmDeleteStudentResult(\'' + escapeHtml(st.nisn) + '\', \'' + escapeHtml(st.name).replace(/'/g, "\\'") + '\')" title="Hapus nilai peserta ini">' +
@@ -6497,17 +6517,24 @@ function exportResultsToExcel() {
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,';
-  csvContent += 'Peringkat,No Peserta,Nama Siswa,Kelas,Total Soal Terjawab,Nilai Akhir,Waktu Selesai\r\n';
+  csvContent += 'Peringkat,No Peserta,Nama Siswa,Kelas,Jawaban Benar,Nilai Akhir,Waktu Selesai\r\n';
 
   finishedList.sort((a, b) => b.score - a.score);
 
   finishedList.forEach((st, idx) => {
+    const qCount = st.totalQ || (state.questions && state.questions.length > 0 ? state.questions.length : 5);
+    let correct = 0;
+    if (typeof st.correctCount === 'number' && st.correctCount > 0) {
+      correct = st.correctCount;
+    } else if (typeof st.score === 'number' && st.score > 0) {
+      correct = Math.min(qCount, Math.round(st.score / 20));
+    }
     const row = [
       idx + 1,
       '"' + st.nisn + '"',
       '"' + st.name + '"',
       '"' + st.className + '"',
-      st.answeredCount + ' / ' + st.totalQ,
+      correct + ' / ' + qCount + ' Benar',
       st.score,
       '"' + st.time + '"'
     ].join(',');
@@ -7624,15 +7651,25 @@ async function pullRealtimeUpdatesFromNeon(options = {}) {
             }
           } else {
             // Ada rekaman riil di Neon, sinkronkan ke liveStudents
-            const syncedFromCloud = attemptRows.map(r => ({
-              nisn: r.participant_number,
-              name: r.student_name,
-              className: r.class_name,
-              status: r.status,
-              warningCount: parseInt(r.warning_count) || 0,
-              score: r.total_score !== null ? parseInt(r.total_score) : 0,
-              time: r.updated_at ? new Date(r.updated_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB' : '-'
-            }));
+            const totalQFallback = (state.questions && state.questions.length > 0) ? state.questions.length : 5;
+            const syncedFromCloud = attemptRows.map(r => {
+              const sc = r.total_score !== null ? parseInt(r.total_score) : 0;
+              const existingLive = (state.liveStudents || []).find(s => s.nisn === r.participant_number);
+              const qCount = (existingLive && existingLive.totalQ) ? existingLive.totalQ : totalQFallback;
+              const cCount = (existingLive && typeof existingLive.correctCount === 'number' && existingLive.correctCount > 0) ? existingLive.correctCount : Math.min(qCount, Math.round(sc / 20));
+              return {
+                nisn: r.participant_number,
+                name: r.student_name,
+                className: r.class_name,
+                status: r.status,
+                warningCount: parseInt(r.warning_count) || 0,
+                score: sc,
+                totalQ: qCount,
+                correctCount: cCount,
+                answeredCount: (existingLive && existingLive.answeredCount) ? existingLive.answeredCount : qCount,
+                time: r.updated_at ? new Date(r.updated_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB' : '-'
+              };
+            });
             state.liveStudents = syncedFromCloud;
             localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
             renderResultsTable();
