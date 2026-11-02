@@ -583,10 +583,12 @@ function initPwaSupport() {
   }
 
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const banner = document.getElementById('pwa-install-banner');
   if (isStandalone) {
-    const banner = document.getElementById('pwa-install-banner');
     if (banner) banner.style.display = 'none';
     return;
+  } else {
+    if (banner) banner.style.display = 'flex';
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -596,12 +598,15 @@ function initPwaSupport() {
     if (banner) {
       banner.style.display = 'flex';
     }
+    const cta = document.getElementById('pwa-auto-install-cta');
+    if (cta) cta.style.display = 'block';
   });
 
   window.addEventListener('appinstalled', () => {
     deferredPwaPrompt = null;
     const banner = document.getElementById('pwa-install-banner');
     if (banner) banner.style.display = 'none';
+    closePwaGuideModal();
     showToast('🎉 Aplikasi Ujian Online berhasil terpasang di HP!', 'success');
   });
 }
@@ -612,15 +617,83 @@ function triggerPwaInstall() {
     deferredPwaPrompt.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === 'accepted') {
         showToast('Memasang aplikasi ke layar HP...', 'info');
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'none';
       }
       deferredPwaPrompt = null;
-      const banner = document.getElementById('pwa-install-banner');
-      if (banner) banner.style.display = 'none';
     });
   } else {
-    alert('Untuk memasang aplikasi di HP Android:\n1. Buka menu titik tiga (⋮) di pojok kanan atas browser Chrome.\n2. Pilih "Tambahkan ke Layar Utama" atau "Install Aplikasi".\n3. Ikon Ujian Online akan langsung muncul di layar HP Anda!');
+    openPwaGuideModal();
   }
 }
+
+function triggerPwaPromptDirect() {
+  if (deferredPwaPrompt) {
+    deferredPwaPrompt.prompt();
+    deferredPwaPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        showToast('Memasang aplikasi ke layar HP...', 'info');
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'none';
+      }
+      deferredPwaPrompt = null;
+      closePwaGuideModal();
+    });
+  } else {
+    showToast('Gunakan petunjuk browser di atas untuk menambahkan ke layar utama.', 'info');
+  }
+}
+
+function openPwaGuideModal() {
+  const modal = document.getElementById('modal-pwa-install-guide');
+  if (modal) {
+    modal.style.display = 'flex';
+    const cta = document.getElementById('pwa-auto-install-cta');
+    if (cta) cta.style.display = deferredPwaPrompt ? 'block' : 'none';
+  }
+}
+
+function closePwaGuideModal() {
+  const modal = document.getElementById('modal-pwa-install-guide');
+  if (modal) modal.style.display = 'none';
+}
+
+function switchPwaGuideTab(platform) {
+  const tabAndroid = document.getElementById('pwa-tab-android');
+  const tabIos = document.getElementById('pwa-tab-ios');
+  const guideAndroid = document.getElementById('pwa-guide-android');
+  const guideIos = document.getElementById('pwa-guide-ios');
+
+  if (platform === 'android') {
+    if (tabAndroid) {
+      tabAndroid.style.background = '#2563eb';
+      tabAndroid.style.color = '#ffffff';
+    }
+    if (tabIos) {
+      tabIos.style.background = 'transparent';
+      tabIos.style.color = '#64748b';
+    }
+    if (guideAndroid) guideAndroid.style.display = 'block';
+    if (guideIos) guideIos.style.display = 'none';
+  } else {
+    if (tabIos) {
+      tabIos.style.background = '#0f172a';
+      tabIos.style.color = '#ffffff';
+    }
+    if (tabAndroid) {
+      tabAndroid.style.background = 'transparent';
+      tabAndroid.style.color = '#64748b';
+    }
+    if (guideIos) guideIos.style.display = 'block';
+    if (guideAndroid) guideAndroid.style.display = 'none';
+  }
+}
+
+window.triggerPwaInstall = triggerPwaInstall;
+window.triggerPwaPromptDirect = triggerPwaPromptDirect;
+window.openPwaGuideModal = openPwaGuideModal;
+window.closePwaGuideModal = closePwaGuideModal;
+window.switchPwaGuideTab = switchPwaGuideTab;
 
 // ==============================================================================
 // THEME ENGINE: DARK MODE & LIGHT MODE (ZETTBOT ANTI-AI)
