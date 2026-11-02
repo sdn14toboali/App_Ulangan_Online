@@ -54,51 +54,44 @@
  <Worksheet ss:Name="Data Siswa">
   <Table ss:DefaultRowHeight="20">
    <Column ss:Width="45"/>
-   <Column ss:Width="135"/>
-   <Column ss:Width="200"/>
-   <Column ss:Width="100"/>
-   <Column ss:Width="100"/>
+   <Column ss:Width="140"/>
+   <Column ss:Width="230"/>
+   <Column ss:Width="110"/>
    <Row ss:Height="26">
     <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">No</Data></Cell>
     <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">No Peserta / NISN</Data></Cell>
     <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Nama Lengkap Siswa</Data></Cell>
     <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Kelas / Rombel</Data></Cell>
-    <Cell ss:StyleID="HeaderStyle"><Data ss:Type="String">Password</Data></Cell>
    </Row>
    <Row>
     <Cell ss:StyleID="CenterText"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">123456</Data></Cell>
     <Cell ss:StyleID="LeftText"><Data ss:Type="String">NOVRI</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">5A</Data></Cell>
-    <Cell ss:StyleID="CenterText"><Data ss:Type="String">358271</Data></Cell>
    </Row>
    <Row>
     <Cell ss:StyleID="CenterText"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">123457</Data></Cell>
     <Cell ss:StyleID="LeftText"><Data ss:Type="String">BELLA ANGGRAINI</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">5A</Data></Cell>
-    <Cell ss:StyleID="CenterText"><Data ss:Type="String">482910</Data></Cell>
    </Row>
    <Row>
     <Cell ss:StyleID="CenterText"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">123458</Data></Cell>
     <Cell ss:StyleID="LeftText"><Data ss:Type="String">DIMAS ADITYA</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">5B</Data></Cell>
-    <Cell ss:StyleID="CenterText"><Data ss:Type="String">619284</Data></Cell>
    </Row>
    <Row>
     <Cell ss:StyleID="CenterText"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">123459</Data></Cell>
     <Cell ss:StyleID="LeftText"><Data ss:Type="String">FATIMAH AZ-ZAHRA</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">5B</Data></Cell>
-    <Cell ss:StyleID="CenterText"><Data ss:Type="String">739102</Data></Cell>
    </Row>
    <Row>
     <Cell ss:StyleID="CenterText"><Data ss:Type="Number">5</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">123460</Data></Cell>
     <Cell ss:StyleID="LeftText"><Data ss:Type="String">RIAN HIDAYAT</Data></Cell>
     <Cell ss:StyleID="CenterText"><Data ss:Type="String">6A</Data></Cell>
-    <Cell ss:StyleID="CenterText"><Data ss:Type="String">840291</Data></Cell>
    </Row>
   </Table>
  </Worksheet>
