@@ -27,6 +27,13 @@
   <!-- Engine Pengolah Berkas Excel Asli (.xlsx / .xls) SheetJS (100% Offline Safe) -->
   <script src="assets/xlsx.full.min.js"></script>
   <script>
+    if (typeof XLSX === 'undefined') {
+      var sjs = document.createElement('script');
+      sjs.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+      document.head.appendChild(sjs);
+    }
+  </script>
+  <script>
     // Fallback Darurat Logo Resmi SDN 14 Toboali jika berkas eksternal belum diunggah ke Vercel/GitHub
     if (typeof window !== 'undefined' && !window.OFFICIAL_SDN14_LOGO) {
       window.OFFICIAL_SDN14_LOGO = "assets/icon-192.png";
@@ -105,7 +112,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=3.40.0">
+  <link rel="stylesheet" href="style.css?v=3.40.1">
 </head>
 <body>
 
@@ -2958,6 +2965,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.40.0"></script>
+  <script src="app.js?v=3.40.1"></script>
 </body>
 </html>
