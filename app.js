@@ -3504,6 +3504,7 @@ function submitFinalExam(forced = false) {
   updateAdminMetrics();
   renderLiveMonitoringTable();
   renderResultsTable();
+  renderSrmsDashboard();
 
   // Exit Fullscreen if active
   if (document.fullscreenElement) {
@@ -3639,33 +3640,125 @@ function renderSrmsDashboard() {
   const headerRoleEl = document.getElementById('srms-header-user-role');
   if (headerRoleEl) headerRoleEl.textContent = teacherRole;
 
-  // 2. Metrics & KPI Row (Gambar 1)
+  // 2. Metrics & KPI Row (Gambar 2 Atas)
   const submittedList = getVisibleSubmittedResults();
+  const visibleLive = (typeof getVisibleLiveStudents === 'function') ? getVisibleLiveStudents() : (state.liveStudents || []);
+  const totalStudents = (state.students && state.students.length > 0) ? state.students.length : (submittedList.length || 1);
+
+  // Rata-rata Nilai
   const avgScore = submittedList.length > 0 
-    ? (submittedList.reduce((acc, curr) => acc + (curr.score || 0), 0) / submittedList.length).toFixed(1)
+    ? (submittedList.reduce((acc, curr) => acc + (typeof curr.score === 'number' ? curr.score : 0), 0) / submittedList.length).toFixed(1)
     : '0';
-  const cgpaValue = avgScore;
+  const cgpaEl = document.getElementById('srms-kpi-cgpa') || document.getElementById('srms-cgpa-val');
+  if (cgpaEl) cgpaEl.textContent = avgScore;
+  const cgpaSub = document.getElementById('srms-kpi-cgpa-sub');
+  if (cgpaSub) cgpaSub.textContent = submittedList.length > 0 ? `${submittedList.length} Siswa Sudah Dinilai` : 'Rata-rata Nilai UAS';
 
-  const cgpaEl = document.getElementById('srms-cgpa-val');
-  if (cgpaEl) cgpaEl.textContent = cgpaValue > 0 ? cgpaValue : '0';
+  // Mata Pelajaran
+  const coursesEl = document.getElementById('srms-kpi-courses') || document.getElementById('srms-courses-count');
+  if (coursesEl) {
+    const activeSubjCount = (state.subjects && state.subjects.length > 0) ? state.subjects.length : 1;
+    coursesEl.textContent = activeSubjCount;
+  }
 
-  const coursesEl = document.getElementById('srms-courses-count');
-  if (coursesEl) coursesEl.textContent = (state.subjects && state.subjects.length > 0) ? state.subjects.length : '6';
+  // Ujian Selesai (Submit vs Total Siswa)
+  const examsEl = document.getElementById('srms-kpi-exams') || document.getElementById('srms-exams-completed');
+  if (examsEl) examsEl.textContent = `${submittedList.length} / ${totalStudents}`;
+  const examsSub = document.getElementById('srms-kpi-exams-sub');
+  if (examsSub) examsSub.textContent = 'Siswa Sudah Submit';
 
-  const examsEl = document.getElementById('srms-exams-completed');
-  if (examsEl) examsEl.textContent = `${submittedList.length} Selesai`;
+  // Ketuntasan Siswa (KKM >= 75)
+  const passCount = submittedList.filter(s => (s.score || 0) >= 75).length;
+  const passPct = submittedList.length > 0 ? Math.round((passCount / submittedList.length) * 100) : 0;
+  const rankEl = document.getElementById('srms-kpi-rank') || document.getElementById('srms-overall-rank');
+  if (rankEl) rankEl.textContent = `${passPct}%`;
+  const rankLabel = document.getElementById('srms-kpi-rank-label');
+  if (rankLabel) rankLabel.textContent = 'Ketuntasan Siswa';
+  const rankSub = document.getElementById('srms-kpi-rank-sub');
+  if (rankSub) rankSub.textContent = `${passCount} dari ${submittedList.length} Tuntas (>=75)`;
 
-  const rankEl = document.getElementById('srms-overall-rank');
-  if (rankEl) rankEl.textContent = submittedList.length > 0 ? `#1 - #${submittedList.length}` : '-';
+  // Kehadiran Siswa
+  const activeStudents = visibleLive.filter(s => s.status === 'in_progress' || s.status === 'submitted').length;
+  const attPct = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : (submittedList.length > 0 ? 100 : 0);
+  const attEl = document.getElementById('srms-kpi-attendance') || document.getElementById('srms-attendance-pct');
+  if (attEl) attEl.textContent = `${attPct}%`;
+  const attSub = document.getElementById('srms-kpi-attendance-sub');
+  if (attSub) attSub.textContent = `${activeStudents} dari ${totalStudents} Siswa Hadir`;
 
-  const attEl = document.getElementById('srms-attendance-pct');
-  if (attEl) attEl.textContent = '100%';
-
-  // 3. Render Recent Results Table (Gambar 1)
+  // 3. Render Recent Results Table (Gambar 2 Tengah)
   renderSrmsRecentResults();
 
-  // 4. Render Horizontal Token Ribbon (Gambar 2)
+  // 4. Render Dynamic Donut Chart Ketuntasan (Gambar 2 Bawah)
+  renderSrmsDonutChart(submittedList);
+
+  // 5. Render Horizontal Token Ribbon
   renderHorizontalTokenRibbon();
+}
+
+function renderSrmsDonutChart(submittedList) {
+  const total = submittedList ? submittedList.length : 0;
+  let countA = 0, countB = 0, countC = 0, countD = 0;
+
+  if (total > 0) {
+    submittedList.forEach(s => {
+      const sc = typeof s.score === 'number' ? s.score : 0;
+      if (sc >= 85) countA++;
+      else if (sc >= 75) countB++;
+      else if (sc >= 60) countC++;
+      else countD++;
+    });
+  }
+
+  const pctA = total > 0 ? Math.round((countA / total) * 100) : 0;
+  const pctB = total > 0 ? Math.round((countB / total) * 100) : 0;
+  const pctC = total > 0 ? Math.round((countC / total) * 100) : 0;
+  const pctD = total > 0 ? Math.max(0, 100 - pctA - pctB - pctC) : 0;
+  const passPct = total > 0 ? Math.round(((countA + countB) / total) * 100) : 0;
+
+  // Center percentage
+  const mainPctEl = document.getElementById('srms-donut-pct-main');
+  if (mainPctEl) mainPctEl.textContent = total > 0 ? `${passPct}%` : '0%';
+
+  // SVG Segments
+  const segA = document.getElementById('srms-donut-seg-a');
+  const segB = document.getElementById('srms-donut-seg-b');
+  const segC = document.getElementById('srms-donut-seg-c');
+  const segD = document.getElementById('srms-donut-seg-d');
+
+  if (total > 0) {
+    if (segA) {
+      segA.setAttribute('stroke-dasharray', `${pctA}, 100`);
+      segA.setAttribute('stroke-dashoffset', '0');
+    }
+    if (segB) {
+      segB.setAttribute('stroke-dasharray', `${pctB}, 100`);
+      segB.setAttribute('stroke-dashoffset', `${-pctA}`);
+    }
+    if (segC) {
+      segC.setAttribute('stroke-dasharray', `${pctC}, 100`);
+      segC.setAttribute('stroke-dashoffset', `${-(pctA + pctB)}`);
+    }
+    if (segD) {
+      segD.setAttribute('stroke-dasharray', `${pctD}, 100`);
+      segD.setAttribute('stroke-dashoffset', `${-(pctA + pctB + pctC)}`);
+    }
+  } else {
+    if (segA) segA.setAttribute('stroke-dasharray', '0, 100');
+    if (segB) segB.setAttribute('stroke-dasharray', '0, 100');
+    if (segC) segC.setAttribute('stroke-dasharray', '0, 100');
+    if (segD) segD.setAttribute('stroke-dasharray', '0, 100');
+  }
+
+  // Legend percentages & counts
+  const legA = document.getElementById('srms-legend-pct-a');
+  const legB = document.getElementById('srms-legend-pct-b');
+  const legC = document.getElementById('srms-legend-pct-c');
+  const legD = document.getElementById('srms-legend-pct-d');
+
+  if (legA) legA.textContent = total > 0 ? `${pctA}% (${countA})` : '0%';
+  if (legB) legB.textContent = total > 0 ? `${pctB}% (${countB})` : '0%';
+  if (legC) legC.textContent = total > 0 ? `${pctC}% (${countC})` : '0%';
+  if (legD) legD.textContent = total > 0 ? `${pctD}% (${countD})` : '0%';
 }
 
 function renderSrmsRecentResults() {
@@ -3678,17 +3771,26 @@ function renderSrmsRecentResults() {
     let rowsHtml = '';
     submittedList.slice(0, 5).forEach(st => {
       const score = (st.score !== undefined && st.score !== null) ? st.score : 0;
-      const grade = score >= 90 ? 'A+' : (score >= 80 ? 'A' : (score >= 70 ? 'B' : 'C'));
+      let grade = 'D';
+      if (score >= 90) grade = 'A+';
+      else if (score >= 80) grade = 'A';
+      else if (score >= 75) grade = 'B+';
+      else if (score >= 70) grade = 'B';
+      else if (score >= 60) grade = 'C';
+      else grade = 'D';
+
       const badgeCls = score >= 75 ? 'badge-pass' : 'badge-remedial';
       const badgeText = score >= 75 ? 'Tuntas' : 'Remedial';
+      const gradeCls = (grade === 'A+' || grade === 'A') ? 'grade-a' : (grade === 'B+' || grade === 'B' ? 'grade-bplus' : (grade === 'C' ? 'grade-c' : 'grade-d'));
+      const subjName = st.subject || state.session.subject || (state.subjects && state.subjects[0] ? state.subjects[0].name : 'Matematika');
 
       rowsHtml += `
         <tr>
-          <td><span class="subject-code-tag">${escapeHtml(state.session.subject || 'CBT')}</span></td>
+          <td><span class="subject-code-tag">${escapeHtml(subjName)}</span></td>
           <td><strong>${escapeHtml(st.name)} (${escapeHtml(st.nisn)})</strong></td>
           <td>${escapeHtml(st.className || 'Kelas 6A')}</td>
-          <td>${score} / 100</td>
-          <td><strong>${grade}</strong></td>
+          <td><strong>${score} / 100</strong></td>
+          <td><span class="srms-grade-badge ${gradeCls}">${grade}</span></td>
           <td><span class="status-badge-srms ${badgeCls}">${badgeText}</span></td>
         </tr>
       `;
@@ -7647,6 +7749,7 @@ async function pullRealtimeUpdatesFromNeon(options = {}) {
               renderResultsTable();
               renderLiveMonitoringTable();
               renderSrmsRecentResults();
+              renderSrmsDashboard();
               updateAdminMetrics();
             }
           } else {
@@ -7675,6 +7778,7 @@ async function pullRealtimeUpdatesFromNeon(options = {}) {
             renderResultsTable();
             renderLiveMonitoringTable();
             renderSrmsRecentResults();
+            renderSrmsDashboard();
             updateAdminMetrics();
           }
         } catch(eAtt) {}
