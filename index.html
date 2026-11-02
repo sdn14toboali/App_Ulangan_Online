@@ -103,7 +103,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=3.36.0">
+  <link rel="stylesheet" href="style.css?v=3.37.0">
 </head>
 <body>
 
@@ -1031,8 +1031,8 @@
               </div>
               <div class="srms-kpi-info">
                 <span class="srms-kpi-label">Rata-rata Nilai</span>
-                <div class="srms-kpi-value" id="srms-kpi-cgpa">88.5</div>
-                <span class="srms-kpi-subtext blue">Rata-rata Nilai UAS</span>
+                <div class="srms-kpi-value" id="srms-kpi-cgpa">0</div>
+                <span class="srms-kpi-subtext blue" id="srms-kpi-cgpa-sub">Rata-rata Nilai Siswa</span>
               </div>
             </div>
 
@@ -1046,7 +1046,7 @@
               </div>
               <div class="srms-kpi-info">
                 <span class="srms-kpi-label">Mata Pelajaran</span>
-                <div class="srms-kpi-value" id="srms-kpi-courses">6</div>
+                <div class="srms-kpi-value" id="srms-kpi-courses">1</div>
                 <span class="srms-kpi-subtext green">Mapel Ujian Aktif</span>
               </div>
             </div>
@@ -1062,8 +1062,8 @@
               </div>
               <div class="srms-kpi-info">
                 <span class="srms-kpi-label">Ujian Selesai</span>
-                <div class="srms-kpi-value" id="srms-kpi-exams">18 / 24</div>
-                <span class="srms-kpi-subtext purple">Siswa Sudah Submit</span>
+                <div class="srms-kpi-value" id="srms-kpi-exams">0 / 0</div>
+                <span class="srms-kpi-subtext purple" id="srms-kpi-exams-sub">Siswa Sudah Submit</span>
               </div>
             </div>
 
@@ -1079,9 +1079,9 @@
                 </svg>
               </div>
               <div class="srms-kpi-info">
-                <span class="srms-kpi-label">Peringkat Sekolah</span>
-                <div class="srms-kpi-value" id="srms-kpi-rank">#4</div>
-                <span class="srms-kpi-subtext orange">Tingkat Kecamatan</span>
+                <span class="srms-kpi-label" id="srms-kpi-rank-label">Ketuntasan Siswa</span>
+                <div class="srms-kpi-value" id="srms-kpi-rank">0%</div>
+                <span class="srms-kpi-subtext orange" id="srms-kpi-rank-sub">Nilai &gt;= KKM (75)</span>
               </div>
             </div>
 
@@ -1098,8 +1098,8 @@
               </div>
               <div class="srms-kpi-info">
                 <span class="srms-kpi-label">Kehadiran Peserta</span>
-                <div class="srms-kpi-value" id="srms-kpi-attendance">94.2%</div>
-                <span class="srms-kpi-subtext red">Total Presensi Ujian</span>
+                <div class="srms-kpi-value" id="srms-kpi-attendance">0%</div>
+                <span class="srms-kpi-subtext red" id="srms-kpi-attendance-sub">Total Presensi Ujian</span>
               </div>
             </div>
           </div>
@@ -1184,23 +1184,23 @@
                   <svg width="130" height="130" viewBox="0 0 36 36" class="srms-donut-svg">
                     <path class="srms-donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#e2e8f0" stroke-width="3.5" fill="none"/>
                     <!-- Segments: Sangat Baik (green), Baik (blue), Cukup (amber), Perlu Bimbingan (rose) -->
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#22c55e" stroke-width="3.8" stroke-dasharray="60, 100" stroke-dashoffset="0" fill="none"/>
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#3b82f6" stroke-width="3.8" stroke-dasharray="25, 100" stroke-dashoffset="-60" fill="none"/>
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#f59e0b" stroke-width="3.8" stroke-dasharray="10, 100" stroke-dashoffset="-85" fill="none"/>
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#ef4444" stroke-width="3.8" stroke-dasharray="5, 100" stroke-dashoffset="-95" fill="none"/>
+                    <path id="srms-donut-seg-a" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#22c55e" stroke-width="3.8" stroke-dasharray="0, 100" stroke-dashoffset="0" fill="none"/>
+                    <path id="srms-donut-seg-b" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#3b82f6" stroke-width="3.8" stroke-dasharray="0, 100" stroke-dashoffset="0" fill="none"/>
+                    <path id="srms-donut-seg-c" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#f59e0b" stroke-width="3.8" stroke-dasharray="0, 100" stroke-dashoffset="0" fill="none"/>
+                    <path id="srms-donut-seg-d" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#ef4444" stroke-width="3.8" stroke-dasharray="0, 100" stroke-dashoffset="0" fill="none"/>
                   </svg>
                   <div class="srms-donut-center-text">
-                    <span class="srms-donut-percentage">88%</span>
+                    <span class="srms-donut-percentage" id="srms-donut-pct-main">0%</span>
                     <span class="srms-donut-sub">Tingkat<br>Ketuntasan</span>
                   </div>
                 </div>
 
                 <!-- Legend -->
                 <div class="srms-donut-legend">
-                  <div class="srms-legend-row"><span class="legend-dot green"></span><span class="legend-text">Sangat Baik (A)</span><strong class="legend-pct">60%</strong></div>
-                  <div class="srms-legend-row"><span class="legend-dot blue"></span><span class="legend-text">Baik (B)</span><strong class="legend-pct">25%</strong></div>
-                  <div class="srms-legend-row"><span class="legend-dot orange"></span><span class="legend-text">Cukup (C)</span><strong class="legend-pct">10%</strong></div>
-                  <div class="srms-legend-row"><span class="legend-dot red"></span><span class="legend-text">Perlu Bimbingan</span><strong class="legend-pct">5%</strong></div>
+                  <div class="srms-legend-row"><span class="legend-dot green"></span><span class="legend-text">Sangat Baik (A)</span><strong class="legend-pct" id="srms-legend-pct-a">0%</strong></div>
+                  <div class="srms-legend-row"><span class="legend-dot blue"></span><span class="legend-text">Baik (B)</span><strong class="legend-pct" id="srms-legend-pct-b">0%</strong></div>
+                  <div class="srms-legend-row"><span class="legend-dot orange"></span><span class="legend-text">Cukup (C)</span><strong class="legend-pct" id="srms-legend-pct-c">0%</strong></div>
+                  <div class="srms-legend-row"><span class="legend-dot red"></span><span class="legend-text">Perlu Bimbingan</span><strong class="legend-pct" id="srms-legend-pct-d">0%</strong></div>
                 </div>
               </div>
             </div>
@@ -1510,9 +1510,6 @@
               </button>
               <button class="btn btn-success btn-sm" onclick="exportResultsToExcel()">
                 Download Excel (.xlsx)
-              </button>
-              <button class="btn btn-outline btn-sm" style="color: var(--rose-600); border-color: var(--rose-300);" onclick="confirmClearAllResults()" title="Bersihkan riwayat hasil ujian dummy atau reset sesi">
-                🗑️ Bersihkan Data Nilai
               </button>
             </div>
           </div>
@@ -2927,6 +2924,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.36.0"></script>
+  <script src="app.js?v=3.37.0"></script>
 </body>
 </html>
