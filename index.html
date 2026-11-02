@@ -52,22 +52,24 @@
         // Auto-sync parameter URL Neon (?ep=...&key=...) seketika saat pertama kali halaman dibuka di HP
         try {
           var urlParams = new URLSearchParams(window.location.search);
-          var epParam = urlParams.get('ep');
-          var keyParam = urlParams.get('key');
+          var epParam = urlParams.get('ep') || urlParams.get('neon_host') || urlParams.get('host');
+          var keyParam = urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass');
           if (epParam) {
-            var decodedEp = decodeURIComponent(epParam);
+            var decodedEp = decodeURIComponent(epParam).trim();
             localStorage.setItem('zettcbt_neon_endpoint', decodedEp);
             localStorage.setItem('zettcbt_db_provider', 'neon');
           }
           if (keyParam) {
-            var decodedKey = decodeURIComponent(keyParam);
+            var decodedKey = decodeURIComponent(keyParam).trim();
             localStorage.setItem('zettcbt_neon_key', decodedKey);
           }
-          // Jika localStorage kosong, terapkan dari window.DEFAULT_NEON_CONFIG
-          if (!localStorage.getItem('zettcbt_neon_endpoint') && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.host) {
-            localStorage.setItem('zettcbt_neon_endpoint', window.DEFAULT_NEON_CONFIG.host);
+          // Auto-Heal: Jika localStorage kosong atau tidak valid, pulihkan otomatis dari window.DEFAULT_NEON_CONFIG
+          var storedEp = (localStorage.getItem('zettcbt_neon_endpoint') || '').trim();
+          var isEpValid = storedEp && (storedEp.indexOf('ep-') !== -1 || storedEp.indexOf('postgres') !== -1);
+          if (!isEpValid && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.host && window.DEFAULT_NEON_CONFIG.host.trim().length > 0) {
+            localStorage.setItem('zettcbt_neon_endpoint', window.DEFAULT_NEON_CONFIG.host.trim());
             if (window.DEFAULT_NEON_CONFIG.password) {
-              localStorage.setItem('zettcbt_neon_key', window.DEFAULT_NEON_CONFIG.password);
+              localStorage.setItem('zettcbt_neon_key', window.DEFAULT_NEON_CONFIG.password.trim());
             }
             localStorage.setItem('zettcbt_db_provider', 'neon');
           }
