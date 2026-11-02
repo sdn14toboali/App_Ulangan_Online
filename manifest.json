@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "SD NEGERI 14 TOBOALI - Ujian Online",
-  "short_name": "Ujian SD NEGERI 14 Toboali",
-  "description": "Sistem Ujian Online & Penilaian Hasil Belajar Resmi SD Negeri 14 Toboali",
+  "name": "SD NEGERI 14 TOBOALI - Sumatif & Formatif",
+  "short_name": "Sumatif | Formatif",
+  "description": "Sistem Ujian Online, Asesmen Sumatif & Formatif Resmi SD Negeri 14 Toboali",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
