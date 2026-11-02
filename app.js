@@ -4869,7 +4869,8 @@ async function handleSaveStudent(event) {
   localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
 
   // Sinkronisasi Realtime Seketika ke Neon Cloud Database
-  if (state.neon && state.neon.endpoint) {
+  const creds = parseNeonCredentials();
+  if (creds && creds.host) {
     executeNeonSql(
       `INSERT INTO students (nisn, full_name, class_name, gender)
        VALUES ($1, $2, $3, $4)
@@ -4927,9 +4928,11 @@ async function deleteStudent(nisn) {
   localStorage.setItem('zettcbt_students', JSON.stringify(state.students));
 
   // Hapus dari Neon Cloud Database
-  if (state.neon.endpoint) {
+  const creds = parseNeonCredentials();
+  if (creds && creds.host) {
     try {
-      await executeNeonSql('DELETE FROM students WHERE nisn = $1;', [nisn]);
+      await executeNeonSql('DELETE FROM students WHERE nisn = $1;', [String(nisn).trim()]);
+      console.log('✅ Realtime delete student dari Neon:', nisn);
     } catch (eNeon) {
       console.warn('Gagal hapus siswa di Neon Cloud:', eNeon.message);
     }
@@ -7395,20 +7398,22 @@ async function pullRealtimeUpdatesFromNeon(options = {}) {
     // Tarik Token Tunggal Terbaru
     await fetchSingleTokenFromNeonCloud();
 
-    // Jika di dashboard guru/admin, periksa perubahan master soal & peserta
+    // Periksa perubahan data peserta (siswa) dan pendidik (guru) secara realtime lintas-perangkat
+    try {
+      const rawCount = await executeNeonSql('SELECT (SELECT COUNT(*) FROM students WHERE is_active = true) as s_count, (SELECT COUNT(*) FROM teachers WHERE is_active = true) as t_count;');
+      const countRows = (rawCount && rawCount.rows) ? rawCount.rows : (Array.isArray(rawCount) ? rawCount : []);
+      if (countRows && countRows.length > 0) {
+        const sCount = parseInt(countRows[0].s_count) || 0;
+        const tCount = parseInt(countRows[0].t_count) || 0;
+        if (sCount !== (state.students || []).length || tCount !== (state.teachers || []).length) {
+          await importDataFromNeonCloud({ silent: true });
+        }
+      }
+    } catch(eCount) {}
+
+    // Jika di dashboard guru/admin, periksa juga perubahan master soal
     if (state.currentTeacher) {
       await fetchQuestionsFromNeonCloud();
-      try {
-        const rawCount = await executeNeonSql('SELECT (SELECT COUNT(*) FROM students) as s_count, (SELECT COUNT(*) FROM teachers) as t_count;');
-        const countRows = (rawCount && rawCount.rows) ? rawCount.rows : (Array.isArray(rawCount) ? rawCount : []);
-        if (countRows && countRows.length > 0) {
-          const sCount = parseInt(countRows[0].s_count) || 0;
-          const tCount = parseInt(countRows[0].t_count) || 0;
-          if (sCount !== (state.students || []).length || tCount !== (state.teachers || []).length) {
-            await importDataFromNeonCloud({ silent: true });
-          }
-        }
-      } catch(eCount) {}
     }
 
     const badge = document.getElementById('db-status-badge');
@@ -7507,7 +7512,7 @@ async function importDataFromNeonCloud(options = {}) {
     try {
       const rawStudents = await executeNeonSql('SELECT nisn, full_name, class_name, gender FROM students WHERE is_active = true ORDER BY class_name, full_name;');
       const studentRows = (rawStudents && rawStudents.rows) ? rawStudents.rows : (Array.isArray(rawStudents) ? rawStudents : []);
-      if (studentRows && studentRows.length > 0) {
+      if (Array.isArray(studentRows)) {
         const importedStudents = studentRows.map((r, idx) => {
           const existing = (state.students || []).find(s => s.nisn === r.nisn);
           return {
@@ -7637,8 +7642,11 @@ async function syncTwoWayWithNeon(options = {}) {
     // Langkah 1: Tarik data terbaru dari Neon Cloud (agar data di web mendapat akun guru/siswa dari Neon)
     await importDataFromNeonCloud({ silent: true });
 
-    // Langkah 2: Ekspor data lokal yang mungkin ada yang baru dibuat di browser ke Neon
-    await exportLocalDataToNeonCloud({ silent: true });
+    // Langkah 2: Ekspor data lokal hanya jika dipicu secara MANUAL (bukan auto-sync pada first load)
+    // Anti-Resurrection Guard: Auto-sync dilarang mengekspor cache lokal agar tidak membangkitkan siswa yang sudah dihapus di Desktop!
+    if (!isAuto) {
+      await exportLocalDataToNeonCloud({ silent: true });
+    }
 
     // Langkah 3: Render ulang seluruh komponen UI agar segar seketika
     renderTeachersTable();
@@ -7697,10 +7705,11 @@ function initNeonAutoSync() {
   // Jika kredensial Neon tersedia, jalankan silent sync dan aktifkan daemon realtime otomatis
   const creds = parseNeonCredentials();
   if (creds && creds.host) {
+    // Tarik data instan dari Neon seketika pada detik ke-0 pembukaan/refresh aplikasi
+    importDataFromNeonCloud({ silent: true });
     setTimeout(() => {
-      syncTwoWayWithNeon({ silent: true, isAuto: true });
       startNeonRealtimeSyncDaemon();
-    }, 1000);
+    }, 500);
   }
 }
 
