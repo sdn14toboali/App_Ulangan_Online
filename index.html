@@ -1483,13 +1483,16 @@
               <h3 style="font-size: 1.05rem; font-weight: 700;">Rekap Hasil Ujian & Peringkat Siswa</h3>
               <p style="font-size: 0.8rem; color: var(--slate-500);">Daftar nilai seluruh peserta yang sudah selesai submit</p>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
               <button class="btn btn-outline btn-sm" onclick="printResultsPdf()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                 🖨️ Cetak Rekap Nilai (PDF)
               </button>
               <button class="btn btn-success btn-sm" onclick="exportResultsToExcel()">
                 Download Excel (.xlsx)
+              </button>
+              <button class="btn btn-outline btn-sm" style="color: var(--rose-600); border-color: var(--rose-300);" onclick="confirmClearAllResults()" title="Bersihkan riwayat hasil ujian dummy atau reset sesi">
+                🗑️ Bersihkan Data Nilai
               </button>
             </div>
           </div>
