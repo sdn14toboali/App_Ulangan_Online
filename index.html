@@ -11,20 +11,20 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Ujian SDN 14">
-  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+  <link rel="shortcut icon" type="image/png" href="assets/icon-192.png">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
 
   <!-- Logo Resmi SD NEGERI 14 TOBOALI Base64 (Anti-404 / Offline Safe) -->
-  <script src="logo.js"></script>
   <script src="assets/logo.js"></script>
+  <script src="logo.js"></script>
   <!-- Konfigurasi Database Neon Cloud Terpusat Lintas Perangkat (PC ⇄ HP) -->
   <script src="db-config.js"></script>
   <script src="assets/db-config.js"></script>
   <script>
-    // Fallback Darurat Logo Vektor Resmi SDN 14 Toboali jika berkas eksternal belum diunggah ke Vercel/GitHub
+    // Fallback Darurat Logo Resmi SDN 14 Toboali jika berkas eksternal belum diunggah ke Vercel/GitHub
     if (typeof window !== 'undefined' && !window.OFFICIAL_SDN14_LOGO) {
-      window.OFFICIAL_SDN14_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='512' height='512'><defs><filter id='logoShadow' x='-10%' y='-10%' width='120%' height='120%'><feDropShadow dx='0' dy='6' stdDeviation='8' flood-color='%230f172a' flood-opacity='0.15'/></filter></defs><rect width='512' height='512' rx='115' fill='%23ffffff'/><g transform='translate(46, 46) scale(4.2)' filter='url(%23logoShadow)'><circle cx='50' cy='50' r='47' fill='%232563eb' stroke='%23f59e0b' stroke-width='5'/><path d='M50 16 L78 34 L78 66 L50 84 L22 66 L22 34 Z' fill='%231e40af' stroke='%23ffffff' stroke-width='2.5'/><path d='M50 24 L64 38 L36 38 Z' fill='%23fbbf24'/><rect x='47' y='38' width='6' height='26' fill='%23f59e0b' rx='2'/><path d='M32 52 Q50 72 68 52 Q50 80 32 52 Z' fill='%23ffffff'/><circle cx='50' cy='51' r='8' fill='%23ef4444'/><text x='50' y='93.5' font-size='8.5' font-family='Arial Black, Arial, sans-serif' font-weight='900' fill='%23ffffff' text-anchor='middle' letter-spacing='0.5'>SDN 14 TOBOALI</text></g></svg>";
+      window.OFFICIAL_SDN14_LOGO = "assets/icon-192.png";
     }
 
     // Inisialisasi cepat Logo & Identitas Sekolah dari Dedicated Vault (Anti-Reset / Offline Safe)
@@ -2888,6 +2888,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.27.0"></script>
+  <script src="app.js?v=3.28.0"></script>
 </body>
 </html>
