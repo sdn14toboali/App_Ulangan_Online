@@ -24,6 +24,8 @@
   <!-- Konfigurasi Database Neon Cloud Terpusat Lintas Perangkat (PC ⇄ HP) -->
   <script src="db-config.js"></script>
   <script src="assets/db-config.js"></script>
+  <!-- Engine Pengolah Berkas Excel Asli (.xlsx / .xls) SheetJS (100% Offline Safe) -->
+  <script src="assets/xlsx.full.min.js"></script>
   <script>
     // Fallback Darurat Logo Resmi SDN 14 Toboali jika berkas eksternal belum diunggah ke Vercel/GitHub
     if (typeof window !== 'undefined' && !window.OFFICIAL_SDN14_LOGO) {
@@ -103,7 +105,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=3.39.0">
+  <link rel="stylesheet" href="style.css?v=3.40.0">
 </head>
 <body>
 
@@ -2387,11 +2389,11 @@
           <label class="btn btn-primary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             Pilih File Excel / CSV
-            <input type="file" id="import-student-file-input" accept=".csv, .txt, .tsv" onchange="handleStudentImportFile(event)" style="display: none;">
+            <input type="file" id="import-student-file-input" accept=".xlsx, .xls, .csv, .txt, .tsv" onchange="handleStudentImportFile(event)" style="display: none;">
           </label>
-          <button type="button" class="btn btn-outline btn-sm" onclick="downloadStudentTemplateCsv()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="downloadStudentTemplateExcel()" style="display: inline-flex; align-items: center; gap: 0.35rem;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Unduh Format Contoh Excel (.CSV)
+            Unduh Format Contoh Excel (.XLSX)
           </button>
         </div>
 
@@ -2400,8 +2402,32 @@
             <span>Atau Salin & Tempel (Paste) Baris Excel ke Sini:</span>
             <span id="import-preview-count" style="font-size: 0.8rem; font-weight: 700; color: var(--emerald-600);">Terdeteksi: 0 siswa</span>
           </label>
-          <textarea id="import-students-raw-text" class="form-control" rows="6" placeholder="Contoh baris Excel (Sesuai Format Resmi):&#10;1	123456	NOVRI	5A	358271&#10;2	123457	BELLA ANGGRAINI	5A	482910&#10;3	123458	DIMAS ADITYA	5B	619284" oninput="updateImportTextPreview()"></textarea>
+          <textarea id="import-students-raw-text" class="form-control" rows="5" placeholder="Contoh baris Excel (Sesuai Format Resmi):&#10;1	123456	NOVRI	5A	358271&#10;2	123457	BELLA ANGGRAINI	5A	482910&#10;3	123458	DIMAS ADITYA	5B	619284" oninput="updateImportTextPreview()"></textarea>
           <small style="font-size: 0.75rem; color: var(--slate-500); display: block; margin-top: 0.25rem;">*Pemisah bisa menggunakan Tab (hasil copy-paste langsung dari tabel Microsoft Excel), Koma (,), atau Titik Koma (;).</small>
+
+          <!-- Pratinjau Visual Tabel Mini Data Siswa yang Terdeteksi -->
+          <div id="import-table-preview-container" style="display: none; margin-top: 0.85rem; border: 1px solid var(--slate-200); border-radius: 8px; overflow: hidden; background: #ffffff;">
+            <div style="background: var(--slate-100); padding: 0.45rem 0.75rem; font-size: 0.75rem; font-weight: 700; color: var(--slate-700); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--slate-200);">
+              <span>🔍 Pratinjau Struktur Kolom Excel Terbaca:</span>
+              <span id="import-preview-badge" class="badge" style="background: #ecfdf5; color: #047857; font-size: 0.7rem;">Siap Disimpan</span>
+            </div>
+            <div style="max-height: 180px; overflow-y: auto;">
+              <table class="table table-bordered table-striped" style="width: 100%; margin: 0; font-size: 0.76rem;">
+                <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 2;">
+                  <tr>
+                    <th style="padding: 4px 8px; width: 40px; text-align: center;">No</th>
+                    <th style="padding: 4px 8px; text-align: center;">No Peserta / NISN</th>
+                    <th style="padding: 4px 8px; text-align: left;">Nama Lengkap Siswa</th>
+                    <th style="padding: 4px 8px; text-align: center;">Kelas</th>
+                    <th style="padding: 4px 8px; text-align: center;">Password</th>
+                  </tr>
+                </thead>
+                <tbody id="import-preview-tbody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
@@ -2932,6 +2958,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.39.0"></script>
+  <script src="app.js?v=3.40.0"></script>
 </body>
 </html>
