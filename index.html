@@ -103,7 +103,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=3.38.0">
+  <link rel="stylesheet" href="style.css?v=3.39.0">
 </head>
 <body>
 
@@ -2378,9 +2378,9 @@
       </div>
       <div class="modal-body">
         <div style="background-color: var(--primary-50); border: 1px solid var(--primary-100); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1rem; font-size: 0.82rem; color: var(--primary-800); line-height: 1.5;">
-          💡 <strong>Petunjuk Impor Massal:</strong><br>
-          Format kolom: <strong>NISN, Nama Lengkap, Kelas, Jenis Kelamin (L/P)</strong>.<br>
-          Anda dapat memilih file <code>.csv</code> atau <strong>langsung copy-paste baris tabel dari Microsoft Excel</strong> ke kotak di bawah.
+          💡 <strong>Petunjuk Impor Massal (Sesuai Format Resmi):</strong><br>
+          Format kolom: <strong>No, No Peserta / NISN, Nama Lengkap Siswa, Kelas / Rombel, Password</strong>.<br>
+          <em>(Kolom 'No' bersifat opsional. Anda dapat memilih file <code>.csv</code> atau <strong>langsung copy-paste baris tabel dari Microsoft Excel</strong> ke kotak di bawah).</em>
         </div>
 
         <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
@@ -2400,8 +2400,8 @@
             <span>Atau Salin & Tempel (Paste) Baris Excel ke Sini:</span>
             <span id="import-preview-count" style="font-size: 0.8rem; font-weight: 700; color: var(--emerald-600);">Terdeteksi: 0 siswa</span>
           </label>
-          <textarea id="import-students-raw-text" class="form-control" rows="6" placeholder="Contoh baris Excel:&#10;2026-001	Ahmad Rizki Pratama	6	L&#10;2026-002	Bella Anggraini Putri	6	P&#10;2026-003	Dimas Aditya Nugraha	5	L" oninput="updateImportTextPreview()"></textarea>
-          <small style="font-size: 0.75rem; color: var(--slate-500); display: block; margin-top: 0.25rem;">*Pemisah bisa menggunakan Koma (,), Titik Koma (;), atau Tab (hasil copy dari tabel Excel).</small>
+          <textarea id="import-students-raw-text" class="form-control" rows="6" placeholder="Contoh baris Excel (Sesuai Format Resmi):&#10;1	123456	NOVRI	5A	358271&#10;2	123457	BELLA ANGGRAINI	5A	482910&#10;3	123458	DIMAS ADITYA	5B	619284" oninput="updateImportTextPreview()"></textarea>
+          <small style="font-size: 0.75rem; color: var(--slate-500); display: block; margin-top: 0.25rem;">*Pemisah bisa menggunakan Tab (hasil copy-paste langsung dari tabel Microsoft Excel), Koma (,), atau Titik Koma (;).</small>
         </div>
 
         <div class="modal-footer" style="padding-left: 0; padding-right: 0; margin-top: 1.25rem;">
@@ -2932,6 +2932,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.38.0"></script>
+  <script src="app.js?v=3.39.0"></script>
 </body>
 </html>
