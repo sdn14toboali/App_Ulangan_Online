@@ -1,5 +1,5 @@
 // Service Worker untuk Ujian Online SD Negeri 14 Toboali
-const CACHE_NAME = 'zettcbt-sdn14-v3.39.0';
+const CACHE_NAME = 'zettcbt-sdn14-v3.40.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
   './app.js',
   './manifest.json',
   './db-config.js',
+  './assets/xlsx.full.min.js',
   './assets/db-config.js',
   './assets/icon-192.png',
   './assets/icon-512.png',
