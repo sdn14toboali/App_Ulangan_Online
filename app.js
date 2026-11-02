@@ -131,16 +131,23 @@ const state = {
     let key = '';
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      ep = urlParams.get('ep') || urlParams.get('neon_host') || urlParams.get('host') || '';
-      key = urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass') || '';
+      ep = (urlParams.get('ep') || urlParams.get('neon_host') || urlParams.get('host') || '').trim();
+      key = (urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass') || '').trim();
       if (ep) localStorage.setItem('zettcbt_neon_endpoint', ep);
       if (key) localStorage.setItem('zettcbt_neon_key', key);
     } catch(e) {}
-    if (!ep) ep = localStorage.getItem('zettcbt_neon_endpoint') || '';
-    if (!key) key = localStorage.getItem('zettcbt_neon_key') || '';
-    if ((!ep || !key) && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG) {
-      if (!ep && window.DEFAULT_NEON_CONFIG.host) ep = window.DEFAULT_NEON_CONFIG.host;
-      if (!key && window.DEFAULT_NEON_CONFIG.password) key = window.DEFAULT_NEON_CONFIG.password;
+    if (!ep) ep = (localStorage.getItem('zettcbt_neon_endpoint') || '').trim();
+    if (!key) key = (localStorage.getItem('zettcbt_neon_key') || '').trim();
+    const isEpValid = ep && (ep.includes('ep-') || ep.startsWith('postgres'));
+    if ((!isEpValid || !key) && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG) {
+      if (!isEpValid && window.DEFAULT_NEON_CONFIG.host) {
+        ep = window.DEFAULT_NEON_CONFIG.host.trim();
+        try { localStorage.setItem('zettcbt_neon_endpoint', ep); } catch(e) {}
+      }
+      if (!key && window.DEFAULT_NEON_CONFIG.password) {
+        key = window.DEFAULT_NEON_CONFIG.password.trim();
+        try { localStorage.setItem('zettcbt_neon_key', key); } catch(e) {}
+      }
     }
     return {
       endpoint: ep,
@@ -808,13 +815,16 @@ function loadSavedState() {
     }
   } catch(e) {}
 
-  // Fallback kredensial database bawaan (DEFAULT_NEON_CONFIG) jika penyimpanan lokal kosong
-  if (typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG) {
-    if (!state.neon.endpoint && window.DEFAULT_NEON_CONFIG.host) {
-      state.neon.endpoint = window.DEFAULT_NEON_CONFIG.host;
+  // Fallback kredensial database bawaan (DEFAULT_NEON_CONFIG) jika penyimpanan lokal kosong atau tidak valid
+  if (typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.host) {
+    const isSavedEpValid = state.neon.endpoint && (state.neon.endpoint.includes('ep-') || state.neon.endpoint.startsWith('postgres'));
+    if (!isSavedEpValid) {
+      state.neon.endpoint = window.DEFAULT_NEON_CONFIG.host.trim();
+      try { localStorage.setItem('zettcbt_neon_endpoint', state.neon.endpoint); } catch(e) {}
     }
     if (!state.neon.apiKey && window.DEFAULT_NEON_CONFIG.password) {
-      state.neon.apiKey = window.DEFAULT_NEON_CONFIG.password;
+      state.neon.apiKey = window.DEFAULT_NEON_CONFIG.password.trim();
+      try { localStorage.setItem('zettcbt_neon_key', state.neon.apiKey); } catch(e) {}
     }
   }
 
@@ -6546,14 +6556,15 @@ function parseNeonCredentials() {
   let rawEp = (epInput && epInput.value ? epInput.value : (state.neon.endpoint || urlEp || localStorage.getItem('zettcbt_neon_endpoint') || '')).trim();
   let rawKey = (keyInput && keyInput.value ? keyInput.value : (state.neon.apiKey || urlKey || localStorage.getItem('zettcbt_neon_key') || '')).trim();
 
-  // Fallback ke window.DEFAULT_NEON_CONFIG jika masih belum terisi
-  if (!rawEp && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.host) {
-    rawEp = window.DEFAULT_NEON_CONFIG.host;
+  // Fallback ke window.DEFAULT_NEON_CONFIG jika masih belum terisi atau tidak valid
+  const isRawEpValid = rawEp && (rawEp.includes('ep-') || rawEp.startsWith('postgres'));
+  if (!isRawEpValid && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.host) {
+    rawEp = window.DEFAULT_NEON_CONFIG.host.trim();
     state.neon.endpoint = rawEp;
     try { localStorage.setItem('zettcbt_neon_endpoint', rawEp); } catch(e) {}
   }
   if (!rawKey && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.password) {
-    rawKey = window.DEFAULT_NEON_CONFIG.password;
+    rawKey = window.DEFAULT_NEON_CONFIG.password.trim();
     state.neon.apiKey = rawKey;
     try { localStorage.setItem('zettcbt_neon_key', rawKey); } catch(e) {}
   }
@@ -7836,8 +7847,15 @@ function copyNeonShareLink() {
 // Unduh file db-config.js siap pakai dengan kredensial aktif
 function downloadNeonConfigFile() {
   const creds = parseNeonCredentials();
-  const hostVal = creds.host || '';
-  const passVal = creds.password || '';
+  const hostVal = (creds.host || '').trim();
+  const passVal = (creds.password || '').trim();
+
+  if (!hostVal) {
+    showToast('⚠️ Kredensial Neon masih kosong! Silakan isi Host & Password di form terlebih dahulu.', 'warning');
+    const epInput = document.getElementById('config-neon-endpoint');
+    if (epInput) epInput.focus();
+    return;
+  }
 
   const fileContent = `/**
  * ZettCBT Pro - Centralized Database Configuration Vault
@@ -7845,13 +7863,18 @@ function downloadNeonConfigFile() {
  * File ini otomatis menghubungkan HP, Tablet & Laptop ke Database Neon Cloud
  */
 
-window.DEFAULT_NEON_CONFIG = {
-  host: "${hostVal}",
-  password: "${passVal}",
-  database: "neondb",
-  user: "neondb_owner",
-  provider: "neon"
-};
+(function() {
+  if (typeof window === 'undefined') return;
+  var existing = window.DEFAULT_NEON_CONFIG || {};
+
+  window.DEFAULT_NEON_CONFIG = {
+    host: "${hostVal}",
+    password: "${passVal}",
+    database: "neondb",
+    user: "neondb_owner",
+    provider: "neon"
+  };
+})();
 `;
 
   const blob = new Blob([fileContent], { type: 'application/javascript;charset=utf-8' });
