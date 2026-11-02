@@ -2818,17 +2818,33 @@ function renderCurrentQuestion() {
   const doubtBoxMobile = document.getElementById('checkbox-doubt-mobile');
   if (doubtBoxMobile) doubtBoxMobile.checked = isDoubt;
 
-  // Disable / Enable Prev & Next Buttons
+  // Disable / Enable Prev & Next Buttons (Top Inside Question Card)
   const btnPrev = document.getElementById('btn-prev-q');
   const btnNext = document.getElementById('btn-next-q');
   if (btnPrev) btnPrev.disabled = state.currentQuestionIndex === 0;
   if (btnNext) {
     if (state.currentQuestionIndex >= qList.length - 1) {
-      btnNext.innerHTML = '<span>Soal Terakhir</span>';
-      btnNext.disabled = true;
+      btnNext.innerHTML = '<span>Kumpulkan</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      btnNext.disabled = false;
+      btnNext.onclick = openSubmitConfirmModal;
     } else {
       btnNext.innerHTML = '<span>Selanjutnya</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>';
       btnNext.disabled = false;
+      btnNext.onclick = () => navigateQuestion(1);
+    }
+  }
+
+  // Update Desktop Bottom Right Action Button (#btn-submit-exam-tarakarta)
+  const desktopActionBtn = document.getElementById('btn-submit-exam-tarakarta');
+  if (desktopActionBtn) {
+    if (state.currentQuestionIndex >= qList.length - 1) {
+      desktopActionBtn.className = 'cbt-btn-submit-green';
+      desktopActionBtn.innerHTML = '<span>Kumpulkan Jawaban</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      desktopActionBtn.onclick = openSubmitConfirmModal;
+    } else {
+      desktopActionBtn.className = 'cbt-btn-next-action';
+      desktopActionBtn.innerHTML = '<span>Soal Selanjutnya</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+      desktopActionBtn.onclick = () => navigateQuestion(1);
     }
   }
 
@@ -2841,15 +2857,24 @@ function renderCurrentQuestion() {
   const mobileNext = document.getElementById('mobile-btn-next') || document.querySelector('.mobile-exam-bottom-bar .btn-mobile-nav.btn-primary');
   if (mobileNext) {
     if (state.currentQuestionIndex >= qList.length - 1) {
-      mobileNext.innerHTML = '<span>Selesai</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      mobileNext.innerHTML = '<span>Kumpulkan</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       mobileNext.classList.add('btn-finish-mode');
       mobileNext.onclick = openSubmitConfirmModal;
     } else {
-      mobileNext.innerHTML = '<span>Berikutnya</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+      mobileNext.innerHTML = '<span>Selanjutnya</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>';
       mobileNext.classList.remove('btn-finish-mode');
       mobileNext.onclick = () => navigateQuestion(1);
     }
   }
+
+  // Update Duration Limit Badges (Desktop & Mobile)
+  const examDurationMin = state.session.durationMinutes || 90;
+  const durBadge = document.getElementById('cbt-card-duration-badge');
+  if (durBadge) durBadge.textContent = `⏱️ Batas Waktu: ${examDurationMin} Menit`;
+  const durTimerSub = document.getElementById('cbt-desktop-timer-sub');
+  if (durTimerSub) durTimerSub.textContent = `Batas Pengerjaan: ${examDurationMin} Menit`;
+  const durBadgeMob = document.getElementById('cbt-mobile-duration-badge');
+  if (durBadgeMob) durBadgeMob.textContent = `⏱️ Limit: ${examDurationMin}m`;
 
   // Update Grid Button Highlights
   updateGridButtonStatus();
@@ -2900,6 +2925,9 @@ function navigateQuestion(delta) {
   if (targetIndex >= 0 && targetIndex < qList.length) {
     state.currentQuestionIndex = targetIndex;
     renderCurrentQuestion();
+  } else if (delta > 0 && targetIndex >= qList.length) {
+    // Apabila sudah di soal terakhir dan klik selanjutnya, langsung buka konfirmasi pengumpulan ujian
+    openSubmitConfirmModal();
   }
 }
 
@@ -3454,6 +3482,9 @@ function submitFinalExam(forced = false) {
   if (state.timerInterval) clearInterval(state.timerInterval);
 
   state.student.endTime = new Date();
+  const startTime = state.student.startTime ? new Date(state.student.startTime) : new Date(Date.now() - 35 * 60000);
+  const durationSpentMin = Math.max(1, Math.round((state.student.endTime - startTime) / 60000));
+  state.student.durationSpent = durationSpentMin;
 
   // Calculate Score & Correct Answers Accurately
   let totalScore = 0;
@@ -3479,6 +3510,9 @@ function submitFinalExam(forced = false) {
     target.totalQ = examQuestions.length;
     target.answeredCount = Object.keys(state.student.answers || {}).length;
     target.time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+    target.durationSpent = durationSpentMin;
+    target.durationLimit = state.session.durationMinutes || 90;
+    target.subject = state.session.subject || state.student.subject;
     localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
   }
 
@@ -4432,7 +4466,7 @@ function renderLiveMonitoringTable() {
       ? '<span class="badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem;">✅ SUDAH SELESAI</span>'
       : '<span class="badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem;"><span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #d97706;"></span> SEDANG MENGERJAKAN</span>';
 
-    // Calculate remaining minutes
+    // Calculate remaining minutes and duration transparency
     let remainingMinutes = st.remainingMinutes;
     if (st.nisn === state.student?.nisn && state.timeRemainingSeconds > 0) {
       remainingMinutes = Math.max(0, Math.ceil(state.timeRemainingSeconds / 60));
@@ -4441,9 +4475,18 @@ function renderLiveMonitoringTable() {
       remainingMinutes = isDone ? 0 : 45;
     }
 
+    const durLimit = st.durationLimit || state.session?.durationMinutes || 90;
+    const durSpent = st.durationSpent || Math.max(1, durLimit - remainingMinutes);
+
     const timeBadge = isDone
-      ? `<span style="font-size: 0.78rem; color: var(--slate-500); font-weight: 600;">🏁 Selesai (${escapeHtml(st.time || '08:45 WIB')})</span>`
-      : `<span class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 800; font-size: 0.82rem; padding: 0.35rem 0.6rem;">⏱️ ${remainingMinutes} Menit</span>`;
+      ? `<div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+           <span class="badge" style="background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; font-weight: 800; font-size: 0.78rem; padding: 0.25rem 0.55rem; border-radius: 6px;">⏱️ Selesai (${durSpent} Menit)</span>
+           <span style="font-size: 0.72rem; color: var(--slate-500); font-weight: 600;">Jam: ${escapeHtml(st.time || '08:45 WIB')}</span>
+         </div>`
+      : `<div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+           <span class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 800; font-size: 0.82rem; padding: 0.25rem 0.55rem; border-radius: 6px;">⏱️ Sisa ${remainingMinutes}m</span>
+           <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Limit: ${durLimit} Menit</span>
+         </div>`;
 
     const warnBadge = st.warningCount > 0
       ? '<span class="badge badge-danger" style="font-size: 0.75rem; font-weight: 700;">🚨 ' + st.warningCount + 'x Peringatan</span>'
@@ -6599,7 +6642,7 @@ function renderResultsTable() {
       '<td><span class="badge" style="background: var(--slate-200); font-weight: 700;">' + escapeHtml(st.className) + '</span></td>' +
       '<td><span style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; color: ' + badgeColor + '; background: ' + badgeBg + '; border: 1px solid ' + badgeBorder + '; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.82rem;">🎯 ' + correct + ' / ' + qCount + ' Benar</span></td>' +
       '<td><strong style="color: var(--primary-600); font-size: 1.15rem;">' + (st.score !== undefined ? st.score : '-') + '</strong></td>' +
-      '<td>' + escapeHtml(st.time || '-') + '</td>' +
+      '<td>' + escapeHtml(st.time || '-') + (st.durationSpent ? ' <span class="badge" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.72rem; font-weight: 700; margin-left: 0.25rem;">⏱️ ' + st.durationSpent + 'm</span>' : '') + '</td>' +
       '<td style="text-align: center;">' +
         '<button type="button" class="btn btn-outline btn-xs" style="color: var(--rose-600); border-color: var(--rose-300); padding: 0.2rem 0.55rem; font-size: 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;" onclick="confirmDeleteStudentResult(\'' + escapeHtml(st.nisn) + '\', \'' + escapeHtml(st.name).replace(/'/g, "\\'") + '\')" title="Hapus nilai peserta ini">' +
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> ' +
@@ -6619,7 +6662,7 @@ function exportResultsToExcel() {
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,';
-  csvContent += 'Peringkat,No Peserta,Nama Siswa,Kelas,Jawaban Benar,Nilai Akhir,Waktu Selesai\r\n';
+  csvContent += 'Peringkat,No Peserta,Nama Siswa,Kelas,Jawaban Benar,Nilai Akhir,Waktu Selesai,Durasi Pengerjaan\r\n';
 
   finishedList.sort((a, b) => b.score - a.score);
 
@@ -6638,7 +6681,8 @@ function exportResultsToExcel() {
       '"' + st.className + '"',
       correct + ' / ' + qCount + ' Benar',
       st.score,
-      '"' + st.time + '"'
+      '"' + (st.time || '-') + '"',
+      '"' + (st.durationSpent ? st.durationSpent + ' Menit' : '-') + '"'
     ].join(',');
     csvContent += row + '\r\n';
   });
