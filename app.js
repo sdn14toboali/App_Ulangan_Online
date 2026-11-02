@@ -1359,19 +1359,19 @@ function openAllSubjectTokensModal() {
       <div class="all-token-card">
         <div class="all-token-card-header">
           <div>
-            <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${escapeHtml(sub.code)} - ${sub.durationMinutes || 90} MENIT</div>
-            <div style="font-size: 0.95rem; font-weight: 800; color: #ffffff;">${escapeHtml(sub.name)}</div>
+            <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${escapeHtml(sub.code)} • ${sub.durationMinutes || 90}M</div>
+            <div style="font-size: 0.86rem; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${escapeHtml(sub.name)}</div>
           </div>
-          <span class="badge" style="background: ${sub.isActive !== false ? '#065f46' : '#881337'}; color: #ffffff; font-size: 0.68rem;">
-            ${sub.isActive !== false ? 'AKTIF' : 'DITUTUP'}
+          <span class="badge" style="background: ${sub.isActive !== false ? '#065f46' : '#881337'}; color: #ffffff; font-size: 0.65rem; padding: 0.15rem 0.4rem;">
+            ${sub.isActive !== false ? 'AKTIF' : 'TUTUP'}
           </span>
         </div>
         <div class="all-token-digits">${escapeHtml(sub.token || '-')}</div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e293b;">
-          <button type="button" class="btn btn-outline btn-sm" onclick="copySingleToken('${sub.token}', '${sub.name}')" style="font-size: 0.75rem; padding: 0.25rem 0.55rem; color: #38bdf8; border-color: #0284c7;">
-            📋 Salin Token
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px solid rgba(255,255,255,0.1);">
+          <button type="button" class="btn btn-outline btn-sm" onclick="copySingleToken('${sub.token}', '${sub.name}')" style="font-size: 0.7rem; padding: 0.18rem 0.45rem; color: #38bdf8; border-color: #0284c7;">
+            📋 Salin
           </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}'); openAllSubjectTokensModal();" style="font-size: 0.75rem; padding: 0.25rem 0.55rem; color: #cbd5e1; border-color: #475569;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}'); openAllSubjectTokensModal();" style="font-size: 0.7rem; padding: 0.18rem 0.45rem; color: #cbd5e1; border-color: #475569;">
             🎲 Acak
           </button>
         </div>
@@ -3368,26 +3368,79 @@ function dismissCheatAlert() {
   enterMobileFullscreen();
 }
 
-// Submit Final Confirmation Modal
+// Submit Final Confirmation Modal (v3.31.0 - Proteksi Validasi Seluruh Soal Wajib Dijawab)
 function openSubmitConfirmModal() {
+  const qList = getActiveExamQuestions();
   let answered = 0;
   let doubt = 0;
+  const unansweredIndices = [];
 
-  state.questions.forEach((q) => {
+  qList.forEach((q, idx) => {
     const ans = state.student.answers[q.id];
-    if (ans) {
+    if (ans && ans.selected) {
       if (ans.isDoubt) doubt++;
-      else if (ans.selected) answered++;
+      else answered++;
+    } else {
+      unansweredIndices.push(idx + 1);
     }
   });
 
-  const empty = state.questions.length - (answered + doubt);
+  const empty = unansweredIndices.length;
 
-  document.getElementById('confirm-answered-count').textContent = answered + ' Soal';
-  document.getElementById('confirm-doubt-count').textContent = doubt + ' Soal';
-  document.getElementById('confirm-empty-count').textContent = empty + ' Soal';
+  const answeredEl = document.getElementById('confirm-answered-count');
+  const doubtEl = document.getElementById('confirm-doubt-count');
+  const emptyEl = document.getElementById('confirm-empty-count');
+  if (answeredEl) answeredEl.textContent = answered + ' Soal';
+  if (doubtEl) doubtEl.textContent = doubt + ' Soal';
+  if (emptyEl) emptyEl.textContent = empty + ' Soal';
+
+  const warnBox = document.getElementById('submit-unanswered-warning-box');
+  const warnText = document.getElementById('submit-unanswered-warning-text');
+  const btnResume = document.getElementById('btn-resume-unanswered');
+  const btnSubmit = document.getElementById('btn-confirm-final-submit');
+
+  if (empty > 0) {
+    // Siswa belum menyelesaikan seluruh butir soal
+    if (warnBox) warnBox.style.display = 'block';
+    if (warnText) {
+      const listStr = unansweredIndices.slice(0, 8).join(', ') + (unansweredIndices.length > 8 ? '...' : '');
+      warnText.innerHTML = `Masih ada <strong>${empty} butir soal</strong> yang belum Anda jawab (Nomor: <strong>${listStr}</strong>). Harap selesaikan seluruh butir soal sebelum menyelesaikan ujian!`;
+    }
+    if (btnResume) {
+      btnResume.style.display = 'block';
+      btnResume.innerHTML = `🔍 Lanjutkan Kerjakan Soal (Menuju No. ${unansweredIndices[0]})`;
+      btnResume.onclick = () => {
+        closeSubmitConfirmModal();
+        jumpToQuestion(unansweredIndices[0] - 1);
+      };
+    }
+    // Sembunyikan tombol konfirmasi akhir sampai semua soal terjawab
+    if (btnSubmit) btnSubmit.style.display = 'none';
+  } else {
+    // Seluruh butir soal telah terjawab lengkap
+    if (warnBox) warnBox.style.display = 'none';
+    if (btnResume) btnResume.style.display = 'none';
+    if (btnSubmit) {
+      btnSubmit.style.display = 'block';
+      btnSubmit.disabled = false;
+    }
+  }
 
   document.getElementById('modal-submit-confirm').style.display = 'flex';
+}
+
+function resumeUnansweredQuestion() {
+  const qList = getActiveExamQuestions();
+  for (let i = 0; i < qList.length; i++) {
+    const q = qList[i];
+    const ans = state.student.answers[q.id];
+    if (!ans || !ans.selected) {
+      closeSubmitConfirmModal();
+      jumpToQuestion(i);
+      return;
+    }
+  }
+  closeSubmitConfirmModal();
 }
 
 function closeSubmitConfirmModal() {
@@ -6408,7 +6461,7 @@ function renderResultsTable() {
   const finishedList = getVisibleSubmittedResults();
 
   if (finishedList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada peserta di kelas/kewenangan Anda yang mengumpulkan ujian.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada peserta di kelas/kewenangan Anda yang mengumpulkan ujian.</td></tr>';
     return;
   }
 
@@ -6424,7 +6477,13 @@ function renderResultsTable() {
       '<td><span class="badge" style="background: var(--slate-200); font-weight: 700;">' + escapeHtml(st.className) + '</span></td>' +
       '<td>' + (st.answeredCount || 0) + ' / ' + (st.totalQ || 0) + '</td>' +
       '<td><strong style="color: var(--primary-600); font-size: 1.1rem;">' + (st.score !== undefined ? st.score : '-') + '</strong></td>' +
-      '<td>' + escapeHtml(st.time || '-') + '</td>';
+      '<td>' + escapeHtml(st.time || '-') + '</td>' +
+      '<td style="text-align: center;">' +
+        '<button type="button" class="btn btn-outline btn-xs" style="color: var(--rose-600); border-color: var(--rose-300); padding: 0.2rem 0.55rem; font-size: 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;" onclick="confirmDeleteStudentResult(\'' + escapeHtml(st.nisn) + '\', \'' + escapeHtml(st.name).replace(/'/g, "\\'") + '\')" title="Hapus nilai peserta ini">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> ' +
+          'Hapus' +
+        '</button>' +
+      '</td>';
     tbody.appendChild(tr);
   });
 }
@@ -6493,6 +6552,32 @@ async function clearAllExamResults() {
   }
 
   showToast('✅ Seluruh data hasil ujian berhasil dibersihkan!', 'success');
+}
+
+// Konfirmasi Hapus Hasil Ujian Per Siswa (v3.31.0)
+async function confirmDeleteStudentResult(nisn, studentName) {
+  const confirmed = confirm(`Apakah Anda yakin ingin menghapus data nilai ujian siswa ${studentName} (${nisn})? Data nilai pengerjaan siswa ini akan di-reset.`);
+  if (!confirmed) return;
+
+  // Hapus siswa dari state.liveStudents
+  state.liveStudents = (state.liveStudents || []).filter(s => s.nisn !== nisn);
+  localStorage.setItem('zettcbt_live_students', JSON.stringify(state.liveStudents));
+
+  // Jika terhubung ke database Neon Cloud, hapus data attempt di server
+  const creds = parseNeonCredentials();
+  if (creds && creds.host) {
+    try {
+      await executeNeonSql('DELETE FROM student_attempts WHERE participant_number = $1;', [nisn]);
+    } catch(e) {
+      console.warn('Neon single student attempt deletion deferred:', e.message);
+    }
+  }
+
+  renderResultsTable();
+  renderLiveMonitoringTable();
+  renderSrmsRecentResults();
+  updateAdminMetrics();
+  showToast(`✅ Hasil ujian siswa ${studentName} berhasil dihapus!`, 'success');
 }
 
 // ==============================================================================
@@ -8170,6 +8255,44 @@ window.copyNeonShareLink = copyNeonShareLink;
 window.downloadNeonConfigFile = downloadNeonConfigFile;
 
 // ==============================================================================
+// LIVE SYSTEM CLOCK (HARI, TANGGAL, BULAN, TAHUN & JAM DETIK REALTIME - v3.31.0)
+// ==============================================================================
+let liveClockInterval = null;
+
+function startLiveClockDaemon() {
+  if (liveClockInterval) clearInterval(liveClockInterval);
+
+  function tick() {
+    const now = new Date();
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+    const dayName = days[now.getDay()];
+    const dateNum = String(now.getDate()).padStart(2, '0');
+    const monthName = months[now.getMonth()];
+    const year = now.getFullYear();
+
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+
+    const fullDateStr = `${dayName}, ${dateNum} ${monthName} ${year}`;
+    const fullTimeStr = `${hh}:${mm}:${ss} WIB`;
+
+    document.querySelectorAll('.live-clock-date-display').forEach(el => {
+      el.textContent = fullDateStr;
+    });
+
+    document.querySelectorAll('.live-clock-time-display').forEach(el => {
+      el.textContent = fullTimeStr;
+    });
+  }
+
+  tick();
+  liveClockInterval = setInterval(tick, 1000);
+}
+
+// ==============================================================================
 // MASTER APPLICATION BOOTSTRAP HOOK (MULTI-BROWSER RESILIENT)
 // ==============================================================================
 
@@ -8188,6 +8311,7 @@ function initApp() {
   updateNotificationBadge();
   initNotificationListeners();
   startProctorTokenTimer();
+  startLiveClockDaemon();
   initNeonAutoSync();
   initPwaSupport();
   initCrossDeviceTokenSync();
