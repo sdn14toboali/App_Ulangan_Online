@@ -2248,6 +2248,7 @@
       <div class="modal-body">
         <form id="form-teacher-editor" onsubmit="handleSaveTeacher(event)">
           <input type="hidden" id="edit-teacher-id">
+          <input type="hidden" id="edit-teacher-original-username">
 
           <div class="form-group">
             <label class="form-label">Nama Lengkap & Gelar Pendidik</label>
@@ -2282,20 +2283,28 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group" id="group-teacher-class">
               <label class="form-label">Kelas Binaan</label>
-              <select id="edit-teacher-class" class="form-control">
+              <input type="text" id="edit-teacher-class" class="form-control" list="list-teacher-classes" placeholder="Pilih atau ketik kelas (Contoh: 5A / 5 / Semua Kelas)" autocomplete="off">
+              <datalist id="list-teacher-classes">
                 <option value="SEMUA KELAS">Semua Kelas</option>
-                <option value="4A">4A</option>
-                <option value="4B">4B</option>
-                <option value="5A">5A</option>
-                <option value="5B">5B</option>
-                <option value="6A">6A</option>
-                <option value="6B">6B</option>
-              </select>
-              <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Kelas</small>
+                <option value="1">Kelas 1</option>
+                <option value="2">Kelas 2</option>
+                <option value="3">Kelas 3</option>
+                <option value="4">Kelas 4</option>
+                <option value="4A">Kelas 4A</option>
+                <option value="4B">Kelas 4B</option>
+                <option value="5">Kelas 5</option>
+                <option value="5A">Kelas 5A</option>
+                <option value="5B">Kelas 5B</option>
+                <option value="6">Kelas 6</option>
+                <option value="6A">Kelas 6A</option>
+                <option value="6B">Kelas 6B</option>
+              </datalist>
+              <small style="font-size: 0.75rem; color: var(--slate-500);">*Bebas pilih dari daftar atau ketik nama rombel/kelas apa pun</small>
             </div>
             <div class="form-group" id="group-teacher-subject">
               <label class="form-label">Mata Pelajaran Binaan</label>
-              <select id="edit-teacher-subject" class="form-control">
+              <input type="text" id="edit-teacher-subject" class="form-control" list="list-teacher-subjects" placeholder="Pilih atau ketik mata pelajaran" autocomplete="off">
+              <datalist id="list-teacher-subjects">
                 <option value="SEMUA MAPEL">Semua Mata Pelajaran</option>
                 <option value="Matematika">Matematika</option>
                 <option value="Bahasa Indonesia">Bahasa Indonesia</option>
@@ -2306,8 +2315,8 @@
                 <option value="PJOK / Penjaskes">PJOK / Penjaskes</option>
                 <option value="Seni dan Budaya (SBdP)">Seni dan Budaya (SBdP)</option>
                 <option value="Muatan Lokal (Bahasa Daerah)">Muatan Lokal (Bahasa Daerah)</option>
-              </select>
-              <small style="font-size: 0.75rem; color: var(--slate-500);">*Khusus Guru Mapel</small>
+              </datalist>
+              <small style="font-size: 0.75rem; color: var(--slate-500);">*Bebas pilih dari daftar atau ketik nama mapel apa pun</small>
             </div>
           </div>
 
@@ -2965,6 +2974,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.42.0"></script>
+  <script src="app.js?v=3.43.0"></script>
 </body>
 </html>
