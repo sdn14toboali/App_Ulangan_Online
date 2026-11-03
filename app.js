@@ -568,6 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNeonAutoSync();
   initPwaSupport();
   initCrossDeviceTokenSync();
+  clearTeacherLoginForm();
 });
 
 // ==============================================================================
@@ -1031,8 +1032,31 @@ function loadSavedState() {
   }
 }
 
+// Helper Bersihkan Total Kolom Username & Password Login Guru (Anti-Autofill Residu)
+function clearTeacherLoginForm() {
+  const uInput = document.getElementById('teacher-login-username');
+  const pInput = document.getElementById('teacher-login-password');
+  if (uInput) uInput.value = '';
+  if (pInput) {
+    pInput.value = '';
+    pInput.type = 'password';
+  }
+  const form = document.getElementById('form-teacher-login');
+  if (form) {
+    try { form.reset(); } catch(e) {}
+  }
+  const eye = document.getElementById('eye-icon');
+  if (eye) {
+    eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+  }
+}
+
 // Navigation between Screen Views
 function showScreen(screenId) {
+  if (screenId === 'teacher-login') {
+    clearTeacherLoginForm();
+  }
+
   const screens = document.querySelectorAll('.view-screen');
   screens.forEach((s) => s.classList.remove('active'));
 
@@ -1737,6 +1761,7 @@ function openTeacherPortal() {
     applyTeacherIsolation();
     showScreen('admin-dashboard');
   } else {
+    clearTeacherLoginForm();
     showScreen('teacher-login');
   }
 }
@@ -1867,6 +1892,9 @@ function handleTeacherLogout() {
   if (elHeaderName) elHeaderName.textContent = 'Bapak/Ibu Guru';
   const elHeaderRole = document.getElementById('srms-header-user-role');
   if (elHeaderRole) elHeaderRole.textContent = (state.school && state.school.name) ? state.school.name : 'SD Negeri 14 Toboali';
+
+  // Bersihkan form login guru dari residu kredensial
+  clearTeacherLoginForm();
 
   showScreen('student-login');
   showToast('Anda telah berhasil keluar dari akun.', 'info');
