@@ -112,6 +112,7 @@ function getStudentPasswordForSubject(student, subjectName) {
 // Global State
 const state = {
   currentView: 'student-login',
+  isScreenTransitioning: false,
   fontSizeLevel: 0, // -1, 0, 1
   currentQuestionIndex: 0,
   timerInterval: null,
@@ -1075,8 +1076,86 @@ function clearStudentLoginForm() {
   }
 }
 
-// Navigation between Screen Views
-function showScreen(screenId) {
+// Navigation between Screen Views with Smooth Directional Slide Transitions
+function showScreen(screenId, direction) {
+  // If target screen is already active, ignore redundant triggers
+  if (state.currentView === screenId) {
+    const currentActiveEl = document.getElementById('screen-' + screenId);
+    if (currentActiveEl && currentActiveEl.classList.contains('active')) {
+      return;
+    }
+  }
+
+  // Prevent transition race conditions
+  if (state.isScreenTransitioning) {
+    return;
+  }
+
+  const currentView = state.currentView || (document.querySelector('.view-screen.active')?.id.replace('screen-', '') || '');
+
+  // Auto-detect direction between student-login and teacher-login if not explicitly specified
+  const isAuthTransition = (currentView === 'student-login' && screenId === 'teacher-login') ||
+                           (currentView === 'teacher-login' && screenId === 'student-login');
+
+  if (isAuthTransition && !direction) {
+    if (currentView === 'student-login' && screenId === 'teacher-login') {
+      direction = 'left'; // Slide ke kiri saat masuk ke login guru
+    } else if (currentView === 'teacher-login' && screenId === 'student-login') {
+      direction = 'right'; // Slide ke kanan saat kembali ke ruang siswa
+    }
+  }
+
+  // If this is a directional auth transition, perform staged two-phase animation
+  if (isAuthTransition && direction) {
+    state.isScreenTransitioning = true;
+    const currentScreenEl = document.getElementById('screen-' + currentView);
+    const targetScreenEl = document.getElementById('screen-' + screenId);
+    const currentCard = currentScreenEl ? currentScreenEl.querySelector('.split-auth-card') : null;
+    const targetCard = targetScreenEl ? targetScreenEl.querySelector('.split-auth-card') : null;
+
+    // Phase 1: Slide out the current card
+    if (currentCard) {
+      currentCard.classList.remove('auth-slide-out-left', 'auth-slide-in-right', 'auth-slide-out-right', 'auth-slide-in-left');
+      if (direction === 'left') {
+        currentCard.classList.add('auth-slide-out-left');
+      } else {
+        currentCard.classList.add('auth-slide-out-right');
+      }
+    }
+
+    setTimeout(() => {
+      if (currentCard) {
+        currentCard.classList.remove('auth-slide-out-left', 'auth-slide-out-right');
+      }
+
+      // Activate target screen and update views
+      executeScreenSwitch(screenId);
+
+      // Phase 2: Slide in the target card
+      if (targetCard) {
+        targetCard.classList.remove('auth-slide-out-left', 'auth-slide-in-right', 'auth-slide-out-right', 'auth-slide-in-left');
+        if (direction === 'left') {
+          targetCard.classList.add('auth-slide-in-right');
+        } else {
+          targetCard.classList.add('auth-slide-in-left');
+        }
+
+        setTimeout(() => {
+          targetCard.classList.remove('auth-slide-in-right', 'auth-slide-in-left');
+          state.isScreenTransitioning = false;
+        }, 340);
+      } else {
+        state.isScreenTransitioning = false;
+      }
+    }, 170);
+    return;
+  }
+
+  // Default instant / regular screen switch for all other screens
+  executeScreenSwitch(screenId);
+}
+
+function executeScreenSwitch(screenId) {
   if (screenId === 'teacher-login') {
     clearTeacherLoginForm();
   }
@@ -1801,7 +1880,7 @@ function openTeacherPortal() {
     showScreen('admin-dashboard');
   } else {
     clearTeacherLoginForm();
-    showScreen('teacher-login');
+    showScreen('teacher-login', 'left');
   }
 }
 
