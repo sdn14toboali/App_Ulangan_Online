@@ -205,26 +205,31 @@ const state = {
   // Daftar Mata Pelajaran Resmi & Token per Mapel SD NEGERI 14 TOBOALI
   subjects: (() => {
     const defaultSubjects = [
-      { id: 'sub-bin', name: 'Bahasa Indonesia', code: 'BIN', token: 'BIN26A', durationMinutes: 90, isActive: true },
-      { id: 'sub-mtk', name: 'Matematika', code: 'MTK', token: 'MTK26B', durationMinutes: 90, isActive: true },
-      { id: 'sub-ipas', name: 'IPAS (Ilmu Pengetahuan Alam & Sosial)', code: 'IPS', token: 'IPS26C', durationMinutes: 90, isActive: true },
-      { id: 'sub-pkn', name: 'Pendidikan Pancasila (PPKn)', code: 'PKN', token: 'PKN26D', durationMinutes: 90, isActive: true },
-      { id: 'sub-pai', name: 'Pendidikan Agama Islam (PAI)', code: 'PAI', token: 'PAI26E', durationMinutes: 90, isActive: true },
-      { id: 'sub-pjok', name: 'PJOK / Penjaskes', code: 'PJK', token: 'PJK26F', durationMinutes: 90, isActive: true },
-      { id: 'sub-sbdp', name: 'Seni dan Budaya (SBdP)', code: 'SBD', token: 'SBD26G', durationMinutes: 90, isActive: true },
-      { id: 'sub-mulok', name: 'Muatan Lokal (Bahasa Daerah)', code: 'MLK', token: 'MLK26H', durationMinutes: 90, isActive: true },
-      { id: 'sub-bing', name: 'Bahasa Inggris', code: 'BIG', token: 'BIG26I', durationMinutes: 90, isActive: true }
+      { id: 'sub-bin', name: 'Bahasa Indonesia', code: 'BIN', token: 'BIN26A', durationMinutes: 90, kkm: 75, isActive: true },
+      { id: 'sub-mtk', name: 'Matematika', code: 'MTK', token: 'MTK26B', durationMinutes: 90, kkm: 70, isActive: true },
+      { id: 'sub-ipas', name: 'IPAS (Ilmu Pengetahuan Alam & Sosial)', code: 'IPS', token: 'IPS26C', durationMinutes: 90, kkm: 70, isActive: true },
+      { id: 'sub-pkn', name: 'Pendidikan Pancasila (PPKn)', code: 'PKN', token: 'PKN26D', durationMinutes: 90, kkm: 75, isActive: true },
+      { id: 'sub-pai', name: 'Pendidikan Agama Islam (PAI)', code: 'PAI', token: 'PAI26E', durationMinutes: 90, kkm: 75, isActive: true },
+      { id: 'sub-pjok', name: 'PJOK / Penjaskes', code: 'PJK', token: 'PJK26F', durationMinutes: 90, kkm: 75, isActive: true },
+      { id: 'sub-sbdp', name: 'Seni dan Budaya (SBdP)', code: 'SBD', token: 'SBD26G', durationMinutes: 90, kkm: 75, isActive: true },
+      { id: 'sub-mulok', name: 'Muatan Lokal (Bahasa Daerah)', code: 'MLK', token: 'MLK26H', durationMinutes: 90, kkm: 70, isActive: true },
+      { id: 'sub-bing', name: 'Bahasa Inggris', code: 'BIG', token: 'BIG26I', durationMinutes: 90, kkm: 70, isActive: true }
     ];
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_subjects') || 'null');
       if (saved && Array.isArray(saved) && saved.length > 0) {
-        // Smart Migration: Jangan reset token mapel yang sudah ada, tapi tambahkan mapel baru yang belum ada
+        // Smart Migration: Jangan reset token mapel yang sudah ada, tapi tambahkan mapel baru & pastikan KKM ada
         let changed = false;
         defaultSubjects.forEach(defSub => {
-          const exists = saved.some(s => s.id === defSub.id || s.code === defSub.code || s.name === defSub.name);
-          if (!exists) {
+          const match = saved.find(s => s.id === defSub.id || s.code === defSub.code || s.name === defSub.name);
+          if (!match) {
             saved.push(defSub);
             changed = true;
+          } else {
+            if (match.kkm === undefined || match.kkm === null || typeof match.kkm !== 'number') {
+              match.kkm = defSub.kkm || 75;
+              changed = true;
+            }
           }
         });
         if (changed) {
@@ -1156,6 +1161,18 @@ function getShortSubjectName(name) {
   if (name.includes('Agama Islam') || name.includes('PAI')) return 'PAI';
   if (name.includes('PJOK') || name.includes('Penjaskes')) return 'PJOK';
   return name.length > 14 ? name.substring(0, 12) + '...' : name;
+}
+
+// Mendapatkan Nilai Standar KKM Mata Pelajaran (Kriteria Ketuntasan Minimal / KKTP)
+function getSubjectKkm(subjectName) {
+  if (!subjectName) return 75;
+  const clean = String(subjectName).trim().toLowerCase();
+  const sub = (state.subjects || []).find(s => {
+    const sName = (s.name || '').trim().toLowerCase();
+    const sCode = (s.code || '').trim().toLowerCase();
+    return sName === clean || sName.includes(clean) || clean.includes(sName) || (sCode && clean.includes(sCode));
+  });
+  return (sub && typeof sub.kkm === 'number' && sub.kkm > 0) ? sub.kkm : 75;
 }
 
 function renderProctorTokenBar() {
@@ -3607,6 +3624,28 @@ function submitFinalExam(forced = false) {
   if (state.session.showScore) {
     scoreBox.style.display = 'block';
     scoreVal.textContent = totalScore;
+
+    // Evaluasi KKM & Status Ketuntasan
+    const currentKkm = getSubjectKkm(state.session.subject);
+    const isTuntas = totalScore >= currentKkm;
+    const kkmBadge = document.getElementById('finish-kkm-info');
+    const statusBadge = document.getElementById('finish-status-pill');
+    if (kkmBadge) {
+      kkmBadge.textContent = `Standar KKM: ${currentKkm}`;
+    }
+    if (statusBadge) {
+      if (isTuntas) {
+        statusBadge.style.background = '#dcfce7';
+        statusBadge.style.color = '#15803d';
+        statusBadge.style.border = '1.5px solid #86efac';
+        statusBadge.innerHTML = '🟢 TUNTAS (MEMENUHI KKM)';
+      } else {
+        statusBadge.style.background = '#fef2f2';
+        statusBadge.style.color = '#b91c1c';
+        statusBadge.style.border = '1.5px solid #fecaca';
+        statusBadge.innerHTML = '⚠️ PERLU REMEDIAL (BELUM MENCAPAI KKM)';
+      }
+    }
   } else {
     scoreBox.style.display = 'none';
   }
@@ -3695,6 +3734,7 @@ function switchAdminTab(tabId, element) {
   if (tabId === 'session-setting') {
     populateSessionSettings();
     renderTeacherExamSchedules();
+    renderSubjectTokensTable();
   }
   if (tabId === 'manage-students') renderStudentsTable();
   if (tabId === 'manage-teachers') renderTeachersTable();
@@ -3752,15 +3792,15 @@ function renderSrmsDashboard() {
   const examsSub = document.getElementById('srms-kpi-exams-sub');
   if (examsSub) examsSub.textContent = 'Siswa Sudah Submit';
 
-  // Ketuntasan Siswa (KKM >= 75)
-  const passCount = submittedList.filter(s => (s.score || 0) >= 75).length;
+  // Ketuntasan Siswa (KKM Dinamis per Mapel)
+  const passCount = submittedList.filter(s => (s.score || 0) >= getSubjectKkm(s.subject)).length;
   const passPct = submittedList.length > 0 ? Math.round((passCount / submittedList.length) * 100) : 0;
   const rankEl = document.getElementById('srms-kpi-rank') || document.getElementById('srms-overall-rank');
   if (rankEl) rankEl.textContent = `${passPct}%`;
   const rankLabel = document.getElementById('srms-kpi-rank-label');
   if (rankLabel) rankLabel.textContent = 'Ketuntasan Siswa';
   const rankSub = document.getElementById('srms-kpi-rank-sub');
-  if (rankSub) rankSub.textContent = `${passCount} dari ${submittedList.length} Tuntas (>=75)`;
+  if (rankSub) rankSub.textContent = `${passCount} dari ${submittedList.length} Tuntas KKM`;
 
   // Kehadiran Siswa
   const activeStudents = visibleLive.filter(s => s.status === 'in_progress' || s.status === 'submitted').length;
@@ -3783,10 +3823,12 @@ function renderSrmsDashboard() {
 function renderSrmsDonutChart(submittedList) {
   const total = submittedList ? submittedList.length : 0;
   let countA = 0, countB = 0, countC = 0, countD = 0;
+  let passCount = 0;
 
   if (total > 0) {
     submittedList.forEach(s => {
       const sc = typeof s.score === 'number' ? s.score : 0;
+      if (sc >= getSubjectKkm(s.subject)) passCount++;
       if (sc >= 85) countA++;
       else if (sc >= 75) countB++;
       else if (sc >= 60) countC++;
@@ -3798,7 +3840,7 @@ function renderSrmsDonutChart(submittedList) {
   const pctB = total > 0 ? Math.round((countB / total) * 100) : 0;
   const pctC = total > 0 ? Math.round((countC / total) * 100) : 0;
   const pctD = total > 0 ? Math.max(0, 100 - pctA - pctB - pctC) : 0;
-  const passPct = total > 0 ? Math.round(((countA + countB) / total) * 100) : 0;
+  const passPct = total > 0 ? Math.round((passCount / total) * 100) : 0;
 
   // Center percentage
   const mainPctEl = document.getElementById('srms-donut-pct-main');
@@ -3864,10 +3906,12 @@ function renderSrmsRecentResults() {
       else if (score >= 60) grade = 'C';
       else grade = 'D';
 
-      const badgeCls = score >= 75 ? 'badge-pass' : 'badge-remedial';
-      const badgeText = score >= 75 ? 'Tuntas' : 'Remedial';
-      const gradeCls = (grade === 'A+' || grade === 'A') ? 'grade-a' : (grade === 'B+' || grade === 'B' ? 'grade-bplus' : (grade === 'C' ? 'grade-c' : 'grade-d'));
       const subjName = st.subject || state.session.subject || (state.subjects && state.subjects[0] ? state.subjects[0].name : 'Matematika');
+      const kkmVal = getSubjectKkm(subjName);
+      const isPass = score >= kkmVal;
+      const badgeCls = isPass ? 'badge-pass' : 'badge-remedial';
+      const badgeText = isPass ? 'Tuntas' : 'Remedial';
+      const gradeCls = (grade === 'A+' || grade === 'A') ? 'grade-a' : (grade === 'B+' || grade === 'B' ? 'grade-bplus' : (grade === 'C' ? 'grade-c' : 'grade-d'));
 
       rowsHtml += `
         <tr>
@@ -5611,19 +5655,24 @@ function printResultsPdf() {
   const container = document.getElementById('print-container');
   const finishedList = getVisibleLiveStudents().filter(s => s.status === 'submitted');
   const sch = state.school;
+  const currentSubj = state.session.subject;
+  const currentKkm = getSubjectKkm(currentSubj);
 
   finishedList.sort((a, b) => b.score - a.score);
 
   let rowsHtml = '';
   finishedList.forEach((st, idx) => {
+    const stScore = typeof st.score === 'number' ? st.score : 0;
+    const isPass = stScore >= currentKkm;
     rowsHtml += `
       <tr>
         <td style="border: 1px solid #000; padding: 6px; text-align: center;">${idx + 1}</td>
-        <td style="border: 1px solid #000; padding: 6px;">${st.nisn}</td>
-        <td style="border: 1px solid #000; padding: 6px;"><strong>${st.name}</strong></td>
-        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${st.className}</td>
-        <td style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">${st.score}</td>
-        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${st.score >= 75 ? 'TUNTAS' : 'REMEDIAL'}</td>
+        <td style="border: 1px solid #000; padding: 6px;">${escapeHtml(st.nisn)}</td>
+        <td style="border: 1px solid #000; padding: 6px;"><strong>${escapeHtml(st.name)}</strong></td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${escapeHtml(st.className)}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${currentKkm}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">${stScore}</td>
+        <td style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; color: ${isPass ? '#15803d' : '#b91c1c'};">${isPass ? 'TUNTAS' : 'REMEDIAL'}</td>
       </tr>
     `;
   });
@@ -5635,22 +5684,23 @@ function printResultsPdf() {
     generateKopSuratHtml() +
     '<div style="text-align: center; margin-bottom: 16px;">' +
       '<strong style="font-size: 12pt; text-transform: uppercase;">REKAPITULASI HASIL PENILAIAN UJIAN BERBASIS KOMPUTER</strong><br>' +
-      '<span style="font-size: 10pt;">Mata Pelajaran: ' + state.session.subject + ' | Tahun Pelajaran: ' + sch.academicYear + '</span>' +
+      '<span style="font-size: 10pt;">Mata Pelajaran: ' + escapeHtml(state.session.subject) + ' (Standar KKM: ' + currentKkm + ') | Tahun Pelajaran: ' + escapeHtml(sch.academicYear) + '</span>' +
     '</div>' +
     '<table style="width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 30px;">' +
       '<thead><tr style="background: #f0f0f0;">' +
-        '<th style="border: 1px solid #000; padding: 6px;">No</th>' +
+        '<th style="border: 1px solid #000; padding: 6px; width: 40px; text-align: center;">No</th>' +
         '<th style="border: 1px solid #000; padding: 6px;">NISN / No Peserta</th>' +
         '<th style="border: 1px solid #000; padding: 6px;">Nama Lengkap Siswa</th>' +
-        '<th style="border: 1px solid #000; padding: 6px;">Kelas</th>' +
-        '<th style="border: 1px solid #000; padding: 6px;">Nilai Akhir</th>' +
-        '<th style="border: 1px solid #000; padding: 6px;">Status</th>' +
+        '<th style="border: 1px solid #000; padding: 6px; text-align: center;">Kelas</th>' +
+        '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 60px;">KKM</th>' +
+        '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 80px;">Nilai Akhir</th>' +
+        '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">Status</th>' +
       '</tr></thead>' +
-      '<tbody>' + (rowsHtml || '<tr><td colspan="6" style="text-align:center; padding: 10px;">Belum ada data nilai submit.</td></tr>') + '</tbody>' +
+      '<tbody>' + (rowsHtml || '<tr><td colspan="7" style="text-align:center; padding: 10px;">Belum ada data nilai submit.</td></tr>') + '</tbody>' +
     '</table>' +
     '<div style="display: flex; justify-content: space-between; font-size: 10pt; margin-top: 30px;">' +
-      '<div>Mengetahui,<br>Kepala ' + sch.name + '<br><br><br><br><strong>' + sch.headmaster + '</strong><br>NIP. ' + sch.headmasterNip + '</div>' +
-      '<div>Toboali, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '<br>Guru Mata Pelajaran / Wali Kelas<br><br><br><br><strong>' + teacherSignerName + '</strong>' + teacherSignerNipHtml + '</div>' +
+      '<div>Mengetahui,<br>Kepala ' + escapeHtml(sch.name) + '<br><br><br><br><strong>' + escapeHtml(sch.headmaster) + '</strong><br>NIP. ' + escapeHtml(sch.headmasterNip) + '</div>' +
+      '<div>Toboali, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '<br>Guru Mata Pelajaran / Wali Kelas<br><br><br><br><strong>' + escapeHtml(teacherSignerName) + '</strong>' + teacherSignerNipHtml + '</div>' +
     '</div>';
 
   window.print();
@@ -6015,7 +6065,7 @@ function renderExamCardsTab() {
 }
 
 /**
- * Manajemen Token Ujian per Mata Pelajaran (Admin Tab Pengaturan Sesi)
+ * Manajemen Token Ujian & Standar KKM per Mata Pelajaran (Admin Tab Pengaturan Sesi)
  */
 function renderSubjectTokensTable() {
   const tbody = document.getElementById('table-subject-tokens-body');
@@ -6032,17 +6082,20 @@ function renderSubjectTokensTable() {
   subjects.forEach((sub, idx) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${idx + 1}</td>
+      <td style="text-align: center;">${idx + 1}</td>
       <td><strong>${escapeHtml(sub.name)}</strong></td>
-      <td><span class="badge" style="background: var(--slate-200); font-weight: 700;">${escapeHtml(sub.code)}</span></td>
+      <td style="text-align: center;"><span class="badge" style="background: var(--slate-200); font-weight: 700;">${escapeHtml(sub.code)}</span></td>
+      <td style="text-align: center;">
+        <input type="number" id="kkm-input-${sub.id}" value="${typeof sub.kkm === 'number' ? sub.kkm : 75}" min="0" max="100" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; font-weight: 700; color: var(--primary-700); padding: 0.3rem 0.5rem; font-size: 0.9rem;" title="Batas Nilai KKM (0-100)">
+      </td>
       <td>
         <div style="display: flex; gap: 0.4rem; align-items: center;">
           <input type="text" id="token-input-${sub.id}" value="${escapeHtml(sub.token)}" class="form-control" style="width: 110px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
           <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}')" title="Acak Token">🎲</button>
         </div>
       </td>
-      <td>
-        <input type="number" id="duration-input-${sub.id}" value="${sub.durationMinutes || 90}" min="10" max="300" class="form-control" style="width: 80px; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+      <td style="text-align: center;">
+        <input type="number" id="duration-input-${sub.id}" value="${sub.durationMinutes || 90}" min="10" max="300" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
       </td>
     `;
     tbody.appendChild(tr);
@@ -6100,8 +6153,13 @@ function generateAllSubjectTokens() {
 
 function saveSubjectTokensSettings() {
   (state.subjects || []).forEach(sub => {
+    const kkmInput = document.getElementById('kkm-input-' + sub.id);
     const tokenInput = document.getElementById('token-input-' + sub.id);
     const durationInput = document.getElementById('duration-input-' + sub.id);
+    if (kkmInput) {
+      const parsedKkm = parseInt(kkmInput.value, 10);
+      sub.kkm = (!isNaN(parsedKkm) && parsedKkm >= 0 && parsedKkm <= 100) ? parsedKkm : 75;
+    }
     if (tokenInput) sub.token = tokenInput.value.trim().toUpperCase();
     if (durationInput) sub.durationMinutes = parseInt(durationInput.value, 10) || 90;
     sub.isActive = true;
@@ -6117,11 +6175,14 @@ function saveSubjectTokensSettings() {
 
   renderSubjectTokensTable();
   renderProctorTokenBar();
+  renderHorizontalTokenRibbon();
   renderTeacherExamSchedules();
+  renderResultsTable();
+  renderSrmsDashboard();
   applySchoolBrandingUI();
   syncTokensToNeonCloud();
   syncSchedulesToNeonCloud();
-  showToast('Pengaturan token dan durasi per mata pelajaran berhasil disimpan & disinkronkan!', 'success');
+  showToast('Pengaturan KKM, token, dan durasi per mata pelajaran berhasil disimpan & disinkronkan!', 'success');
 }
 
 function regenerateAllStudentPasswords() {
@@ -6968,7 +7029,7 @@ function renderResultsTable() {
   const finishedList = getVisibleSubmittedResults();
 
   if (finishedList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada peserta di kelas/kewenangan Anda yang mengumpulkan ujian.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada peserta di kelas/kewenangan Anda yang mengumpulkan ujian.</td></tr>';
     return;
   }
 
@@ -6988,14 +7049,22 @@ function renderResultsTable() {
     const badgeBg = percent >= 75 ? '#f0fdf4' : (percent >= 50 ? '#fffbeb' : '#fef2f2');
     const badgeBorder = percent >= 75 ? '#bbf7d0' : (percent >= 50 ? '#fde68a' : '#fecaca');
 
+    const subjName = st.subject || state.session.subject || 'Semua Mapel';
+    const kkmVal = getSubjectKkm(subjName);
+    const scoreVal = (st.score !== undefined && st.score !== null) ? st.score : 0;
+    const isPass = scoreVal >= kkmVal;
+
     const tr = document.createElement('tr');
     tr.innerHTML = 
-      '<td>' + (idx + 1) + '</td>' +
+      '<td style="text-align: center;">' + (idx + 1) + '</td>' +
       '<td>' + escapeHtml(st.nisn) + '</td>' +
       '<td><strong>' + escapeHtml(st.name) + '</strong></td>' +
-      '<td><span class="badge" style="background: var(--slate-200); font-weight: 700;">' + escapeHtml(st.className) + '</span></td>' +
-      '<td><span style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; color: ' + badgeColor + '; background: ' + badgeBg + '; border: 1px solid ' + badgeBorder + '; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.82rem;">🎯 ' + correct + ' / ' + qCount + ' Benar</span></td>' +
-      '<td><strong style="color: var(--primary-600); font-size: 1.15rem;">' + (st.score !== undefined ? st.score : '-') + '</strong></td>' +
+      '<td style="text-align: center;"><span class="badge" style="background: var(--slate-200); font-weight: 700;">' + escapeHtml(st.className) + '</span></td>' +
+      '<td><span class="badge" style="background: #e0e7ff; color: #3730a3; font-weight: 700; font-size: 0.78rem;">' + escapeHtml(subjName) + '</span></td>' +
+      '<td style="text-align: center;"><span style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; color: ' + badgeColor + '; background: ' + badgeBg + '; border: 1px solid ' + badgeBorder + '; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.82rem;">🎯 ' + correct + ' / ' + qCount + ' Benar</span></td>' +
+      '<td style="text-align: center;"><strong style="color: var(--primary-600); font-size: 1.15rem;">' + scoreVal + '</strong></td>' +
+      '<td style="text-align: center;"><span class="badge" style="background: #f1f5f9; color: #475569; font-weight: 700;">' + kkmVal + '</span></td>' +
+      '<td style="text-align: center;"><span class="badge" style="background: ' + (isPass ? '#dcfce7' : '#fee2e2') + '; color: ' + (isPass ? '#15803d' : '#991b1b') + '; border: 1px solid ' + (isPass ? '#86efac' : '#fca5a5') + '; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.78rem;">' + (isPass ? '🟢 TUNTAS' : '⚠️ REMEDIAL') + '</span></td>' +
       '<td>' + escapeHtml(st.time || '-') + (st.durationSpent ? ' <span class="badge" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.72rem; font-weight: 700; margin-left: 0.25rem;">⏱️ ' + st.durationSpent + 'm</span>' : '') + '</td>' +
       '<td style="text-align: center;">' +
         '<button type="button" class="btn btn-outline btn-xs" style="color: var(--rose-600); border-color: var(--rose-300); padding: 0.2rem 0.55rem; font-size: 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;" onclick="confirmDeleteStudentResult(\'' + escapeHtml(st.nisn) + '\', \'' + escapeHtml(st.name).replace(/'/g, "\\'") + '\')" title="Hapus nilai peserta ini">' +
@@ -7016,7 +7085,7 @@ function exportResultsToExcel() {
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,';
-  csvContent += 'Peringkat,No Peserta,Nama Siswa,Kelas,Jawaban Benar,Nilai Akhir,Waktu Selesai,Durasi Pengerjaan\r\n';
+  csvContent += 'Peringkat,No Peserta,Nama Siswa,Kelas,Mata Pelajaran,Jawaban Benar,Total Nilai,KKM,Status,Waktu Selesai,Durasi Pengerjaan\r\n';
 
   finishedList.sort((a, b) => b.score - a.score);
 
@@ -7028,13 +7097,22 @@ function exportResultsToExcel() {
     } else if (typeof st.score === 'number' && st.score > 0) {
       correct = Math.min(qCount, Math.round(st.score / 20));
     }
+    const subjName = st.subject || state.session.subject || 'Semua Mapel';
+    const kkmVal = getSubjectKkm(subjName);
+    const scoreVal = (st.score !== undefined && st.score !== null) ? st.score : 0;
+    const isPass = scoreVal >= kkmVal;
+    const statusText = isPass ? 'TUNTAS' : 'REMEDIAL';
+
     const row = [
       idx + 1,
-      '"' + st.nisn + '"',
-      '"' + st.name + '"',
-      '"' + st.className + '"',
-      correct + ' / ' + qCount + ' Benar',
-      st.score,
+      '"' + (st.nisn || '') + '"',
+      '"' + (st.name || '').replace(/"/g, '""') + '"',
+      '"' + (st.className || '') + '"',
+      '"' + subjName.replace(/"/g, '""') + '"',
+      '"' + correct + ' / ' + qCount + ' Benar"',
+      scoreVal,
+      kkmVal,
+      '"' + statusText + '"',
       '"' + (st.time || '-') + '"',
       '"' + (st.durationSpent ? st.durationSpent + ' Menit' : '-') + '"'
     ].join(',');
