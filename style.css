@@ -1108,10 +1108,10 @@ body {
   min-height: 100vh;
   background: var(--bg-canvas) !important;
   position: relative;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
-/* Sidebar Samping Kiri */
+/* Sidebar Samping Kiri (Floating Claymorphic Capsule) */
 .admin-sidebar {
   width: 270px;
   background-color: #ffffff !important;
@@ -1119,13 +1119,17 @@ body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border-right: 1px solid rgba(226, 232, 240, 0.85) !important;
-  box-shadow: 4px 0 24px rgba(148, 163, 184, 0.12) !important;
+  align-self: flex-start !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 12px 32px -4px rgba(148, 163, 184, 0.16), 0 4px 12px rgba(148, 163, 184, 0.08) !important;
   position: sticky;
-  top: 0;
-  height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
+  top: 1.25rem;
+  margin: 1.25rem 0 1.25rem 1.25rem;
+  height: fit-content !important;
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+  overflow-x: hidden;
   z-index: 100;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1531,6 +1535,10 @@ body {
     width: 280px !important;
     height: 100vh !important;
     max-height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-right: 1px solid rgba(226, 232, 240, 0.85) !important;
     z-index: 1000 !important;
     transform: translateX(-100%) !important;
     box-shadow: var(--shadow-xl) !important;
@@ -2428,15 +2436,18 @@ body.dark-mode .srms-quick-logout-btn:hover {
 
 .srms-sidebar {
   background: #ffffff !important;
-  border-right: 1px solid rgba(226, 232, 240, 0.85) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  border-radius: 22px !important;
   position: sticky;
-  top: 0;
-  height: 100vh;
-  max-height: 100vh;
+  top: 1.25rem;
+  margin: 1.25rem 0 1.25rem 1.25rem;
+  height: fit-content !important;
+  max-height: calc(100vh - 2.5rem);
+  align-self: flex-start !important;
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
-  box-shadow: 4px 0 24px rgba(148, 163, 184, 0.12) !important;
+  box-shadow: 0 12px 32px -4px rgba(148, 163, 184, 0.16), 0 4px 12px rgba(148, 163, 184, 0.08) !important;
 }
 
 .srms-brand-box {
@@ -2500,7 +2511,7 @@ body.dark-mode .srms-quick-logout-btn:hover {
   flex: 1 1 auto;
   overflow-y: auto;
   min-height: 0;
-  padding: 0.85rem 0.85rem;
+  padding: 0.85rem 0.85rem 1.15rem;
   display: flex;
   flex-direction: column;
   gap: 5px;
