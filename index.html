@@ -113,7 +113,7 @@
   </script>
 
   <!-- Core Design System & Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=3.57.0">
+  <link rel="stylesheet" href="style.css?v=3.58.0">
 </head>
 <body>
 
@@ -1379,44 +1379,44 @@
       <div id="tab-kkm-setting" class="admin-tab-content" style="display: none;">
         <!-- Header & Quick Statistics -->
         <div class="kkm-room-header-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-          <div class="card p-3 shadow-xs" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #bfdbfe; border-radius: 12px;">
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #1e40af; letter-spacing: 0.5px;">Total Mapel Terdaftar</div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #1e3a8a; margin-top: 4px;" id="kkm-room-total-subjects">-</div>
-            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Ruang Mata Pelajaran Aktif</div>
+          <div class="kkm-kpi-card" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #bfdbfe;">
+            <div class="kkm-kpi-label" style="color: #1e40af;">Total Mapel Terdaftar</div>
+            <div class="kkm-kpi-value" style="color: #1e3a8a;" id="kkm-room-total-subjects">-</div>
+            <div class="kkm-kpi-desc">Ruang Mata Pelajaran Aktif</div>
           </div>
-          <div class="card p-3 shadow-xs" style="background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1px solid #bbf7d0; border-radius: 12px;">
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #166534; letter-spacing: 0.5px;">Rata-Rata KKM Sekolah</div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #14532d; margin-top: 4px;" id="kkm-room-avg-kkm">-</div>
-            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Standar Ketuntasan Minimal</div>
+          <div class="kkm-kpi-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1px solid #bbf7d0;">
+            <div class="kkm-kpi-label" style="color: #166534;">Rata-Rata KKM Sekolah</div>
+            <div class="kkm-kpi-value" style="color: #14532d;" id="kkm-room-avg-kkm">-</div>
+            <div class="kkm-kpi-desc">Standar Ketuntasan Minimal</div>
           </div>
-          <div class="card p-3 shadow-xs" style="background: linear-gradient(135deg, #fefce8 0%, #ffffff 100%); border: 1px solid #fef08a; border-radius: 12px;">
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #854d0e; letter-spacing: 0.5px;">Target Kelulusan KKM</div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #713f12; margin-top: 4px;" id="kkm-room-target-pass">100%</div>
-            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Evaluasi Tuntas Mandiri</div>
+          <div class="kkm-kpi-card" style="background: linear-gradient(135deg, #fefce8 0%, #ffffff 100%); border: 1px solid #fef08a;">
+            <div class="kkm-kpi-label" style="color: #854d0e;">Target Kelulusan KKM</div>
+            <div class="kkm-kpi-value" style="color: #713f12;" id="kkm-room-target-pass">100%</div>
+            <div class="kkm-kpi-desc">Evaluasi Tuntas Mandiri</div>
           </div>
-          <div class="card p-3 shadow-xs" style="background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%); border: 1px solid #e9d5ff; border-radius: 12px;">
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #6b21a8; letter-spacing: 0.5px;">Sinkronisasi Cloud</div>
-            <div style="font-size: 1.35rem; font-weight: 800; color: #581c87; margin-top: 6px;">Neon PostgreSQL</div>
-            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Auto Sync Database Online</div>
+          <div class="kkm-kpi-card" style="background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%); border: 1px solid #e9d5ff;">
+            <div class="kkm-kpi-label" style="color: #6b21a8;">Sinkronisasi Cloud</div>
+            <div class="kkm-kpi-value" style="color: #581c87; font-size: 1.45rem;">Neon PostgreSQL</div>
+            <div class="kkm-kpi-desc">Auto Sync Database Online</div>
           </div>
         </div>
 
         <!-- Main Form Entry KKM Card -->
-        <div class="card p-4 shadow-sm" style="border-radius: 14px; border: 1px solid var(--slate-200); background: #ffffff;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div class="kkm-main-card">
+          <div class="kkm-card-header">
             <div>
-              <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--slate-900); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+              <h3 class="kkm-card-title">
                 <span>📝 Form Entry Standar KKM Mata Pelajaran</span>
               </h3>
-              <p style="font-size: 0.85rem; color: var(--slate-500); margin: 0.25rem 0 0 0;">
+              <p class="kkm-card-subtitle">
                 Entry batas nilai KKM (Kriteria Ketuntasan Minimal / KKTP) untuk evaluasi kelulusan <strong>TUNTAS</strong> vs <strong>REMEDIAL</strong> pada rekapitulasi nilai guru.
               </p>
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-              <button type="button" class="btn btn-outline btn-sm" onclick="openAddSubjectRoomModal()" style="font-weight: 700;">
+            <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="kkm-btn-add" onclick="openAddSubjectRoomModal()">
                 ➕ Tambah Mapel / Room Baru
               </button>
-              <button type="button" class="btn btn-primary btn-sm" onclick="saveKkmRoomSettings()" style="font-weight: 700; background: #2563eb; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">
+              <button type="button" class="kkm-btn-save" onclick="saveKkmRoomSettings()">
                 💾 Simpan Standar KKM
               </button>
             </div>
@@ -3184,6 +3184,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.57.0"></script>
+  <script src="app.js?v=3.58.0"></script>
 </body>
 </html>
