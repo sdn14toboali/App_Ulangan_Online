@@ -5740,6 +5740,7 @@ body:has(#screen-student-exam.active) #global-header,
   gap: 1.25rem;
   flex-wrap: wrap;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  margin-bottom: 0.35rem;
 }
 
 .single-token-left {
@@ -6453,20 +6454,29 @@ body {
 }
 
 /* ==============================================================================
-   STANDAR KKM MATA PELAJARAN (ROOM STANDALONE - v3.57.0)
-   DESAIN ELEGAN, BERSIH & TIPOGRAFI MODERN ANTI-AI
+   STANDAR KKM MATA PELAJARAN (ROOM STANDALONE - v3.60.0)
+   DESAIN ELEGAN, BERSIH, SPASI LAPANG & TIPOGRAFI MODERN ANTI-AI
    ============================================================================== */
+#tab-kkm-setting {
+  padding: 1.75rem 1.75rem 3rem !important;
+  box-sizing: border-box !important;
+}
+
 .kkm-room-header-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important;
+  gap: 1.25rem !important;
+  margin-bottom: 2.25rem !important;
 }
 
 @media (max-width: 768px) {
+  #tab-kkm-setting {
+    padding: 1rem 1rem 2rem !important;
+  }
   .kkm-room-header-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.85rem !important;
+    margin-bottom: 1.5rem !important;
   }
 }
 
