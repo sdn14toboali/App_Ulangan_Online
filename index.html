@@ -748,6 +748,10 @@
               <div style="text-align: center;">
                 <span style="font-size: 0.8rem; font-weight: 600; color: var(--slate-500); text-transform: uppercase;">NILAI UJIAN ANDA</span>
                 <div id="finish-score-value" style="font-size: 2.5rem; font-weight: 800; color: var(--primary-600); line-height: 1.2;">0</div>
+                <div style="margin-top: 0.65rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem;">
+                  <span id="finish-status-pill" class="badge" style="font-size: 0.85rem; font-weight: 800; padding: 0.35rem 0.95rem; border-radius: 99px; background: #dcfce7; color: #15803d; border: 1.5px solid #86efac;">🟢 TUNTAS</span>
+                  <small id="finish-kkm-info" style="font-size: 0.76rem; color: var(--slate-500); font-weight: 600;">Standar KKM: 75</small>
+                </div>
               </div>
             </div>
           </div>
@@ -1361,6 +1365,40 @@
           </div>
         </div>
 
+        <!-- KARTU PENGATURAN KKM & TOKEN PER MATA PELAJARAN -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h3 style="font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 0.45rem;">
+                <span>🎯 Standar KKM &amp; Durasi Ujian Mata Pelajaran</span>
+              </h3>
+              <p style="font-size: 0.8rem; color: var(--slate-500); margin: 0.15rem 0 0 0;">
+                Tentukan batas nilai KKM (Kriteria Ketuntasan Minimal / KKTP) untuk evaluasi kelulusan <strong>TUNTAS</strong> vs <strong>REMEDIAL</strong> pada setiap mata pelajaran.
+              </p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveSubjectTokensSettings()">
+              💾 Simpan Pengaturan KKM &amp; Mapel
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">No</th>
+                  <th>Mata Pelajaran</th>
+                  <th style="width: 80px; text-align: center;">Kode</th>
+                  <th style="width: 140px; text-align: center;">Standar KKM</th>
+                  <th style="width: 170px;">Token Mapel</th>
+                  <th style="width: 120px; text-align: center;">Durasi (Menit)</th>
+                </tr>
+              </thead>
+              <tbody id="table-subject-tokens-body">
+                <!-- Injected via Javascript renderSubjectTokensTable() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="card" style="max-width: 700px;">
           <div class="card-header">
             <h3 style="font-size: 1.05rem; font-weight: 700;">Pengaturan Aturan Pengerjaan Siswa</h3>
@@ -1534,14 +1572,17 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>No</th>
+                  <th style="width: 40px; text-align: center;">No</th>
                   <th>No Peserta</th>
                   <th>Nama Lengkap</th>
-                  <th>Kelas</th>
-                  <th>Jawaban Benar</th>
-                  <th>Total Nilai</th>
+                  <th style="width: 70px; text-align: center;">Kelas</th>
+                  <th>Mata Pelajaran</th>
+                  <th style="text-align: center;">Jawaban Benar</th>
+                  <th style="text-align: center;">Total Nilai</th>
+                  <th style="width: 75px; text-align: center;">KKM</th>
+                  <th style="width: 120px; text-align: center;">Status</th>
                   <th>Waktu Submit</th>
-                  <th style="text-align: center;">Aksi</th>
+                  <th style="text-align: center; width: 80px;">Aksi</th>
                 </tr>
               </thead>
               <tbody id="table-results-body">
@@ -2974,6 +3015,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.46.0"></script>
+  <script src="app.js?v=3.48.0"></script>
 </body>
 </html>
