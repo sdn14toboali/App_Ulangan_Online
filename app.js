@@ -1051,10 +1051,32 @@ function clearTeacherLoginForm() {
   }
 }
 
+// Helper Bersihkan Total Kolom Nomor Peserta & Password Login Siswa (Anti-Autofill Residu)
+function clearStudentLoginForm() {
+  const nInput = document.getElementById('login-nisn');
+  const pInput = document.getElementById('login-password');
+  if (nInput) nInput.value = '';
+  if (pInput) {
+    pInput.value = '';
+    pInput.type = 'password';
+  }
+  const form = document.getElementById('form-student-login');
+  if (form) {
+    try { form.reset(); } catch(e) {}
+  }
+  const eye = document.getElementById('student-pass-eye-icon');
+  if (eye) {
+    eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+  }
+}
+
 // Navigation between Screen Views
 function showScreen(screenId) {
   if (screenId === 'teacher-login') {
     clearTeacherLoginForm();
+  }
+  if (screenId === 'student-login') {
+    clearStudentLoginForm();
   }
 
   const screens = document.querySelectorAll('.view-screen');
@@ -1893,8 +1915,9 @@ function handleTeacherLogout() {
   const elHeaderRole = document.getElementById('srms-header-user-role');
   if (elHeaderRole) elHeaderRole.textContent = (state.school && state.school.name) ? state.school.name : 'SD Negeri 14 Toboali';
 
-  // Bersihkan form login guru dari residu kredensial
+  // Bersihkan form login guru & siswa dari residu kredensial
   clearTeacherLoginForm();
+  clearStudentLoginForm();
 
   showScreen('student-login');
   showToast('Anda telah berhasil keluar dari akun.', 'info');
@@ -8853,6 +8876,54 @@ function initApp() {
   initNeonAutoSync();
   initPwaSupport();
   initCrossDeviceTokenSync();
+
+  // Bersihkan form login siswa & guru saat startup awal aplikasi
+  clearTeacherLoginForm();
+  clearStudentLoginForm();
+
+  // Multi-tier Anti-Autofill Interceptor (Mencegah browser Chrome/Edge mengisi kredensial Guru NIP 1993... ke Form Siswa)
+  const nisnEl = document.getElementById('login-nisn');
+  const passEl = document.getElementById('login-password');
+  if (nisnEl) {
+    nisnEl.addEventListener('focus', function() {
+      if (this.value && (this.value.startsWith('1993') || this.value.length > 15)) {
+        clearStudentLoginForm();
+      }
+    });
+  }
+  if (passEl) {
+    passEl.addEventListener('focus', function() {
+      if (nisnEl && (nisnEl.value.startsWith('1993') || nisnEl.value.length > 15)) {
+        clearStudentLoginForm();
+      }
+    });
+  }
+
+  // Interseptor Timer bertahap untuk menetralkan browser autofill yang menyuntikkan value secara async
+  setTimeout(() => {
+    if (!state.isExamRunning && (state.currentView === 'student-login' || !state.currentView)) {
+      clearStudentLoginForm();
+    }
+  }, 150);
+
+  setTimeout(() => {
+    if (!state.isExamRunning && (state.currentView === 'student-login' || !state.currentView)) {
+      const n = document.getElementById('login-nisn');
+      const p = document.getElementById('login-password');
+      if (n && (n.value.startsWith('1993') || n.value.length > 15 || (p && p.value && !n.value))) {
+        clearStudentLoginForm();
+      }
+    }
+  }, 450);
+
+  setTimeout(() => {
+    if (!state.isExamRunning && (state.currentView === 'student-login' || !state.currentView)) {
+      const n = document.getElementById('login-nisn');
+      if (n && (n.value.startsWith('1993') || n.value.length > 15)) {
+        clearStudentLoginForm();
+      }
+    }
+  }, 1000);
 }
 
 if (typeof document !== 'undefined') {
