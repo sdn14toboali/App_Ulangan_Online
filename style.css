@@ -338,171 +338,41 @@ body {
 }
 
 /* ==============================================================================
-   PINTEREST / FLORIN POP SLIDING OVERLAY AUTH CARD (v3.55.0)
-   100% BEBAS SCROLLBAR INTERNAL - HARDWARE ACCELERATED GPU TRANSITIONS
+   SPLIT AUTH LAYOUT MANDIRI (DUA LAYAR STABIL v3.56.0)
+   100% BEBAS SCROLLBAR INTERNAL - NATURAL AUTO-HEIGHT SINKRON
    ============================================================================== */
 
-.sliding-auth-card {
-  width: 100%;
-  max-width: 980px;
-  background: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(226, 232, 240, 0.85);
-  position: relative;
-  overflow: hidden;
-  min-height: 640px;
-  display: flex;
-}
-
-/* Fallback kompatibilitas jika elemen menggunakan class .split-auth-card */
 .split-auth-card {
   width: 100%;
   max-width: 980px;
   background: #ffffff;
   border-radius: 24px;
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(226, 232, 240, 0.85);
-  position: relative;
-  overflow: hidden;
-  min-height: 640px;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.85);
   display: flex;
-}
-
-/* Form Side Containers (50% Width Each) */
-.auth-form-side {
-  width: 50%;
-  height: 100%;
-  padding: 1.75rem 2.25rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #ffffff;
-  transition: all 0.65s cubic-bezier(0.65, 0, 0.35, 1);
-  overflow-y: hidden !important;
-  overflow-x: hidden !important;
-  box-sizing: border-box;
-}
-
-.teacher-form-side {
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
-  z-index: 1;
-  pointer-events: none;
-  transform: translateX(-25px);
-}
-
-.sliding-auth-card.teacher-active .teacher-form-side {
-  opacity: 1;
-  z-index: 5;
-  pointer-events: all;
-  transform: translateX(0);
-}
-
-.student-form-side {
-  margin-left: auto;
-  opacity: 1;
-  z-index: 2;
-  pointer-events: all;
-  transform: translateX(0);
-}
-
-.sliding-auth-card.teacher-active .student-form-side {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(25px);
-}
-
-/* Sliding Overlay Container (Covers 50% of the card) */
-.auth-overlay-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50%;
-  height: 100%;
   overflow: hidden;
-  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
-  z-index: 100;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+  min-height: auto;
 }
 
-.sliding-auth-card.teacher-active .auth-overlay-container {
-  transform: translateX(100%);
-}
-
-/* Parallax Inner Overlay (200% width, shifts in reverse to track panels) */
-.auth-overlay {
+.split-auth-hero {
+  flex: 1;
   background: linear-gradient(145deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+  padding: 2.5rem 2.25rem;
   color: #ffffff;
-  position: relative;
-  left: 0;
-  height: 100%;
-  width: 200%;
-  transform: translateX(0);
-  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
-  display: flex;
-}
-
-.sliding-auth-card.teacher-active .auth-overlay {
-  transform: translateX(-50%);
-}
-
-/* Individual Overlay Panels (50% each inside 200% width) */
-.auth-overlay-panel {
-  width: 50%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2.25rem 2.25rem;
-  color: #ffffff;
   box-sizing: border-box;
-  text-align: left;
-  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.overlay-panel-left {
-  transform: translateX(0);
-}
-
-.sliding-auth-card.teacher-active .overlay-panel-left {
-  transform: translateX(-20%);
-}
-
-.overlay-panel-right {
-  transform: translateX(20%);
-}
-
-.sliding-auth-card.teacher-active .overlay-panel-right {
-  transform: translateX(0);
-}
-
-/* Ghost switch button inside overlay panels */
-.btn-ghost-switch {
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
-  border-radius: 12px;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.25s ease;
-  backdrop-filter: blur(8px);
-  width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.btn-ghost-switch:hover {
+.split-auth-form-side {
+  flex: 1;
+  padding: 2.25rem 2.5rem;
   background: #ffffff;
-  color: #1d4ed8;
-  border-color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow-y: visible !important;
 }
 
 /* Typography & Hero Components */
@@ -656,13 +526,7 @@ body {
   line-height: 1.35;
 }
 
-/* Mobile Segmented Switcher (< 768px) */
-.mobile-auth-switcher {
-  display: none;
-}
-
 @media (max-width: 768px) {
-  .sliding-auth-card,
   .split-auth-card {
     flex-direction: column;
     min-height: auto;
@@ -671,60 +535,13 @@ body {
     margin: 0.5rem auto;
   }
 
-  .auth-overlay-container {
-    display: none !important;
+  .split-auth-hero {
+    padding: 1.75rem 1.25rem;
   }
 
-  .mobile-auth-switcher {
-    display: flex;
-    background: #f1f5f9;
-    padding: 4px;
-    border-radius: 12px;
-    margin: 1rem 1rem 0;
-    gap: 4px;
+  .split-auth-form-side {
+    padding: 1.5rem 1.25rem 2rem;
   }
-
-  .mobile-switch-btn {
-    flex: 1;
-    padding: 0.6rem 0.5rem;
-    font-size: 0.82rem;
-    font-weight: 700;
-    border-radius: 9px;
-    border: none;
-    background: transparent;
-    color: #64748b;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .mobile-switch-btn.active {
-    background: #2563eb;
-    color: #ffffff;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
-  }
-
-  .auth-form-side {
-    width: 100% !important;
-    position: relative !important;
-    padding: 1.25rem 1.25rem 1.5rem !important;
-    transform: none !important;
-  }
-
-  .teacher-form-side {
-    display: none;
-    opacity: 1;
-  }
-
-  .sliding-auth-card.teacher-active .teacher-form-side,
-  .split-auth-card.teacher-active .teacher-form-side {
-    display: flex;
-  }
-
-  .sliding-auth-card.teacher-active .student-form-side,
-  .split-auth-card.teacher-active .student-form-side {
-    display: none;
-  }
-}
 
   .form-control {
     font-size: 16px;
