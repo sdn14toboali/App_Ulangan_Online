@@ -6453,7 +6453,8 @@ body {
 }
 
 /* ==============================================================================
-   STANDAR KKM & DURASI MATA PELAJARAN (ROOM STANDALONE - v3.52.0)
+   STANDAR KKM MATA PELAJARAN (ROOM STANDALONE - v3.57.0)
+   DESAIN ELEGAN, BERSIH & TIPOGRAFI MODERN ANTI-AI
    ============================================================================== */
 .kkm-room-header-grid {
   display: grid;
@@ -6469,19 +6470,103 @@ body {
   }
 }
 
-/* ==============================================================================
-   STANDAR KKM & DURASI MATA PELAJARAN (ROOM STANDALONE - v3.52.0)
-   ============================================================================== */
-.kkm-room-header-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+.kkm-room-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--font-sans);
 }
 
-@media (max-width: 768px) {
-  .kkm-room-header-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
+.kkm-room-table th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  padding: 0.95rem 1rem !important;
+  border-bottom: 1.5px solid #e2e8f0 !important;
+  white-space: nowrap !important;
+}
+
+.kkm-room-table td {
+  padding: 0.9rem 1rem !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: #1e293b !important;
+  vertical-align: middle !important;
+}
+
+.kkm-room-table tbody tr {
+  transition: background-color 0.15s ease !important;
+}
+
+.kkm-room-table tbody tr:hover {
+  background-color: #f8fafc !important;
+}
+
+.kkm-room-table td.col-subject-name {
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  font-size: 0.94rem !important;
+  letter-spacing: -0.01em !important;
+}
+
+.kkm-badge-code {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  padding: 0.25rem 0.65rem !important;
+  border-radius: 6px !important;
+  letter-spacing: 0.06em !important;
+}
+
+.kkm-input-number {
+  width: 90px !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  font-weight: 800 !important;
+  font-size: 1.05rem !important;
+  color: #1e40af !important;
+  background: #f8fafc !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  padding: 0.4rem 0.5rem !important;
+  transition: all 0.2s ease !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  display: block !important;
+}
+
+.kkm-input-number:focus {
+  background: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+  outline: none !important;
+}
+
+.kkm-btn-delete {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  border: 1px solid #fee2e2 !important;
+  background: #ffffff !important;
+  color: #ef4444 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+
+.kkm-btn-delete:hover {
+  background: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15) !important;
 }
