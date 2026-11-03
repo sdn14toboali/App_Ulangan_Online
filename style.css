@@ -333,6 +333,8 @@ body {
   justify-content: center;
   padding: 2.5rem 1.25rem;
   background: var(--bg-canvas) !important;
+  overflow-x: hidden;
+  position: relative;
 }
 
 .split-auth-card {
@@ -345,6 +347,71 @@ body {
   overflow: hidden;
   min-height: 560px;
   border: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+/* ==============================================================================
+   DIRECTIONAL SLIDE TRANSITIONS (STUDENT <-> TEACHER AUTH)
+   ============================================================================== */
+@keyframes authSlideOutLeft {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-40px, 0, 0) scale(0.985);
+  }
+}
+
+@keyframes authSlideInRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(50px, 0, 0) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes authSlideOutRight {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(40px, 0, 0) scale(0.985);
+  }
+}
+
+@keyframes authSlideInLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50px, 0, 0) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.auth-slide-out-left {
+  animation: authSlideOutLeft 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  pointer-events: none;
+}
+
+.auth-slide-in-right {
+  animation: authSlideInRight 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.auth-slide-out-right {
+  animation: authSlideOutRight 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  pointer-events: none;
+}
+
+.auth-slide-in-left {
+  animation: authSlideInLeft 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
 .split-auth-card.student-centered-auth {
