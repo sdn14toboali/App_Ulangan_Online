@@ -337,36 +337,180 @@ body {
   position: relative;
 }
 
+/* ==============================================================================
+   PINTEREST / FLORIN POP SLIDING OVERLAY AUTH CARD (v3.55.0)
+   100% BEBAS SCROLLBAR INTERNAL - HARDWARE ACCELERATED GPU TRANSITIONS
+   ============================================================================== */
+
+.sliding-auth-card {
+  width: 100%;
+  max-width: 980px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(226, 232, 240, 0.85);
+  position: relative;
+  overflow: hidden;
+  min-height: 640px;
+  display: flex;
+}
+
+/* Fallback kompatibilitas jika elemen menggunakan class .split-auth-card */
 .split-auth-card {
   width: 100%;
   max-width: 980px;
   background: #ffffff;
   border-radius: 24px;
-  box-shadow: 0 20px 45px -10px rgba(148, 163, 184, 0.25), 0 4px 12px rgba(148, 163, 184, 0.1);
-  display: flex;
-  overflow: hidden;
-  min-height: 620px;
-  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(226, 232, 240, 0.85);
   position: relative;
+  overflow: hidden;
+  min-height: 640px;
+  display: flex;
 }
 
-.split-auth-hero {
-  flex: 1 1 48%;
-  background: linear-gradient(145deg, #4f46e5 0%, #3b82f6 50%, #2563eb 100%);
+/* Form Side Containers (50% Width Each) */
+.auth-form-side {
+  width: 50%;
+  height: 100%;
+  padding: 1.75rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #ffffff;
+  transition: all 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box;
+}
+
+.teacher-form-side {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transform: translateX(-25px);
+}
+
+.sliding-auth-card.teacher-active .teacher-form-side {
+  opacity: 1;
+  z-index: 5;
+  pointer-events: all;
+  transform: translateX(0);
+}
+
+.student-form-side {
+  margin-left: auto;
+  opacity: 1;
+  z-index: 2;
+  pointer-events: all;
+  transform: translateX(0);
+}
+
+.sliding-auth-card.teacher-active .student-form-side {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(25px);
+}
+
+/* Sliding Overlay Container (Covers 50% of the card) */
+.auth-overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: 100;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+}
+
+.sliding-auth-card.teacher-active .auth-overlay-container {
+  transform: translateX(100%);
+}
+
+/* Parallax Inner Overlay (200% width, shifts in reverse to track panels) */
+.auth-overlay {
+  background: linear-gradient(145deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
   color: #ffffff;
-  padding: 2.5rem;
+  position: relative;
+  left: 0;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+  display: flex;
+}
+
+.sliding-auth-card.teacher-active .auth-overlay {
+  transform: translateX(-50%);
+}
+
+/* Individual Overlay Panels (50% each inside 200% width) */
+.auth-overlay-panel {
+  width: 50%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  position: relative;
-  overflow: hidden;
+  padding: 2.25rem 2.25rem;
+  color: #ffffff;
+  box-sizing: border-box;
+  text-align: left;
+  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
+.overlay-panel-left {
+  transform: translateX(0);
+}
+
+.sliding-auth-card.teacher-active .overlay-panel-left {
+  transform: translateX(-20%);
+}
+
+.overlay-panel-right {
+  transform: translateX(20%);
+}
+
+.sliding-auth-card.teacher-active .overlay-panel-right {
+  transform: translateX(0);
+}
+
+/* Ghost switch button inside overlay panels */
+.btn-ghost-switch {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-ghost-switch:hover {
+  background: #ffffff;
+  color: #1d4ed8;
+  border-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+/* Typography & Hero Components */
 .split-auth-hero-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .split-hero-logo {
@@ -408,39 +552,37 @@ body {
 }
 
 .split-hero-headline {
-  font-size: 1.65rem;
+  font-size: 1.55rem;
   font-weight: 800;
   line-height: 1.25;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
   color: #ffffff;
   letter-spacing: -0.01em;
 }
 
 .split-hero-subtext {
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: 0.85rem;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .split-hero-features {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: auto;
-  padding-top: 1rem;
+  gap: 0.65rem;
 }
 
 .split-feature-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  padding: 0.65rem 0.95rem;
-  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
   color: #ffffff;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 500;
   backdrop-filter: blur(6px);
   transition: transform 0.2s ease, background 0.2s ease;
@@ -456,33 +598,24 @@ body {
   color: #93c5fd;
 }
 
-.split-auth-form-side {
-  flex: 1 1 52%;
-  padding: 3rem 2.75rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #ffffff;
-}
-
 .split-form-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .login-school-brand-banner {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.85rem;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.65rem;
   border-bottom: 1px solid var(--slate-200);
 }
 
 .school-login-logo-img {
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 2px;
   background: #ffffff;
   border: 1.5px solid var(--slate-200);
@@ -496,98 +629,102 @@ body {
 }
 
 .school-login-brand-text strong {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
   color: var(--slate-900);
   line-height: 1.2;
 }
 
 .school-login-brand-text span {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--primary-600);
   margin-top: 2px;
 }
 
-.split-form-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: #eff6ff;
-  color: #2563eb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
 .split-form-title {
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: var(--slate-900);
   letter-spacing: -0.01em;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
 }
 
 .split-form-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--slate-500);
-  line-height: 1.4;
+  line-height: 1.35;
+}
+
+/* Mobile Segmented Switcher (< 768px) */
+.mobile-auth-switcher {
+  display: none;
 }
 
 @media (max-width: 768px) {
+  .sliding-auth-card,
   .split-auth-card {
     flex-direction: column;
-    max-width: 480px;
+    min-height: auto;
     border-radius: 20px;
+    max-width: 480px;
     margin: 0.5rem auto;
   }
 
-  .split-auth-hero {
-    display: flex !important;
-    padding: 1.35rem 1.15rem 1.1rem;
-    border-radius: 20px 20px 0 0;
+  .auth-overlay-container {
+    display: none !important;
   }
 
-  .split-hero-subtext {
-    font-size: 0.82rem;
-    line-height: 1.4;
-    margin-bottom: 0.5rem;
-  }
-
-  .split-hero-features {
-    display: flex !important;
-    gap: 0.45rem;
-    flex-wrap: wrap;
-    margin-top: 0.6rem;
-  }
-
-  .split-feature-item {
-    font-size: 0.72rem;
-    padding: 3px 8px;
-    background: rgba(255, 255, 255, 0.16);
-    border-radius: 6px;
-    gap: 0.4rem;
-  }
-
-  .split-auth-form-side {
-    padding: 1.25rem 1.15rem 1.5rem;
-  }
-
-  .login-school-brand-banner {
-    margin-bottom: 0.85rem;
-    padding-bottom: 0.65rem;
-    gap: 0.65rem;
-  }
-
-  .school-login-logo-img {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
-    flex-shrink: 0;
+  .mobile-auth-switcher {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
     border-radius: 12px;
+    margin: 1rem 1rem 0;
+    gap: 4px;
   }
+
+  .mobile-switch-btn {
+    flex: 1;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-switch-btn.active {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  }
+
+  .auth-form-side {
+    width: 100% !important;
+    position: relative !important;
+    padding: 1.25rem 1.25rem 1.5rem !important;
+    transform: none !important;
+  }
+
+  .teacher-form-side {
+    display: none;
+    opacity: 1;
+  }
+
+  .sliding-auth-card.teacher-active .teacher-form-side,
+  .split-auth-card.teacher-active .teacher-form-side {
+    display: flex;
+  }
+
+  .sliding-auth-card.teacher-active .student-form-side,
+  .split-auth-card.teacher-active .student-form-side {
+    display: none;
+  }
+}
 
   .form-control {
     font-size: 16px;
