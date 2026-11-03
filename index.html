@@ -113,7 +113,7 @@
   </script>
 
   <!-- Core Design System & Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=3.56.0">
+  <link rel="stylesheet" href="style.css?v=3.57.0">
 </head>
 <body>
 
@@ -1390,9 +1390,9 @@
             <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Standar Ketuntasan Minimal</div>
           </div>
           <div class="card p-3 shadow-xs" style="background: linear-gradient(135deg, #fefce8 0%, #ffffff 100%); border: 1px solid #fef08a; border-radius: 12px;">
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #854d0e; letter-spacing: 0.5px;">Durasi Ujian Standar</div>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #713f12; margin-top: 4px;" id="kkm-room-default-duration">90 Mnt</div>
-            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Timer Pengerjaan Soal Siswa</div>
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #854d0e; letter-spacing: 0.5px;">Target Kelulusan KKM</div>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #713f12; margin-top: 4px;" id="kkm-room-target-pass">100%</div>
+            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Evaluasi Tuntas Mandiri</div>
           </div>
           <div class="card p-3 shadow-xs" style="background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%); border: 1px solid #e9d5ff; border-radius: 12px;">
             <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #6b21a8; letter-spacing: 0.5px;">Sinkronisasi Cloud</div>
@@ -1406,7 +1406,7 @@
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
             <div>
               <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--slate-900); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <span>📝 Form Entry KKM &amp; Durasi Mata Pelajaran</span>
+                <span>📝 Form Entry Standar KKM Mata Pelajaran</span>
               </h3>
               <p style="font-size: 0.85rem; color: var(--slate-500); margin: 0.25rem 0 0 0;">
                 Entry batas nilai KKM (Kriteria Ketuntasan Minimal / KKTP) untuk evaluasi kelulusan <strong>TUNTAS</strong> vs <strong>REMEDIAL</strong> pada rekapitulasi nilai guru.
@@ -1417,22 +1417,20 @@
                 ➕ Tambah Mapel / Room Baru
               </button>
               <button type="button" class="btn btn-primary btn-sm" onclick="saveKkmRoomSettings()" style="font-weight: 700; background: #2563eb; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">
-                💾 Simpan Entry KKM &amp; Mapel
+                💾 Simpan Standar KKM
               </button>
             </div>
           </div>
 
-          <div class="table-responsive">
-            <table class="data-table">
+          <div class="table-responsive" style="border-radius: 12px; border: 1px solid #e2e8f0;">
+            <table class="data-table kkm-room-table">
               <thead>
                 <tr>
-                  <th style="width: 45px; text-align: center;">No</th>
+                  <th style="width: 50px; text-align: center;">No</th>
                   <th>Mata Pelajaran</th>
-                  <th style="width: 90px; text-align: center;">Kode</th>
-                  <th style="width: 140px; text-align: center;">Standar KKM</th>
-                  <th style="width: 190px;">Token Mapel</th>
-                  <th style="width: 130px; text-align: center;">Durasi (Menit)</th>
-                  <th style="width: 80px; text-align: center;">Aksi</th>
+                  <th style="width: 100px; text-align: center;">Kode</th>
+                  <th style="width: 160px; text-align: center;">Standar KKM</th>
+                  <th style="width: 90px; text-align: center;">Aksi</th>
                 </tr>
               </thead>
               <tbody id="table-subject-tokens-body-room">
@@ -3186,6 +3184,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.56.0"></script>
+  <script src="app.js?v=3.57.0"></script>
 </body>
 </html>
