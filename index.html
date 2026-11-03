@@ -113,7 +113,6 @@
   </script>
 
   <!-- Core Design System & Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=3.60.0">
 </head>
 <body>
 
@@ -1036,6 +1035,33 @@
                 <path d="M170 30c3 2 5-1 7 2-2-4-5-2-7-2z" fill="#64748b"/>
                 <path d="M182 42c2 1 4-1 6 1-2-3-4-1-6-1z" fill="#94a3b8"/>
               </svg>
+            </div>
+          </div>
+
+          <!-- BILAH FILTER KELAS / ROMBEL SISWA (DISESUAIKAN PER KELAS MASING-MASING v3.61.0) -->
+          <div class="srms-dashboard-filter-bar">
+            <div class="srms-filter-bar-left">
+              <div class="srms-filter-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <div class="srms-filter-text">
+                <div class="srms-filter-label" id="srms-dashboard-filter-label">Filter Rombel / Murid Kelas</div>
+                <div class="srms-filter-desc" id="srms-dashboard-filter-desc">Sesuaikan metrik ringkasan nilai, ujian selesai &amp; kehadiran per kelas binaan</div>
+              </div>
+            </div>
+            <div class="srms-filter-bar-right">
+              <label for="srms-dashboard-class-filter" class="srms-filter-select-label">Pilih Kelas:</label>
+              <div class="srms-select-wrapper">
+                <select id="srms-dashboard-class-filter" class="srms-dashboard-select" onchange="handleDashboardClassFilterChange(this.value)" title="Pilih kelas untuk menyesuaikan indikator metrik dasbor">
+                  <!-- Injected via populateDashboardClassFilter() -->
+                </select>
+              </div>
+              <span class="srms-filter-badge" id="srms-dashboard-class-badge">148 Siswa</span>
             </div>
           </div>
 
