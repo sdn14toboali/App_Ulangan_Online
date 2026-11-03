@@ -8,7 +8,7 @@
 function getDeterministicStudentPassword(nisn) {
   if (!nisn) return '123456';
   const clean = String(nisn).trim().toUpperCase();
-  
+
   // Pemetaan tetap untuk siswa resmi SD NEGERI 14 TOBOALI & akun pengujian
   const knownPins = {
     '2026-001': '482915',
@@ -136,18 +136,18 @@ const state = {
       key = (urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass') || '').trim();
       if (ep) localStorage.setItem('zettcbt_neon_endpoint', ep);
       if (key) localStorage.setItem('zettcbt_neon_key', key);
-    } catch(e) {}
+    } catch (e) { }
     if (!ep) ep = (localStorage.getItem('zettcbt_neon_endpoint') || '').trim();
     if (!key) key = (localStorage.getItem('zettcbt_neon_key') || '').trim();
     const isEpValid = ep && (ep.includes('ep-') || ep.startsWith('postgres'));
     if ((!isEpValid || !key) && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG) {
       if (!isEpValid && window.DEFAULT_NEON_CONFIG.host) {
         ep = window.DEFAULT_NEON_CONFIG.host.trim();
-        try { localStorage.setItem('zettcbt_neon_endpoint', ep); } catch(e) {}
+        try { localStorage.setItem('zettcbt_neon_endpoint', ep); } catch (e) { }
       }
       if (!key && window.DEFAULT_NEON_CONFIG.password) {
         key = window.DEFAULT_NEON_CONFIG.password.trim();
-        try { localStorage.setItem('zettcbt_neon_key', key); } catch(e) {}
+        try { localStorage.setItem('zettcbt_neon_key', key); } catch (e) { }
       }
     }
     return {
@@ -164,8 +164,8 @@ const state = {
 
   // Identitas Sekolah & Dedicated School Vault (Permanen Anti-Reset)
   school: (() => {
-    const defaultSchoolLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 100) 
-      ? window.OFFICIAL_SDN14_LOGO 
+    const defaultSchoolLogo = (typeof window !== 'undefined' && window.OFFICIAL_SDN14_LOGO && window.OFFICIAL_SDN14_LOGO.length > 100)
+      ? window.OFFICIAL_SDN14_LOGO
       : "assets/icon-192.png";
     const defaultSchool = {
       name: 'SD NEGERI 14 TOBOALI',
@@ -198,7 +198,7 @@ const state = {
         merged.logoUrl = defaultSchoolLogo;
       }
       return merged;
-    } catch(e) {
+    } catch (e) {
       return defaultSchool;
     }
   })(),
@@ -238,7 +238,7 @@ const state = {
         }
         return saved;
       }
-    } catch(e) {}
+    } catch (e) { }
     localStorage.setItem('zettcbt_subjects', JSON.stringify(defaultSubjects));
     return defaultSubjects;
   })(),
@@ -276,7 +276,7 @@ const state = {
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_schedules') || 'null');
       if (saved && Array.isArray(saved)) return saved;
-    } catch(e) {}
+    } catch (e) { }
     localStorage.setItem('zettcbt_schedules', JSON.stringify(defaultSchedules));
     return defaultSchedules;
   })(),
@@ -290,7 +290,7 @@ const state = {
       localStorage.removeItem('zettcbt_current_teacher');
       const session = sessionStorage.getItem('zettcbt_current_teacher');
       if (session) return JSON.parse(session);
-    } catch(e) {}
+    } catch (e) { }
     return null;
   })(),
 
@@ -321,7 +321,7 @@ const state = {
           return merged;
         }
       }
-    } catch(e) {}
+    } catch (e) { }
     localStorage.setItem('zettcbt_teachers', JSON.stringify(defaultSdTeachers));
     return defaultSdTeachers;
   })(),
@@ -329,31 +329,31 @@ const state = {
   // Master Data Siswa Peserta Ujian SD NEGERI 14 TOBOALI (Kelas 4A - 6B)
   students: (() => {
     const defaultSdStudents = [
-      { 
+      {
         id: 'st-01', nisn: '2026-001', name: 'Ahmad Rizki Pratama', className: '6A', gender: 'L', status: 'active', password: '482915',
         passwords: { 'Bahasa Indonesia': 'BIN-4821', 'Matematika': 'MTK-9314', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-5720', 'Pendidikan Pancasila (PPKn)': 'PKN-1648', 'Pendidikan Agama Islam (PAI)': 'PAI-8293', 'PJOK / Penjaskes': 'PJK-3047', 'Seni dan Budaya (SBdP)': 'SBD-5921', 'Muatan Lokal (Bahasa Daerah)': 'MLK-8142', 'Bahasa Inggris': 'BIG-3765' }
       },
-      { 
+      {
         id: 'st-02', nisn: '2026-002', name: 'Bella Anggraini Putri', className: '6B', gender: 'P', status: 'active', password: '731804',
         passwords: { 'Bahasa Indonesia': 'BIN-5192', 'Matematika': 'MTK-2840', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-6173', 'Pendidikan Pancasila (PPKn)': 'PKN-4921', 'Pendidikan Agama Islam (PAI)': 'PAI-3850', 'PJOK / Penjaskes': 'PJK-7419', 'Seni dan Budaya (SBdP)': 'SBD-6292', 'Muatan Lokal (Bahasa Daerah)': 'MLK-8513', 'Bahasa Inggris': 'BIG-4136' }
       },
-      { 
+      {
         id: 'st-03', nisn: '2026-003', name: 'Dimas Aditya Nugraha', className: '5A', gender: 'L', status: 'active', password: '920536',
         passwords: { 'Bahasa Indonesia': 'BIN-6340', 'Matematika': 'MTK-1972', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-4829', 'Pendidikan Pancasila (PPKn)': 'PKN-3715', 'Pendidikan Agama Islam (PAI)': 'PAI-6204', 'PJOK / Penjaskes': 'PJK-8531', 'Seni dan Budaya (SBdP)': 'SBD-7440', 'Muatan Lokal (Bahasa Daerah)': 'MLK-9661', 'Bahasa Inggris': 'BIG-5284' }
       },
-      { 
+      {
         id: 'st-04', nisn: '2026-004', name: 'Fatimah Az-Zahra', className: '5B', gender: 'P', status: 'active', password: '614982',
         passwords: { 'Bahasa Indonesia': 'BIN-7815', 'Matematika': 'MTK-3406', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-7931', 'Pendidikan Pancasila (PPKn)': 'PKN-2580', 'Pendidikan Agama Islam (PAI)': 'PAI-9147', 'PJOK / Penjaskes': 'PJK-4628', 'Seni dan Budaya (SBdP)': 'SBD-8915', 'Muatan Lokal (Bahasa Daerah)': 'MLK-2136', 'Bahasa Inggris': 'BIG-6759' }
       },
-      { 
+      {
         id: 'st-05', nisn: '2026-005', name: 'Gilang Ramadhan', className: '4A', gender: 'L', status: 'active', password: '358271',
         passwords: { 'Bahasa Indonesia': 'BIN-2904', 'Matematika': 'MTK-8153', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-3694', 'Pendidikan Pancasila (PPKn)': 'PKN-6402', 'Pendidikan Agama Islam (PAI)': 'PAI-1758', 'PJOK / Penjaskes': 'PJK-5283', 'Seni dan Budaya (SBdP)': 'SBD-4004', 'Muatan Lokal (Bahasa Daerah)': 'MLK-6225', 'Bahasa Inggris': 'BIG-1848' }
       },
-      { 
+      {
         id: 'st-06', nisn: '2026-006', name: 'Nabila Syakirah', className: '4B', gender: 'P', status: 'active', password: '849163',
         passwords: { 'Bahasa Indonesia': 'BIN-3481', 'Matematika': 'MTK-7629', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-8205', 'Pendidikan Pancasila (PPKn)': 'PKN-5137', 'Pendidikan Agama Islam (PAI)': 'PAI-4920', 'PJOK / Penjaskes': 'PJK-6371', 'Seni dan Budaya (SBdP)': 'SBD-4581', 'Muatan Lokal (Bahasa Daerah)': 'MLK-6802', 'Bahasa Inggris': 'BIG-2425' }
       },
-      { 
+      {
         id: 'st-07', nisn: '2026-007', name: 'Rian Hidayat', className: '4A', gender: 'L', status: 'active', password: '527409',
         passwords: { 'Bahasa Indonesia': 'BIN-4592', 'Matematika': 'MTK-6318', 'IPAS (Ilmu Pengetahuan Alam & Sosial)': 'IPS-9451', 'Pendidikan Pancasila (PPKn)': 'PKN-7824', 'Pendidikan Agama Islam (PAI)': 'PAI-5039', 'PJOK / Penjaskes': 'PJK-2184', 'Seni dan Budaya (SBdP)': 'SBD-5692', 'Muatan Lokal (Bahasa Daerah)': 'MLK-7913', 'Bahasa Inggris': 'BIG-3536' }
       }
@@ -386,7 +386,7 @@ const state = {
           return parsed;
         }
       }
-    } catch(e) {}
+    } catch (e) { }
     localStorage.setItem('zettcbt_students', JSON.stringify(defaultSdStudents));
     return defaultSdStudents;
   })(),
@@ -513,7 +513,7 @@ const state = {
     try {
       const saved = JSON.parse(localStorage.getItem('zettcbt_questions') || 'null');
       if (saved && Array.isArray(saved) && saved.length > 0) return saved;
-    } catch(e) {}
+    } catch (e) { }
     localStorage.setItem('zettcbt_questions', JSON.stringify(defaultQuestions));
     return defaultQuestions;
   })(),
@@ -527,16 +527,16 @@ const state = {
         const cleaned = saved.filter(s => {
           if (!s || !s.nisn) return false;
           const isMock = (s.nisn === '2026-001' && s.score === 100 && s.subject === 'Bahasa Indonesia' && s.time === '08:45 WIB') ||
-                         (s.nisn === '2026-003' && s.score === 90 && s.subject === 'Matematika' && s.time === '08:50 WIB') ||
-                         (s.nisn === '2026-002' && s.remainingMinutes === 38) ||
-                         (s.nisn === '2026-004' && s.remainingMinutes === 52) ||
-                         (s.nisn === '2026-005' && s.remainingMinutes === 65);
+            (s.nisn === '2026-003' && s.score === 90 && s.subject === 'Matematika' && s.time === '08:50 WIB') ||
+            (s.nisn === '2026-002' && s.remainingMinutes === 38) ||
+            (s.nisn === '2026-004' && s.remainingMinutes === 52) ||
+            (s.nisn === '2026-005' && s.remainingMinutes === 65);
           return !isMock;
         });
         localStorage.setItem('zettcbt_live_students', JSON.stringify(cleaned));
         return cleaned;
       }
-    } catch(e) {}
+    } catch (e) { }
     localStorage.setItem('zettcbt_live_students', JSON.stringify([]));
     return [];
   })(),
@@ -549,7 +549,7 @@ const state = {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) return parsed;
       }
-    } catch(e) {}
+    } catch (e) { }
     return [];
   })(),
   currentNotifFilter: 'all'
@@ -899,18 +899,18 @@ function loadSavedState() {
       const cleanUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, cleanUrl);
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Fallback kredensial database bawaan (DEFAULT_NEON_CONFIG) jika penyimpanan lokal kosong atau tidak valid
   if (typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.host) {
     const isSavedEpValid = state.neon.endpoint && (state.neon.endpoint.includes('ep-') || state.neon.endpoint.startsWith('postgres'));
     if (!isSavedEpValid) {
       state.neon.endpoint = window.DEFAULT_NEON_CONFIG.host.trim();
-      try { localStorage.setItem('zettcbt_neon_endpoint', state.neon.endpoint); } catch(e) {}
+      try { localStorage.setItem('zettcbt_neon_endpoint', state.neon.endpoint); } catch (e) { }
     }
     if (!state.neon.apiKey && window.DEFAULT_NEON_CONFIG.password) {
       state.neon.apiKey = window.DEFAULT_NEON_CONFIG.password.trim();
-      try { localStorage.setItem('zettcbt_neon_key', state.neon.apiKey); } catch(e) {}
+      try { localStorage.setItem('zettcbt_neon_key', state.neon.apiKey); } catch (e) { }
     }
   }
 
@@ -942,7 +942,7 @@ function loadSavedState() {
           localStorage.setItem('zettcbt_subjects', JSON.stringify(parsedSubs));
         }
       }
-    } catch(e) {}
+    } catch (e) { }
   }
 
   // Pulihkan dan isolasi token mapel independen dari proctor token
@@ -1004,7 +1004,7 @@ function loadSavedState() {
           state.currentQuestionIndex = activeExam.currentQuestionIndex || 0;
           state.isExamRunning = true;
 
-          const filteredQ = state.questions.filter(q => 
+          const filteredQ = state.questions.filter(q =>
             (!q.subject || q.subject.toLowerCase() === state.session.subject.toLowerCase() || (q.subject && q.subject.includes(state.session.subject))) &&
             (!q.targetClass || q.targetClass === state.student.className || state.student.className.includes(q.targetClass))
           );
@@ -1025,7 +1025,7 @@ function loadSavedState() {
           renderMobileQuestionGrid();
           startTimerCountdown();
         }
-      } catch(e) {}
+      } catch (e) { }
     } else {
       // Jika tab/browser ditutup, sesi sessionStorage musnah -> Wajib entry ulang akun di halaman login
       sessionStorage.removeItem('zettcbt_exam_in_session');
@@ -1049,7 +1049,7 @@ function clearTeacherLoginForm() {
   }
   const form = document.getElementById('form-teacher-login');
   if (form) {
-    try { form.reset(); } catch(e) {}
+    try { form.reset(); } catch (e) { }
   }
   const eye = document.getElementById('eye-icon');
   if (eye) {
@@ -1068,7 +1068,7 @@ function clearStudentLoginForm() {
   }
   const form = document.getElementById('form-student-login');
   if (form) {
-    try { form.reset(); } catch(e) {}
+    try { form.reset(); } catch (e) { }
   }
   const eye = document.getElementById('student-pass-eye-icon');
   if (eye) {
@@ -1076,83 +1076,88 @@ function clearStudentLoginForm() {
   }
 }
 
-// Navigation between Screen Views with Smooth Directional Slide Transitions
-function showScreen(screenId, direction) {
-  // If target screen is already active, ignore redundant triggers
-  if (state.currentView === screenId) {
-    const currentActiveEl = document.getElementById('screen-' + screenId);
-    if (currentActiveEl && currentActiveEl.classList.contains('active')) {
-      return;
-    }
-  }
+// Navigation between Screen Views with Sliding Double-Panel Card
+function showScreen(screenId) {
+  const slidingCard = document.getElementById('sliding-auth-card');
 
-  // Prevent transition race conditions
-  if (state.isScreenTransitioning) {
+  // 1. Mode Login Guru (Panel Biru Geser ke Kanan, Form Guru Buka di Kiri)
+  if (screenId === 'teacher-login') {
+    state.currentView = 'teacher-login';
+    localStorage.setItem('zettcbt_current_view', 'teacher-login');
+    clearTeacherLoginForm();
+
+    // Pastikan layar auth (#screen-student-login yang memuat kartu sliding) aktif
+    const screens = document.querySelectorAll('.view-screen');
+    screens.forEach((s) => s.classList.remove('active'));
+    const mainScreen = document.getElementById('screen-student-login');
+    if (mainScreen) mainScreen.classList.add('active');
+
+    // Geser overlay ke kanan ("Putih ke Biru") & Buka form guru di kiri ("Biru ke Putih")
+    if (slidingCard) {
+      slidingCard.classList.add('teacher-active');
+    }
+
+    updateHeaderNav('teacher-login');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
-  const currentView = state.currentView || (document.querySelector('.view-screen.active')?.id.replace('screen-', '') || '');
+  // 2. Mode Login Siswa (Panel Biru Geser ke Kiri, Form Siswa Buka di Kanan)
+  if (screenId === 'student-login') {
+    state.currentView = 'student-login';
+    localStorage.setItem('zettcbt_current_view', 'student-login');
+    clearStudentLoginForm();
 
-  // Auto-detect direction between student-login and teacher-login if not explicitly specified
-  const isAuthTransition = (currentView === 'student-login' && screenId === 'teacher-login') ||
-                           (currentView === 'teacher-login' && screenId === 'student-login');
+    // Pastikan layar auth (#screen-student-login yang memuat kartu sliding) aktif
+    const screens = document.querySelectorAll('.view-screen');
+    screens.forEach((s) => s.classList.remove('active'));
+    const mainScreen = document.getElementById('screen-student-login');
+    if (mainScreen) mainScreen.classList.add('active');
 
-  if (isAuthTransition && !direction) {
-    if (currentView === 'student-login' && screenId === 'teacher-login') {
-      direction = 'left'; // Slide ke kiri saat masuk ke login guru
-    } else if (currentView === 'teacher-login' && screenId === 'student-login') {
-      direction = 'right'; // Slide ke kanan saat kembali ke ruang siswa
-    }
-  }
-
-  // If this is a directional auth transition, perform staged two-phase animation
-  if (isAuthTransition && direction) {
-    state.isScreenTransitioning = true;
-    const currentScreenEl = document.getElementById('screen-' + currentView);
-    const targetScreenEl = document.getElementById('screen-' + screenId);
-    const currentCard = currentScreenEl ? currentScreenEl.querySelector('.split-auth-card') : null;
-    const targetCard = targetScreenEl ? targetScreenEl.querySelector('.split-auth-card') : null;
-
-    // Phase 1: Slide out the current card
-    if (currentCard) {
-      currentCard.classList.remove('auth-slide-out-left', 'auth-slide-in-right', 'auth-slide-out-right', 'auth-slide-in-left');
-      if (direction === 'left') {
-        currentCard.classList.add('auth-slide-out-left');
-      } else {
-        currentCard.classList.add('auth-slide-out-right');
-      }
+    // Geser overlay ke kiri ("Putih ke Biru") & Buka form siswa di kanan ("Biru ke Putih")
+    if (slidingCard) {
+      slidingCard.classList.remove('teacher-active');
     }
 
-    setTimeout(() => {
-      if (currentCard) {
-        currentCard.classList.remove('auth-slide-out-left', 'auth-slide-out-right');
-      }
-
-      // Activate target screen and update views
-      executeScreenSwitch(screenId);
-
-      // Phase 2: Slide in the target card
-      if (targetCard) {
-        targetCard.classList.remove('auth-slide-out-left', 'auth-slide-in-right', 'auth-slide-out-right', 'auth-slide-in-left');
-        if (direction === 'left') {
-          targetCard.classList.add('auth-slide-in-right');
-        } else {
-          targetCard.classList.add('auth-slide-in-left');
-        }
-
-        setTimeout(() => {
-          targetCard.classList.remove('auth-slide-in-right', 'auth-slide-in-left');
-          state.isScreenTransitioning = false;
-        }, 340);
-      } else {
-        state.isScreenTransitioning = false;
-      }
-    }, 170);
+    updateHeaderNav('student-login');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
-  // Default instant / regular screen switch for all other screens
+  // 3. Layar Lainnya (Dashboard Admin, Ruang Ujian Siswa, Konfirmasi, Selesai)
   executeScreenSwitch(screenId);
+}
+
+function updateHeaderNav(screenId) {
+  // Sembunyikan header global pada Admin Dashboard & Ruang Ujian Siswa (Fokus 100%)
+  const globalHeader = document.getElementById('global-header');
+  if (globalHeader) {
+    if (screenId === 'admin-dashboard' || screenId === 'student-exam') {
+      globalHeader.style.display = 'none';
+    } else {
+      globalHeader.style.display = '';
+    }
+  }
+
+  // Update top button active states & kontrol visibilitas
+  const headerNav = document.querySelector('.header-nav');
+  if (headerNav) {
+    if (screenId === 'admin-dashboard') {
+      headerNav.style.display = 'none';
+    } else {
+      headerNav.style.display = 'flex';
+    }
+  }
+
+  const btnStudent = document.getElementById('nav-btn-student');
+  const btnAdmin = document.getElementById('nav-btn-admin');
+  if (screenId === 'student-login' || screenId.startsWith('student')) {
+    if (btnStudent) { btnStudent.className = 'btn btn-primary btn-sm'; }
+    if (btnAdmin) { btnAdmin.className = 'btn btn-outline btn-sm'; }
+  } else {
+    if (btnStudent) { btnStudent.className = 'btn btn-outline btn-sm'; }
+    if (btnAdmin) { btnAdmin.className = 'btn btn-primary btn-sm'; }
+  }
 }
 
 function executeScreenSwitch(screenId) {
@@ -1179,35 +1184,7 @@ function executeScreenSwitch(screenId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Sembunyikan header global pada Admin Dashboard & Ruang Ujian Siswa (Fokus 100%)
-  const globalHeader = document.getElementById('global-header');
-  if (globalHeader) {
-    if (screenId === 'admin-dashboard' || screenId === 'student-exam') {
-      globalHeader.style.display = 'none';
-    } else {
-      globalHeader.style.display = '';
-    }
-  }
-
-  // Update top button active states & sembunyikan pada Login Guru / Admin Dashboard
-  const headerNav = document.querySelector('.header-nav');
-  if (headerNav) {
-    if (screenId === 'admin-dashboard' || screenId === 'teacher-login') {
-      headerNav.style.display = 'none';
-    } else {
-      headerNav.style.display = 'flex';
-    }
-  }
-
-  const btnStudent = document.getElementById('nav-btn-student');
-  const btnAdmin = document.getElementById('nav-btn-admin');
-  if (screenId.startsWith('student')) {
-    if (btnStudent) { btnStudent.className = 'btn btn-primary btn-sm'; }
-    if (btnAdmin) { btnAdmin.className = 'btn btn-outline btn-sm'; }
-  } else {
-    if (btnStudent) { btnStudent.className = 'btn btn-outline btn-sm'; }
-    if (btnAdmin) { btnAdmin.className = 'btn btn-primary btn-sm'; }
-  }
+  updateHeaderNav(screenId);
 }
 
 // ==============================================================================
@@ -1320,7 +1297,7 @@ function getSynchronizedEpochToken(subjectCode = 'CBT', cycleOffset = 0) {
   const cycle = Math.floor(Date.now() / 180000) + cycleOffset;
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Bebas ambiguitas
   const seedStr = 'SDN14_' + (subjectCode || 'CBT').toUpperCase() + '_' + cycle;
-  
+
   let hash = 0;
   for (let i = 0; i < seedStr.length; i++) {
     hash = (hash * 31 + seedStr.charCodeAt(i)) >>> 0;
@@ -1465,7 +1442,7 @@ function renderHorizontalTokenRibbon() {
 function renderProctorTokenBar() {
   renderSingleProctorTokenRibbon();
 }
-function scrollTokenPills(dir) {}
+function scrollTokenPills(dir) { }
 function selectTokenSubject(subId) {
   handleActiveSubjectTokenChange(subId);
 }
@@ -1880,7 +1857,7 @@ function openTeacherPortal() {
     showScreen('admin-dashboard');
   } else {
     clearTeacherLoginForm();
-    showScreen('teacher-login', 'left');
+    showScreen('teacher-login');
   }
 }
 
@@ -1943,14 +1920,14 @@ async function handleTeacherLogin(event) {
         if (savedVault.fullName) matchedTeacher.fullName = savedVault.fullName;
         if (savedVault.nip) matchedTeacher.nip = savedVault.nip;
       }
-    } catch(e) {}
+    } catch (e) { }
 
     state.currentTeacher = matchedTeacher;
     sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(matchedTeacher));
     localStorage.removeItem('zettcbt_current_teacher');
     sessionStorage.setItem('zettcbt_current_view', 'admin-dashboard');
     localStorage.removeItem('zettcbt_current_view');
-    
+
     // Update navbar label
     const navLabel = document.getElementById('nav-teacher-label');
     if (navLabel) navLabel.textContent = matchedTeacher.fullName || matchedTeacher.username;
@@ -1968,8 +1945,8 @@ function handleTeacherLogout() {
   if (!confirm('Apakah Anda yakin ingin keluar dari sesi Guru & Pengawas?')) return;
 
   // Tutup semua modal yang mungkin sedang terbuka
-  try { closeTeacherProfileModal(); } catch(e){}
-  try { closeNotificationsModal(); } catch(e){}
+  try { closeTeacherProfileModal(); } catch (e) { }
+  try { closeNotificationsModal(); } catch (e) { }
   const profileModal = document.getElementById('modal-teacher-profile');
   if (profileModal) profileModal.style.display = 'none';
 
@@ -2119,7 +2096,7 @@ function getVisibleQuestions() {
 
   if (t.role === 'guru_kelas') {
     // Guru kelas hanya melihat soal kelasnya sendiri atau yang dibuatnya sendiri
-    return (state.questions || []).filter(q => 
+    return (state.questions || []).filter(q =>
       isClassMatch(q.targetClass, t.assignedClass) || q.teacherId === t.id
     );
   }
@@ -2127,9 +2104,9 @@ function getVisibleQuestions() {
   if (t.role === 'guru_mapel') {
     // Guru mapel hanya melihat soal mapelnya sendiri atau yang dibuatnya sendiri
     const sub = (t.assignedSubject || '').toLowerCase();
-    return (state.questions || []).filter(q => 
-      (q.subject && q.subject.toLowerCase().includes(sub)) || 
-      (sub && (q.subject || '').toLowerCase().includes(sub)) || 
+    return (state.questions || []).filter(q =>
+      (q.subject && q.subject.toLowerCase().includes(sub)) ||
+      (sub && (q.subject || '').toLowerCase().includes(sub)) ||
       q.teacherId === t.id
     );
   }
@@ -2282,7 +2259,7 @@ async function handleStudentLogin(event) {
         status: 'active'
       };
       state.students.push(student);
-      try { localStorage.setItem('zettcbt_students', JSON.stringify(state.students)); } catch(e) {}
+      try { localStorage.setItem('zettcbt_students', JSON.stringify(state.students)); } catch (e) { }
     } else {
       showToast('Nomor Peserta / NISN "' + nisn + '" belum terdaftar di sistem sekolah! Hubungi pengawas.', 'danger');
       return;
@@ -2308,9 +2285,9 @@ async function handleStudentLogin(event) {
   const prevTok = (state.proctorToken.previousToken || localStorage.getItem('zettcbt_previous_proctor_token') || '').trim().toUpperCase();
   const sessionTok = ((state.session && state.session.token) || 'PAS2026').trim().toUpperCase();
 
-  let isTokenValid = (token === activeTok) || (prevTok && token === prevTok) || 
-                     (token === sessionTok) || (token === 'PAS26A') || (token === 'PAS2026') || 
-                     (token === 'SDN14') || (token === 'UJIAN2026');
+  let isTokenValid = (token === activeTok) || (prevTok && token === prevTok) ||
+    (token === sessionTok) || (token === 'PAS26A') || (token === 'PAS2026') ||
+    (token === 'SDN14') || (token === 'UJIAN2026');
 
   // Cek kecocokan dengan seluruh mata pelajaran pada siklus epoch saat ini maupun sebelumnya (grace period)
   if (!isTokenValid) {
@@ -2352,7 +2329,7 @@ async function handleStudentLogin(event) {
           if (cSubMatch) isTokenValid = true;
         }
       }
-    } catch(err) {
+    } catch (err) {
       console.warn('Fallback sync single token cloud error:', err);
     }
   }
@@ -2379,7 +2356,7 @@ async function handleStudentLogin(event) {
     };
   } else if (Array.isArray(state.schedules) && state.schedules.length > 0) {
     // Prioritas 2: Arahkan ke jadwal kelas siswa
-    const matchingSchedules = state.schedules.filter(sc => 
+    const matchingSchedules = state.schedules.filter(sc =>
       sc.className === 'SEMUA KELAS' || sc.className === student.className || (student.className && student.className.includes(sc.className))
     );
     const targetSched = matchingSchedules[0];
@@ -2425,13 +2402,13 @@ async function handleStudentLogin(event) {
         isResumed = true;
       }
     }
-  } catch (e) {}
+  } catch (e) { }
 
   // Tandai sesi ujian aktif di sessionStorage (musnah otomatis jika browser/tab ditutup)
   sessionStorage.setItem('zettcbt_exam_in_session', 'true');
 
   // Filter Soal Sesuai Mata Pelajaran & Kelas
-  const filteredQ = state.questions.filter(q => 
+  const filteredQ = state.questions.filter(q =>
     (!q.subject || q.subject.toLowerCase() === subjectName.toLowerCase() || q.subject.includes(subj.code)) &&
     (!q.targetClass || q.targetClass === student.className || student.className.includes(q.targetClass))
   );
@@ -2492,7 +2469,7 @@ function findScheduleForStudent(className, subjectName) {
       const sName = (sc.subjectName || sc.subject || '').trim().toLowerCase();
       const sClass = (sc.className || '').trim().toUpperCase();
       return (sName.includes(cleanSub) || cleanSub.includes(sName)) &&
-             (sClass === cleanClass || sClass === 'SEMUA KELAS' || !sClass);
+        (sClass === cleanClass || sClass === 'SEMUA KELAS' || !sClass);
     });
   }
 
@@ -2519,7 +2496,7 @@ function checkExamScheduleStatus(className, subjectName) {
   }
 
   const now = new Date();
-  
+
   // Format tanggal saat ini: YYYY-MM-DD
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, '0');
@@ -2770,14 +2747,14 @@ function renderCurrentQuestion() {
   // Sync Progress Status & Bar
   const answeredCount = Object.keys(state.student.answers || {}).filter(k => state.student.answers[k] && state.student.answers[k].selected).length;
   const pct = qList.length > 0 ? Math.round((answeredCount / qList.length) * 100) : 0;
-  
+
   const mobProgBar = document.getElementById('cbt-mobile-progress-bar');
   if (mobProgBar) mobProgBar.style.width = pct + '%';
   const mobProgCount = document.getElementById('cbt-mobile-progress-count');
   if (mobProgCount) mobProgCount.textContent = answeredCount + ' dari ' + qList.length + ' Soal (' + pct + '%)';
   const deskProg = document.getElementById('cbt-desktop-progress-text');
   if (deskProg) deskProg.textContent = answeredCount + ' dari ' + qList.length + ' Terjawab';
-  
+
   const cbtSub = document.getElementById('cbt-card-subject-val');
   if (cbtSub) cbtSub.textContent = state.student.subject || state.session.subject || '-';
   const cbtClass = document.getElementById('cbt-card-class-val');
@@ -2831,7 +2808,7 @@ function renderCurrentQuestion() {
       item.appendChild(optText);
       if (optionsContainer) optionsContainer.appendChild(item);
     });
-  } 
+  }
   // 2. Tipe: PG Kompleks (Multi Select Checkbox)
   else if (qType === 'kompleks') {
     const hint = document.createElement('div');
@@ -2889,19 +2866,19 @@ function renderCurrentQuestion() {
     pairs.forEach((p, pIdx) => {
       const tr = document.createElement('tr');
       tr.style.borderTop = '1px solid var(--slate-200)';
-      
+
       let optionsHtml = '<option value="">-- Pilih Pasangan --</option>';
       pairs.forEach((item, aIdx) => {
         const isSel = userPairs[pIdx] === item.jawab ? 'selected' : '';
         optionsHtml += '<option value="' + escapeHtml(item.jawab) + '" ' + isSel + '>' + escapeHtml(item.jawab) + '</option>';
       });
 
-      tr.innerHTML = 
+      tr.innerHTML =
         '<td style="padding: 0.75rem; font-weight: 600;">' + (pIdx + 1) + '. ' + escapeHtml(p.premis) + '</td>' +
         '<td style="padding: 0.75rem;">' +
-          '<select class="form-control" onchange="selectPairAnswer(\'' + q.id + '\', ' + pIdx + ', this.value)">' +
-            optionsHtml +
-          '</select>' +
+        '<select class="form-control" onchange="selectPairAnswer(\'' + q.id + '\', ' + pIdx + ', this.value)">' +
+        optionsHtml +
+        '</select>' +
         '</td>';
       tbody.appendChild(tr);
     });
@@ -2945,13 +2922,13 @@ function renderCurrentQuestion() {
       tr.style.borderTop = '1px solid var(--slate-200)';
       const currentVal = userBs[sIdx];
 
-      tr.innerHTML = 
+      tr.innerHTML =
         '<td style="padding: 0.75rem; font-weight: 600;">' + (sIdx + 1) + '. ' + escapeHtml(st.text) + '</td>' +
         '<td style="padding: 0.75rem; text-align: center;">' +
-          '<div style="display: inline-flex; gap: 0.4rem;">' +
-            '<button type="button" class="btn btn-sm ' + (currentVal === 'B' ? 'btn-success' : 'btn-outline') + '" onclick="selectBsAnswer(\'' + q.id + '\', ' + sIdx + ', \'B\')">Benar</button>' +
-            '<button type="button" class="btn btn-sm ' + (currentVal === 'S' ? 'btn-danger' : 'btn-outline') + '" onclick="selectBsAnswer(\'' + q.id + '\', ' + sIdx + ', \'S\')">Salah</button>' +
-          '</div>' +
+        '<div style="display: inline-flex; gap: 0.4rem;">' +
+        '<button type="button" class="btn btn-sm ' + (currentVal === 'B' ? 'btn-success' : 'btn-outline') + '" onclick="selectBsAnswer(\'' + q.id + '\', ' + sIdx + ', \'B\')">Benar</button>' +
+        '<button type="button" class="btn btn-sm ' + (currentVal === 'S' ? 'btn-danger' : 'btn-outline') + '" onclick="selectBsAnswer(\'' + q.id + '\', ' + sIdx + ', \'S\')">Salah</button>' +
+        '</div>' +
         '</td>';
       tbody.appendChild(tr);
     });
@@ -3145,7 +3122,7 @@ function updateGridButtonStatus() {
     const btn = document.getElementById('grid-btn-' + idx);
     const mBtn = document.getElementById('mobile-grid-btn-' + idx);
     const sBtn = document.getElementById('mobile-strip-btn-' + idx);
-    
+
     [btn, mBtn, sBtn].forEach(el => {
       if (!el) return;
       el.className = (el === sBtn) ? 'mobile-strip-chip' : 'grid-btn';
@@ -3154,7 +3131,7 @@ function updateGridButtonStatus() {
         if (el === sBtn) {
           try {
             el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-          } catch(e) {}
+          } catch (e) { }
         }
       }
 
@@ -3193,7 +3170,7 @@ function triggerAutoSaveIndicator() {
         currentQuestionIndex: state.currentQuestionIndex,
         timestamp: Date.now()
       }));
-    } catch(e) {}
+    } catch (e) { }
   }
 
   // If Neon PostgreSQL credentials are configured, execute background patch
@@ -3227,7 +3204,7 @@ function enterMobileFullscreen() {
   const el = document.documentElement;
   try {
     if (el.requestFullscreen) {
-      el.requestFullscreen().catch(() => {});
+      el.requestFullscreen().catch(() => { });
     } else if (el.webkitRequestFullscreen) {
       el.webkitRequestFullscreen();
     } else if (el.mozRequestFullScreen) {
@@ -3235,7 +3212,7 @@ function enterMobileFullscreen() {
     } else if (el.msRequestFullscreen) {
       el.msRequestFullscreen();
     }
-  } catch (e) {}
+  } catch (e) { }
 
   const btnRe = document.getElementById('btn-re-fullscreen');
   if (btnRe) btnRe.style.display = 'none';
@@ -3352,7 +3329,7 @@ function triggerHapticVibration() {
   if (navigator.vibrate) {
     try {
       navigator.vibrate([300, 150, 300, 150, 450]);
-    } catch (e) {}
+    } catch (e) { }
   }
 }
 
@@ -3689,7 +3666,7 @@ function submitFinalExam(forced = false) {
 
   // Exit Fullscreen if active
   if (document.fullscreenElement) {
-    document.exitFullscreen().catch(() => {});
+    document.exitFullscreen().catch(() => { });
   }
 
   // Populate Finish Screen
@@ -3757,6 +3734,7 @@ function switchAdminTab(tabId, element) {
       'srms-dashboard': 'Dasbor Utama Guru & Pengawas',
       'live-monitor': 'Monitor Ujian Langsung (Realtime Siswa & Sisa Waktu)',
       'question-bank': 'Bank Soal (5 Tipe ANBK)',
+      'kkm-setting': 'Standar KKM & Durasi Mata Pelajaran',
       'session-setting': 'Jadwal & Sesi Pelaksanaan Ujian (Hari, Jam, Ruangan)',
       'manage-students': 'Kelola Data Siswa Peserta Ujian',
       'manage-teachers': 'Kelola Data Guru & Pengawas',
@@ -3791,6 +3769,9 @@ function switchAdminTab(tabId, element) {
     renderAdminQuestionBank();
     renderSubjectTokensTable();
   }
+  if (tabId === 'kkm-setting') {
+    renderKkmRoomTable();
+  }
   if (tabId === 'session-setting') {
     populateSessionSettings();
     renderTeacherExamSchedules();
@@ -3811,8 +3792,8 @@ function switchAdminTab(tabId, element) {
 function renderSrmsDashboard() {
   const t = state.currentTeacher;
   const teacherName = t ? t.fullName : 'Bapak/Ibu Guru & Pengawas';
-  const teacherRole = t 
-    ? (t.role === 'admin_sekolah' ? 'Operator Sekolah (Admin)' : (t.role === 'guru_kelas' ? 'Wali/Guru Kelas ' + t.assignedClass : 'Guru Mapel ' + t.assignedSubject)) 
+  const teacherRole = t
+    ? (t.role === 'admin_sekolah' ? 'Operator Sekolah (Admin)' : (t.role === 'guru_kelas' ? 'Wali/Guru Kelas ' + t.assignedClass : 'Guru Mapel ' + t.assignedSubject))
     : ((state.school && state.school.name) ? state.school.name : 'SD Negeri 14 Toboali');
 
   // 1. Update Profile & Greetings
@@ -3831,7 +3812,7 @@ function renderSrmsDashboard() {
   const totalStudents = (state.students && state.students.length > 0) ? state.students.length : (submittedList.length || 1);
 
   // Rata-rata Nilai
-  const avgScore = submittedList.length > 0 
+  const avgScore = submittedList.length > 0
     ? (submittedList.reduce((acc, curr) => acc + (typeof curr.score === 'number' ? curr.score : 0), 0) / submittedList.length).toFixed(1)
     : '0';
   const cgpaEl = document.getElementById('srms-kpi-cgpa') || document.getElementById('srms-cgpa-val');
@@ -3953,7 +3934,7 @@ function renderSrmsRecentResults() {
   if (!tbody) return;
 
   const submittedList = getVisibleSubmittedResults();
-  
+
   if (submittedList.length > 0) {
     let rowsHtml = '';
     submittedList.slice(0, 5).forEach(st => {
@@ -4031,7 +4012,7 @@ function openTeacherProfileModal() {
       if (savedVault.fullName) t.fullName = savedVault.fullName;
       if (savedVault.nip) t.nip = savedVault.nip;
     }
-  } catch(e) {}
+  } catch (e) { }
 
   const nameInput = document.getElementById('teacher-profile-input-name');
   const nipInput = document.getElementById('teacher-profile-input-nip');
@@ -4218,8 +4199,8 @@ function addExamNotification(type, studentInfo, message, details = {}) {
     subject: studentInfo.subject || state.session.subject || '-',
     title: details.title || (
       type === 'violation' ? 'Peringatan Pelanggaran' :
-      type === 'submitted' ? 'Ujian Selesai Dikumpulkan' :
-      'Kendala Ujian Peserta'
+        type === 'submitted' ? 'Ujian Selesai Dikumpulkan' :
+          'Kendala Ujian Peserta'
     ),
     message: message || '',
     details: details,
@@ -4235,14 +4216,14 @@ function addExamNotification(type, studentInfo, message, details = {}) {
   try {
     localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
     localStorage.setItem('zettcbt_last_notification', JSON.stringify(notif));
-  } catch(e) {}
+  } catch (e) { }
 
   // Siarkan ke channel broadcast bila didukung
   try {
     if (tokenSyncChannel && typeof tokenSyncChannel.postMessage === 'function') {
       tokenSyncChannel.postMessage({ type: 'EXAM_NOTIFICATION', notification: notif });
     }
-  } catch(e) {}
+  } catch (e) { }
 
   updateNotificationBadge();
 
@@ -4280,7 +4261,7 @@ function receiveBroadcastNotification(notif) {
 
   try {
     localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
-  } catch(e) {}
+  } catch (e) { }
 
   updateNotificationBadge();
 
@@ -4310,7 +4291,7 @@ function markAllNotificationsRead() {
   visible.forEach(n => { n.isRead = true; });
   try {
     localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
-  } catch(e) {}
+  } catch (e) { }
   updateNotificationBadge();
   renderNotificationsList();
   showToast('Semua notifikasi ditandai sebagai telah dibaca.', 'success');
@@ -4324,7 +4305,7 @@ function clearAllNotifications() {
   state.notifications = (state.notifications || []).filter(n => !visibleIds.has(n.id));
   try {
     localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
-  } catch(e) {}
+  } catch (e) { }
   updateNotificationBadge();
   renderNotificationsList();
   showToast('Riwayat notifikasi berhasil dibersihkan.', 'success');
@@ -4338,7 +4319,7 @@ function handleResetStudentFromNotif(nisn) {
   });
   try {
     localStorage.setItem('zettcbt_notifications', JSON.stringify(state.notifications));
-  } catch(e) {}
+  } catch (e) { }
   updateNotificationBadge();
   renderNotificationsList();
 }
@@ -4349,7 +4330,7 @@ function initNotificationListeners() {
       try {
         const notif = JSON.parse(e.newValue);
         receiveBroadcastNotification(notif);
-      } catch(err) {}
+      } catch (err) { }
     }
   });
 }
@@ -4440,7 +4421,7 @@ function handleSaveTeacherProfile(event) {
 function handleGlobalSearch(query) {
   if (!query || !query.trim()) return;
   const q = query.trim().toLowerCase();
-  
+
   // Cari di siswa, soal, jadwal
   const matchedStudent = state.students.find(s => s.name.toLowerCase().includes(q) || s.nisn.toLowerCase().includes(q));
   if (matchedStudent) {
@@ -4581,7 +4562,7 @@ function renderLiveMonitoringTable() {
   tbody.innerHTML = '';
 
   const visibleList = getVisibleLiveStudents();
-  let filtered = visibleList.filter(s => 
+  let filtered = visibleList.filter(s =>
     (s.name || '').toLowerCase().includes(search) || (s.nisn || '').toLowerCase().includes(search)
   );
 
@@ -4617,7 +4598,7 @@ function renderLiveMonitoringTable() {
     const tr = document.createElement('tr');
 
     const isDone = st.status === 'submitted';
-    const statusBadge = isDone 
+    const statusBadge = isDone
       ? '<span class="badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem;">✅ SUDAH SELESAI</span>'
       : '<span class="badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem;"><span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #d97706;"></span> SEDANG MENGERJAKAN</span>';
 
@@ -4657,7 +4638,7 @@ function renderLiveMonitoringTable() {
       </div>
     `;
 
-    tr.innerHTML = 
+    tr.innerHTML =
       '<td style="text-align: center;">' + (idx + 1) + '</td>' +
       '<td><strong style="color: var(--slate-900); font-size: 0.92rem; display: block;">' + escapeHtml(st.name) + '</strong><span style="font-size: 0.78rem; color: var(--slate-500); font-family: monospace;">' + escapeHtml(st.nisn) + '</span></td>' +
       '<td style="text-align: center;"><span class="badge" style="background: var(--slate-200); color: var(--slate-800); font-weight: 700;">' + escapeHtml(st.className) + '</span></td>' +
@@ -4667,7 +4648,7 @@ function renderLiveMonitoringTable() {
       '<td>' + progressHtml + '</td>' +
       '<td style="text-align: center;">' + warnBadge + '</td>' +
       '<td style="text-align: center;">' +
-        '<button class="btn btn-outline btn-sm" onclick="resetStudentLogin(\'' + escapeHtml(st.nisn) + '\')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Buka Kunci / Pulihkan Sesi Siswa">🔓 Reset</button>' +
+      '<button class="btn btn-outline btn-sm" onclick="resetStudentLogin(\'' + escapeHtml(st.nisn) + '\')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Buka Kunci / Pulihkan Sesi Siswa">🔓 Reset</button>' +
       '</td>';
 
     tbody.appendChild(tr);
@@ -4703,23 +4684,23 @@ function renderAdminQuestionBank() {
 
   visibleQuestions.forEach((q, idx) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = 
+    tr.innerHTML =
       '<td>' + (idx + 1) + '</td>' +
       '<td>' +
-        '<div style="font-weight: 600; color: var(--slate-900);">' + escapeHtml(q.text) + '</div>' +
-        '<div style="font-size: 0.78rem; color: var(--slate-500); margin-top: 0.25rem;">' +
-          'A: ' + escapeHtml(q.optionA) + ' | B: ' + escapeHtml(q.optionB) + ' | C: ' + escapeHtml(q.optionC) + ' | D: ' + escapeHtml(q.optionD) +
-        '</div>' +
+      '<div style="font-weight: 600; color: var(--slate-900);">' + escapeHtml(q.text) + '</div>' +
+      '<div style="font-size: 0.78rem; color: var(--slate-500); margin-top: 0.25rem;">' +
+      'A: ' + escapeHtml(q.optionA) + ' | B: ' + escapeHtml(q.optionB) + ' | C: ' + escapeHtml(q.optionC) + ' | D: ' + escapeHtml(q.optionD) +
+      '</div>' +
       '</td>' +
       '<td><span class="badge badge-info">' + escapeHtml(q.subject || 'Umum') + '</span></td>' +
       '<td><span class="badge badge-success">' + escapeHtml(q.targetClass || 'UMUM') + '</span></td>' +
       '<td><span class="badge badge-info">Opsi ' + q.correctKey + '</span></td>' +
       '<td>' + (q.scoreWeight || 20) + '</td>' +
       '<td>' +
-        '<div style="display: flex; gap: 0.35rem;">' +
-          '<button class="btn btn-outline btn-sm" onclick="openEditQuestionModal(\'' + q.id + '\')">Edit</button>' +
-          '<button class="btn btn-danger btn-sm" onclick="deleteQuestion(\'' + q.id + '\')">Hapus</button>' +
-        '</div>' +
+      '<div style="display: flex; gap: 0.35rem;">' +
+      '<button class="btn btn-outline btn-sm" onclick="openEditQuestionModal(\'' + q.id + '\')">Edit</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="deleteQuestion(\'' + q.id + '\')">Hapus</button>' +
+      '</div>' +
       '</td>';
     tbody.appendChild(tr);
   });
@@ -4745,7 +4726,7 @@ function handleQuestionImageUpload(event) {
   }
 
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const dataUrl = e.target.result;
     const urlInput = document.getElementById('edit-question-image');
     if (urlInput) urlInput.value = dataUrl;
@@ -4856,13 +4837,13 @@ function openEditQuestionModal(qId) {
   document.getElementById('edit-question-id').value = q.id;
   document.getElementById('edit-question-text').value = q.text;
   document.getElementById('edit-question-image').value = q.imageUrl || '';
-  
+
   if (q.imageUrl) {
     previewQuestionImage(q.imageUrl);
   } else {
     removeQuestionImage();
   }
-  
+
   const subjInput = document.getElementById('edit-question-subject');
   const classInput = document.getElementById('edit-question-class');
 
@@ -5071,7 +5052,7 @@ function renderStudentsTable() {
   students.forEach((s, idx) => {
     const displayPass = (s.password || getDeterministicStudentPassword(s.nisn) || '123456').trim();
     const tr = document.createElement('tr');
-    tr.innerHTML = 
+    tr.innerHTML =
       '<td>' + (idx + 1) + '</td>' +
       '<td><strong>' + escapeHtml(s.nisn) + '</strong></td>' +
       '<td>' + escapeHtml(s.name) + '</td>' +
@@ -5080,10 +5061,10 @@ function renderStudentsTable() {
       '<td>' + (s.gender === 'P' ? 'Perempuan (P)' : 'Laki-laki (L)') + '</td>' +
       '<td><span class="badge badge-success">Terdaftar (Aktif)</span></td>' +
       '<td>' +
-        '<div style="display: flex; gap: 0.35rem;">' +
-          '<button class="btn btn-outline btn-sm" onclick="openEditStudentModal(\'' + escapeHtml(s.nisn) + '\')">Edit</button>' +
-          '<button class="btn btn-danger btn-sm" onclick="deleteStudent(\'' + escapeHtml(s.nisn) + '\')">Hapus</button>' +
-        '</div>' +
+      '<div style="display: flex; gap: 0.35rem;">' +
+      '<button class="btn btn-outline btn-sm" onclick="openEditStudentModal(\'' + escapeHtml(s.nisn) + '\')">Edit</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="deleteStudent(\'' + escapeHtml(s.nisn) + '\')">Hapus</button>' +
+      '</div>' +
       '</td>';
     tbody.appendChild(tr);
   });
@@ -5133,7 +5114,7 @@ function openEditStudentModal(nisn) {
 
   const passInput = document.getElementById('edit-student-password');
   if (passInput) passInput.value = (s.password || getDeterministicStudentPassword(s.nisn) || generateUniqueStudentPassword(state.students)).trim();
-  
+
   const classInput = document.getElementById('edit-student-class');
   if (classInput) {
     classInput.value = s.className;
@@ -5366,11 +5347,11 @@ function renderTeachersTable() {
     }
 
     const isPrimaryAdmin = t.username === 'admin';
-    const deleteBtn = isPrimaryAdmin 
+    const deleteBtn = isPrimaryAdmin
       ? '<span style="font-size:0.75rem; color:var(--slate-400);">Akun Utama</span>'
       : '<button class="btn btn-danger btn-sm" onclick="deleteTeacher(\'' + t.id + '\')">Hapus</button>';
 
-    tr.innerHTML = 
+    tr.innerHTML =
       '<td>' + (idx + 1) + '</td>' +
       '<td><strong>' + escapeHtml(t.fullName) + '</strong></td>' +
       '<td><code>' + escapeHtml(t.username) + '</code></td>' +
@@ -5378,10 +5359,10 @@ function renderTeachersTable() {
       '<td>' + badgeRole + '</td>' +
       '<td>' + scopeInfo + '</td>' +
       '<td>' +
-        '<div style="display: flex; gap: 0.35rem; align-items: center;">' +
-          '<button class="btn btn-outline btn-sm" onclick="openEditTeacherModal(\'' + t.id + '\')">Edit</button>' +
-          deleteBtn +
-        '</div>' +
+      '<div style="display: flex; gap: 0.35rem; align-items: center;">' +
+      '<button class="btn btn-outline btn-sm" onclick="openEditTeacherModal(\'' + t.id + '\')">Edit</button>' +
+      deleteBtn +
+      '</div>' +
       '</td>';
 
     tbody.appendChild(tr);
@@ -5464,7 +5445,7 @@ async function handleSaveTeacher(event) {
   const username = document.getElementById('edit-teacher-username').value.trim().toLowerCase();
   const password = document.getElementById('edit-teacher-password').value.trim();
   const role = document.getElementById('edit-teacher-role').value;
-  
+
   let assignedClass = null;
   let assignedSubject = null;
 
@@ -5534,7 +5515,7 @@ async function handleSaveTeacher(event) {
       fullName: fullName,
       nip: teacherObj.nip || ''
     }));
-  } catch(eVault) {}
+  } catch (eVault) { }
 
   // 3. Update sesi aktif jika pengguna yang sedang login mengedit akunnya sendiri
   if (state.currentTeacher && (state.currentTeacher.id === teacherObj.id || state.currentTeacher.username === originalUsername || state.currentTeacher.username === username)) {
@@ -5656,8 +5637,8 @@ async function deleteTeacher(id) {
 
 function generateKopSuratHtml() {
   const sch = state.school;
-  const logoHtml = sch.logoUrl 
-    ? `<div style="flex-shrink: 0; margin-right: 18px;"><img src="${sch.logoUrl}" alt="Logo Sekolah" style="height: 75px; max-width: 85px; object-fit: contain;"></div>` 
+  const logoHtml = sch.logoUrl
+    ? `<div style="flex-shrink: 0; margin-right: 18px;"><img src="${sch.logoUrl}" alt="Logo Sekolah" style="height: 75px; max-width: 85px; object-fit: contain;"></div>`
     : '';
 
   return `
@@ -5699,11 +5680,11 @@ function printExamQuestionsPdf() {
     questionsHtml += qContent;
   });
 
-  container.innerHTML = 
+  container.innerHTML =
     generateKopSuratHtml() +
     '<div style="text-align: center; margin-bottom: 16px;">' +
-      '<strong style="font-size: 12pt; text-transform: uppercase;">NASKAH BUTIR SOAL UJIAN SEKOLAH</strong><br>' +
-      '<span style="font-size: 10pt;">Mata Pelajaran: ' + state.session.subject + ' | Tahun Ajaran: ' + sch.academicYear + '</span>' +
+    '<strong style="font-size: 12pt; text-transform: uppercase;">NASKAH BUTIR SOAL UJIAN SEKOLAH</strong><br>' +
+    '<span style="font-size: 10pt;">Mata Pelajaran: ' + state.session.subject + ' | Tahun Ajaran: ' + sch.academicYear + '</span>' +
     '</div>' +
     questionsHtml;
 
@@ -5740,27 +5721,27 @@ function printResultsPdf() {
   const teacherSignerName = sch.teacherSigner || (state.currentTeacher ? state.currentTeacher.fullName : 'Pengawas Ujian');
   const teacherSignerNipHtml = (sch.teacherSignerNip && sch.teacherSignerNip !== '-') ? `<br>NIP. ${sch.teacherSignerNip}` : '';
 
-  container.innerHTML = 
+  container.innerHTML =
     generateKopSuratHtml() +
     '<div style="text-align: center; margin-bottom: 16px;">' +
-      '<strong style="font-size: 12pt; text-transform: uppercase;">REKAPITULASI HASIL PENILAIAN UJIAN BERBASIS KOMPUTER</strong><br>' +
-      '<span style="font-size: 10pt;">Mata Pelajaran: ' + escapeHtml(state.session.subject) + ' (Standar KKM: ' + currentKkm + ') | Tahun Pelajaran: ' + escapeHtml(sch.academicYear) + '</span>' +
+    '<strong style="font-size: 12pt; text-transform: uppercase;">REKAPITULASI HASIL PENILAIAN UJIAN BERBASIS KOMPUTER</strong><br>' +
+    '<span style="font-size: 10pt;">Mata Pelajaran: ' + escapeHtml(state.session.subject) + ' (Standar KKM: ' + currentKkm + ') | Tahun Pelajaran: ' + escapeHtml(sch.academicYear) + '</span>' +
     '</div>' +
     '<table style="width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 30px;">' +
-      '<thead><tr style="background: #f0f0f0;">' +
-        '<th style="border: 1px solid #000; padding: 6px; width: 40px; text-align: center;">No</th>' +
-        '<th style="border: 1px solid #000; padding: 6px;">NISN / No Peserta</th>' +
-        '<th style="border: 1px solid #000; padding: 6px;">Nama Lengkap Siswa</th>' +
-        '<th style="border: 1px solid #000; padding: 6px; text-align: center;">Kelas</th>' +
-        '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 60px;">KKM</th>' +
-        '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 80px;">Nilai Akhir</th>' +
-        '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">Status</th>' +
-      '</tr></thead>' +
-      '<tbody>' + (rowsHtml || '<tr><td colspan="7" style="text-align:center; padding: 10px;">Belum ada data nilai submit.</td></tr>') + '</tbody>' +
+    '<thead><tr style="background: #f0f0f0;">' +
+    '<th style="border: 1px solid #000; padding: 6px; width: 40px; text-align: center;">No</th>' +
+    '<th style="border: 1px solid #000; padding: 6px;">NISN / No Peserta</th>' +
+    '<th style="border: 1px solid #000; padding: 6px;">Nama Lengkap Siswa</th>' +
+    '<th style="border: 1px solid #000; padding: 6px; text-align: center;">Kelas</th>' +
+    '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 60px;">KKM</th>' +
+    '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 80px;">Nilai Akhir</th>' +
+    '<th style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">Status</th>' +
+    '</tr></thead>' +
+    '<tbody>' + (rowsHtml || '<tr><td colspan="7" style="text-align:center; padding: 10px;">Belum ada data nilai submit.</td></tr>') + '</tbody>' +
     '</table>' +
     '<div style="display: flex; justify-content: space-between; font-size: 10pt; margin-top: 30px;">' +
-      '<div>Mengetahui,<br>Kepala ' + escapeHtml(sch.name) + '<br><br><br><br><strong>' + escapeHtml(sch.headmaster) + '</strong><br>NIP. ' + escapeHtml(sch.headmasterNip) + '</div>' +
-      '<div>Toboali, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '<br>Guru Mata Pelajaran / Wali Kelas<br><br><br><br><strong>' + escapeHtml(teacherSignerName) + '</strong>' + teacherSignerNipHtml + '</div>' +
+    '<div>Mengetahui,<br>Kepala ' + escapeHtml(sch.name) + '<br><br><br><br><strong>' + escapeHtml(sch.headmaster) + '</strong><br>NIP. ' + escapeHtml(sch.headmasterNip) + '</div>' +
+    '<div>Toboali, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '<br>Guru Mata Pelajaran / Wali Kelas<br><br><br><br><strong>' + escapeHtml(teacherSignerName) + '</strong>' + teacherSignerNipHtml + '</div>' +
     '</div>';
 
   window.print();
@@ -5781,13 +5762,13 @@ function printExamCardsPdf() {
   let cardsHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
 
   students.forEach((st) => {
-    const cardLogoHtml = sch.logoUrl 
-      ? `<img src="${sch.logoUrl}" style="height: 38px; width: 38px; object-fit: contain; margin-right: 8px;">` 
+    const cardLogoHtml = sch.logoUrl
+      ? `<img src="${sch.logoUrl}" style="height: 38px; width: 38px; object-fit: contain; margin-right: 8px;">`
       : '';
 
     let subRows = '';
     subjects.forEach((sub, subIdx) => {
-      const sched = (state.schedules || []).find(sc => 
+      const sched = (state.schedules || []).find(sc =>
         (sc.subjectName === sub.name || sc.subject === sub.name || sc.subjectName === sub.code) &&
         (sc.className === 'SEMUA KELAS' || sc.className === st.className || (st.className && st.className.includes(sc.className)))
       );
@@ -5906,7 +5887,7 @@ function printAttendanceSheetPdf(targetClass = 'ALL', targetSubject = 'Matematik
   }
 
   // Cari Jadwal Ujian yang cocok jika ada
-  const sched = (state.schedules || []).find(sc => 
+  const sched = (state.schedules || []).find(sc =>
     (sc.subjectName === targetSubject || sc.subject === targetSubject) &&
     (sc.className === 'SEMUA KELAS' || targetClass === 'ALL' || sc.className === targetClass)
   );
@@ -5935,13 +5916,13 @@ function printAttendanceSheetPdf(targetClass = 'ALL', targetSubject = 'Matematik
   students.forEach((st, idx) => {
     const num = idx + 1;
     const isOdd = num % 2 !== 0;
-    
+
     // Zigzag Tanda Tangan: nomor ganjil di kolom kiri, nomor genap di kolom kanan
-    const signCol1 = isOdd 
-      ? `<div style="font-size: 8pt; color: #333; text-align: left; padding-left: 4px;">${num}. ....................</div>` 
+    const signCol1 = isOdd
+      ? `<div style="font-size: 8pt; color: #333; text-align: left; padding-left: 4px;">${num}. ....................</div>`
       : '&nbsp;';
-    const signCol2 = !isOdd 
-      ? `<div style="font-size: 8pt; color: #333; text-align: left; padding-left: 4px;">${num}. ....................</div>` 
+    const signCol2 = !isOdd
+      ? `<div style="font-size: 8pt; color: #333; text-align: left; padding-left: 4px;">${num}. ....................</div>`
       : '&nbsp;';
 
     rowsHtml += `
@@ -6062,7 +6043,7 @@ function renderExamCardsTab() {
   students.forEach((st) => {
     let subRows = '';
     subjects.forEach((sub, subIdx) => {
-      const sched = (state.schedules || []).find(sc => 
+      const sched = (state.schedules || []).find(sc =>
         (sc.subjectName === sub.name || sc.subject === sub.name || sc.subjectName === sub.code) &&
         (sc.className === 'SEMUA KELAS' || sc.className === st.className || (st.className && st.className.includes(sc.className)))
       );
@@ -6197,8 +6178,10 @@ function populateSubjectTokensTbody(tbody, prefix = '') {
 function renderSubjectTokensTable() {
   const tbody1 = document.getElementById('table-subject-tokens-body');
   const tbody2 = document.getElementById('table-subject-tokens-body-qbank');
+  const tbody3 = document.getElementById('table-subject-tokens-body-room');
   if (tbody1) populateSubjectTokensTbody(tbody1, '');
   if (tbody2) populateSubjectTokensTbody(tbody2, 'qbank-');
+  if (tbody3) renderKkmRoomTable();
 }
 
 function randomizeSingleSubjectToken(subId, prefix = '') {
@@ -6207,11 +6190,13 @@ function randomizeSingleSubjectToken(subId, prefix = '') {
   const randomNum = Math.floor(Math.random() * 89 + 10);
   const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
   const newToken = `${sub.code}${randomNum}${randomLetter}`;
-  
+
   const input1 = document.getElementById('token-input-' + subId);
   const input2 = document.getElementById('qbank-token-input-' + subId);
+  const input3 = document.getElementById('room-token-input-' + subId);
   if (input1) input1.value = newToken;
   if (input2) input2.value = newToken;
+  if (input3) input3.value = newToken;
 
   sub.token = newToken;
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
@@ -6224,6 +6209,7 @@ function randomizeSingleSubjectToken(subId, prefix = '') {
   renderProctorTokenBar();
   renderHorizontalTokenRibbon();
   renderTeacherExamSchedules();
+  renderKkmRoomTable();
   syncTokensToNeonCloud();
   syncSchedulesToNeonCloud();
   showToast(`Token baru untuk ${sub.name}: ${newToken}. Telah disinkronkan ke seluruh perangkat!`, 'info');
@@ -6233,11 +6219,13 @@ function generateAllSubjectTokens() {
   (state.subjects || []).forEach(sub => {
     const input1 = document.getElementById('token-input-' + sub.id);
     const input2 = document.getElementById('qbank-token-input-' + sub.id);
+    const input3 = document.getElementById('room-token-input-' + sub.id);
     const randomNum = Math.floor(Math.random() * 89 + 10);
     const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
     const newToken = `${sub.code}${randomNum}${randomLetter}`;
     if (input1) input1.value = newToken;
     if (input2) input2.value = newToken;
+    if (input3) input3.value = newToken;
     sub.token = newToken;
   });
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
@@ -6251,6 +6239,7 @@ function generateAllSubjectTokens() {
   renderProctorTokenBar();
   renderHorizontalTokenRibbon();
   renderTeacherExamSchedules();
+  renderKkmRoomTable();
   syncTokensToNeonCloud();
   syncSchedulesToNeonCloud();
   showToast('Seluruh token mata pelajaran berhasil diacak & disinkronkan ke seluruh perangkat!', 'info');
@@ -6258,9 +6247,9 @@ function generateAllSubjectTokens() {
 
 function saveSubjectTokensSettings(sourcePrefix = '') {
   (state.subjects || []).forEach(sub => {
-    const kkmInput = (sourcePrefix && document.getElementById(sourcePrefix + 'kkm-input-' + sub.id)) || document.getElementById('kkm-input-' + sub.id) || document.getElementById('qbank-kkm-input-' + sub.id);
-    const tokenInput = (sourcePrefix && document.getElementById(sourcePrefix + 'token-input-' + sub.id)) || document.getElementById('token-input-' + sub.id) || document.getElementById('qbank-token-input-' + sub.id);
-    const durationInput = (sourcePrefix && document.getElementById(sourcePrefix + 'duration-input-' + sub.id)) || document.getElementById('duration-input-' + sub.id) || document.getElementById('qbank-duration-input-' + sub.id);
+    const kkmInput = (sourcePrefix && document.getElementById(sourcePrefix + 'kkm-input-' + sub.id)) || document.getElementById('room-kkm-input-' + sub.id) || document.getElementById('kkm-input-' + sub.id) || document.getElementById('qbank-kkm-input-' + sub.id);
+    const tokenInput = (sourcePrefix && document.getElementById(sourcePrefix + 'token-input-' + sub.id)) || document.getElementById('room-token-input-' + sub.id) || document.getElementById('token-input-' + sub.id) || document.getElementById('qbank-token-input-' + sub.id);
+    const durationInput = (sourcePrefix && document.getElementById(sourcePrefix + 'duration-input-' + sub.id)) || document.getElementById('room-duration-input-' + sub.id) || document.getElementById('duration-input-' + sub.id) || document.getElementById('qbank-duration-input-' + sub.id);
     if (kkmInput) {
       const parsedKkm = parseInt(kkmInput.value, 10);
       sub.kkm = (!isNaN(parsedKkm) && parsedKkm >= 0 && parsedKkm <= 100) ? parsedKkm : 75;
@@ -6284,9 +6273,166 @@ function saveSubjectTokensSettings(sourcePrefix = '') {
   renderTeacherExamSchedules();
   renderResultsTable();
   renderSrmsDashboard();
+  renderKkmRoomTable();
   applySchoolBrandingUI();
   syncTokensToNeonCloud();
   syncSchedulesToNeonCloud();
+  showToast('Entry KKM, token, dan durasi per mata pelajaran berhasil disimpan & disinkronkan!', 'success');
+}
+
+/**
+ * Standalone Room Engine: Standar KKM & Durasi Mata Pelajaran (v3.52.0)
+ */
+function renderKkmRoomTable() {
+  const tbody = document.getElementById('table-subject-tokens-body-room');
+  if (!tbody) return;
+
+  const subjects = state.subjects || [];
+  tbody.innerHTML = '';
+
+  // Update KPI chips
+  const totalSubEl = document.getElementById('kkm-room-total-subjects');
+  if (totalSubEl) totalSubEl.textContent = subjects.length;
+
+  let totalKkm = 0;
+  let countKkm = 0;
+
+  if (subjects.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada mata pelajaran / room terdaftar. Klik "+ Tambah Mapel / Room Baru" di atas.</td></tr>';
+  } else {
+    subjects.forEach((sub, idx) => {
+      const kkmVal = typeof sub.kkm === 'number' ? sub.kkm : 75;
+      totalKkm += kkmVal;
+      countKkm++;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="text-align: center;">${idx + 1}</td>
+        <td><strong>${escapeHtml(sub.name)}</strong></td>
+        <td style="text-align: center;"><span class="badge" style="background: var(--slate-200); font-weight: 700;">${escapeHtml(sub.code)}</span></td>
+        <td style="text-align: center;">
+          <input type="number" id="room-kkm-input-${sub.id}" value="${kkmVal}" min="0" max="100" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; font-weight: 700; color: var(--primary-700); padding: 0.3rem 0.5rem; font-size: 0.9rem;" title="Batas Nilai KKM (0-100)">
+        </td>
+        <td>
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <input type="text" id="room-token-input-${sub.id}" value="${escapeHtml(sub.token || '')}" class="form-control" style="width: 110px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}', 'room-')" title="Acak Token">🎲</button>
+          </div>
+        </td>
+        <td style="text-align: center;">
+          <input type="number" id="room-duration-input-${sub.id}" value="${sub.durationMinutes || 90}" min="10" max="300" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+        </td>
+        <td style="text-align: center;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="deleteSubjectRoom('${sub.id}')" title="Hapus Mapel / Room Ini" style="color: #ef4444; border-color: #fca5a5; padding: 0.25rem 0.5rem; font-size: 0.78rem;">
+            🗑️
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  const avgKkmEl = document.getElementById('kkm-room-avg-kkm');
+  if (avgKkmEl) {
+    avgKkmEl.textContent = countKkm > 0 ? Math.round(totalKkm / countKkm) : '75';
+  }
+}
+
+function saveKkmRoomSettings() {
+  saveSubjectTokensSettings('room-');
+}
+
+function openAddSubjectRoomModal() {
+  const modal = document.getElementById('modal-add-subject-room');
+  if (!modal) return;
+  const f = document.getElementById('form-add-subject-room');
+  if (f) f.reset();
+  const dur = document.getElementById('input-new-subject-duration');
+  if (dur) dur.value = 90;
+  const kkm = document.getElementById('input-new-subject-kkm');
+  if (kkm) kkm.value = 75;
+  modal.style.display = 'flex';
+}
+
+function closeAddSubjectRoomModal() {
+  const modal = document.getElementById('modal-add-subject-room');
+  if (modal) modal.style.display = 'none';
+}
+
+function handleSaveNewSubjectRoom(e) {
+  if (e) e.preventDefault();
+  const nameEl = document.getElementById('input-new-subject-name');
+  const codeEl = document.getElementById('input-new-subject-code');
+  const kkmEl = document.getElementById('input-new-subject-kkm');
+  const durEl = document.getElementById('input-new-subject-duration');
+  const tokenEl = document.getElementById('input-new-subject-token');
+
+  const name = nameEl ? nameEl.value.trim() : '';
+  const code = codeEl ? codeEl.value.trim().toUpperCase() : '';
+  const kkm = kkmEl ? parseInt(kkmEl.value, 10) || 75 : 75;
+  const durationMinutes = durEl ? parseInt(durEl.value, 10) || 90 : 90;
+  let token = tokenEl ? tokenEl.value.trim().toUpperCase() : '';
+
+  if (!name || !code) {
+    showToast('Nama mata pelajaran dan kode wajib diisi!', 'warning');
+    return;
+  }
+
+  // Generate token otomatis jika kosong
+  if (!token) {
+    const randomNum = Math.floor(Math.random() * 89 + 10);
+    const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    token = `${code}${randomNum}${randomLetter}`;
+  }
+
+  const id = 'sub-' + code.toLowerCase() + '-' + Date.now().toString(36);
+  const newSub = {
+    id: id,
+    name: name,
+    code: code,
+    kkm: kkm,
+    durationMinutes: durationMinutes,
+    token: token,
+    isActive: true
+  };
+
+  state.subjects = state.subjects || [];
+  state.subjects.push(newSub);
+  localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+  closeAddSubjectRoomModal();
+  renderKkmRoomTable();
+  renderSubjectTokensTable();
+  renderProctorTokenBar();
+  renderHorizontalTokenRibbon();
+  applySchoolBrandingUI();
+  syncTokensToNeonCloud();
+  showToast(`Mata pelajaran / Room baru "${name}" (${code}) berhasil dibuat!`, 'success');
+}
+
+function deleteSubjectRoom(id) {
+  const sub = (state.subjects || []).find(s => s.id === id);
+  if (!sub) return;
+
+  if (state.subjects.length <= 1) {
+    showToast('Minimal harus ada 1 mata pelajaran terdaftar!', 'warning');
+    return;
+  }
+
+  if (!confirm(`Yakin ingin menghapus mata pelajaran / room "${sub.name}" (${sub.code})?`)) {
+    return;
+  }
+
+  state.subjects = state.subjects.filter(s => s.id !== id);
+  localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+  renderKkmRoomTable();
+  renderSubjectTokensTable();
+  renderProctorTokenBar();
+  renderHorizontalTokenRibbon();
+  syncTokensToNeonCloud();
+  showToast(`Mata pelajaran "${sub.name}" berhasil dihapus!`, 'info');
+}
   showToast('Entry KKM, token, dan durasi per mata pelajaran berhasil disimpan & disinkronkan!', 'success');
 }
 
@@ -6332,7 +6478,7 @@ function handleLogoFileUpload(event) {
   }
 
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const dataUrl = e.target.result;
     if (document.getElementById('school-logo-url')) {
       document.getElementById('school-logo-url').value = dataUrl;
@@ -6466,7 +6612,7 @@ function applySchoolBrandingUI() {
   if (sidebarLogo) {
     sidebarLogo.src = logo;
     sidebarLogo.alt = schoolName;
-    sidebarLogo.onerror = function() {
+    sidebarLogo.onerror = function () {
       if (this.src !== 'assets/icon-192.png' && !this.src.includes('icon-192.png')) {
         this.src = 'assets/icon-192.png';
       } else if (defaultLogo && this.src !== defaultLogo) {
@@ -6504,7 +6650,7 @@ function applySchoolBrandingUI() {
     if (studentFormLogo) {
       studentFormLogo.src = logo;
       studentFormLogo.alt = schoolName;
-      studentFormLogo.onerror = function() {
+      studentFormLogo.onerror = function () {
         if (this.src !== 'assets/icon-192.png' && !this.src.includes('icon-192.png')) {
           this.src = 'assets/icon-192.png';
         } else if (defaultLogo && this.src !== defaultLogo) {
@@ -6540,7 +6686,7 @@ function applySchoolBrandingUI() {
     if (teacherFormLogo) {
       teacherFormLogo.src = logo;
       teacherFormLogo.alt = schoolName;
-      teacherFormLogo.onerror = function() {
+      teacherFormLogo.onerror = function () {
         if (this.src !== 'assets/icon-192.png' && !this.src.includes('icon-192.png')) {
           this.src = 'assets/icon-192.png';
         } else if (defaultLogo && this.src !== defaultLogo) {
@@ -6595,7 +6741,7 @@ function applySchoolBrandingUI() {
   if (cbtSidebarLogo && logo) {
     cbtSidebarLogo.src = logo;
     cbtSidebarLogo.alt = schoolName;
-    cbtSidebarLogo.onerror = function() {
+    cbtSidebarLogo.onerror = function () {
       if (this.src !== 'assets/icon-192.png' && !this.src.includes('icon-192.png')) {
         this.src = 'assets/icon-192.png';
       } else if (defaultLogo && this.src !== defaultLogo) {
@@ -6666,7 +6812,7 @@ function triggerBlobDownload(blob, fileName) {
       try {
         if (link.parentNode) link.parentNode.removeChild(link);
         URL.revokeObjectURL(url);
-      } catch (errClean) {}
+      } catch (errClean) { }
     }, 15000);
     return true;
   } catch (e) {
@@ -6701,7 +6847,7 @@ function triggerDataUriDownload(dataUri, fileName) {
     setTimeout(() => {
       try {
         if (link.parentNode) link.parentNode.removeChild(link);
-      } catch (errClean) {}
+      } catch (errClean) { }
     }, 15000);
     return true;
   } catch (err) {
@@ -6723,7 +6869,7 @@ function downloadStudentTemplateExcel(e) {
     setTimeout(() => {
       try {
         if (link.parentNode) link.parentNode.removeChild(link);
-      } catch(errClean) {}
+      } catch (errClean) { }
     }, 15000);
     showToast('Mengunduh Format Contoh Excel (.XLS) 4 kolom resmi...', 'success');
   } catch (err) {
@@ -6748,13 +6894,13 @@ function handleStudentImportFile(event) {
 
   if (isExcel && typeof XLSX !== 'undefined') {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       try {
         const data = new Uint8Array(e.target.result);
         const wb = XLSX.read(data, { type: 'array' });
         const firstSheetName = wb.SheetNames[0];
         const ws = wb.Sheets[firstSheetName];
-        
+
         // Convert sheet to tab-separated text with raw strings to preserve leading zeroes
         const tsv = XLSX.utils.sheet_to_csv(ws, { FS: '\t', rawNumbers: false });
         const textarea = document.getElementById('import-students-raw-text');
@@ -6772,7 +6918,7 @@ function handleStudentImportFile(event) {
   } else {
     // CSV / TXT / TSV
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       const content = e.target.result;
       const textarea = document.getElementById('import-students-raw-text');
       if (textarea) {
@@ -6793,7 +6939,7 @@ function parseStudentDataFromText(rawText) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const lowerLine = line.toLowerCase();
-    
+
     // Abaikan baris header tabel jika terdeteksi kata kunci header
     if (i === 0 && (
       lowerLine.includes('nisn') ||
@@ -6962,8 +7108,8 @@ async function executeBatchImportStudents() {
 
   importedList.forEach(imp => {
     const existingIndex = state.students.findIndex(s => s.nisn.toLowerCase() === imp.nisn.toLowerCase());
-    const finalPass = (imp.password && imp.password.trim() && imp.password !== '123456') 
-      ? imp.password.trim() 
+    const finalPass = (imp.password && imp.password.trim() && imp.password !== '123456')
+      ? imp.password.trim()
       : (getDeterministicStudentPassword(imp.nisn) || generateUniqueStudentPassword(state.students));
 
     if (existingIndex >= 0) {
@@ -7160,7 +7306,7 @@ function renderResultsTable() {
     const isPass = scoreVal >= kkmVal;
 
     const tr = document.createElement('tr');
-    tr.innerHTML = 
+    tr.innerHTML =
       '<td style="text-align: center;">' + (idx + 1) + '</td>' +
       '<td>' + escapeHtml(st.nisn) + '</td>' +
       '<td><strong>' + escapeHtml(st.name) + '</strong></td>' +
@@ -7172,10 +7318,10 @@ function renderResultsTable() {
       '<td style="text-align: center;"><span class="badge" style="background: ' + (isPass ? '#dcfce7' : '#fee2e2') + '; color: ' + (isPass ? '#15803d' : '#991b1b') + '; border: 1px solid ' + (isPass ? '#86efac' : '#fca5a5') + '; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.78rem;">' + (isPass ? '🟢 TUNTAS' : '⚠️ REMEDIAL') + '</span></td>' +
       '<td>' + escapeHtml(st.time || '-') + (st.durationSpent ? ' <span class="badge" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-size: 0.72rem; font-weight: 700; margin-left: 0.25rem;">⏱️ ' + st.durationSpent + 'm</span>' : '') + '</td>' +
       '<td style="text-align: center;">' +
-        '<button type="button" class="btn btn-outline btn-xs" style="color: var(--rose-600); border-color: var(--rose-300); padding: 0.2rem 0.55rem; font-size: 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;" onclick="confirmDeleteStudentResult(\'' + escapeHtml(st.nisn) + '\', \'' + escapeHtml(st.name).replace(/'/g, "\\'") + '\')" title="Hapus nilai peserta ini">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> ' +
-          'Hapus' +
-        '</button>' +
+      '<button type="button" class="btn btn-outline btn-xs" style="color: var(--rose-600); border-color: var(--rose-300); padding: 0.2rem 0.55rem; font-size: 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;" onclick="confirmDeleteStudentResult(\'' + escapeHtml(st.nisn) + '\', \'' + escapeHtml(st.name).replace(/'/g, "\\'") + '\')" title="Hapus nilai peserta ini">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> ' +
+      'Hapus' +
+      '</button>' +
       '</td>';
     tbody.appendChild(tr);
   });
@@ -7256,7 +7402,7 @@ async function clearAllExamResults() {
   if (creds && creds.host) {
     try {
       await executeNeonSql('DELETE FROM student_answers; DELETE FROM student_attempts;');
-    } catch(e) {
+    } catch (e) {
       console.warn('Neon clear attempts/answers deferred:', e.message);
     }
   }
@@ -7278,7 +7424,7 @@ async function confirmDeleteStudentResult(nisn, studentName) {
   if (creds && creds.host) {
     try {
       await executeNeonSql('DELETE FROM student_attempts WHERE participant_number = $1;', [nisn]);
-    } catch(e) {
+    } catch (e) {
       console.warn('Neon single student attempt deletion deferred:', e.message);
     }
   }
@@ -7350,11 +7496,11 @@ function populateDatabaseConfig() {
 
   if (ep) {
     state.neon.endpoint = ep;
-    try { localStorage.setItem('zettcbt_neon_endpoint', ep); } catch(e) {}
+    try { localStorage.setItem('zettcbt_neon_endpoint', ep); } catch (e) { }
   }
   if (key) {
     state.neon.apiKey = key;
-    try { localStorage.setItem('zettcbt_neon_key', key); } catch(e) {}
+    try { localStorage.setItem('zettcbt_neon_key', key); } catch (e) { }
   }
 
   const endpointInput = document.getElementById('config-neon-endpoint');
@@ -7449,7 +7595,7 @@ async function autoSaveAndConnectNeon() {
       // Jalankan initial sync diam-diam
       syncTwoWayWithNeon({ silent: true, isAuto: true });
     }
-  } catch(e) {
+  } catch (e) {
     console.warn('Auto-connect Neon deferred:', e.message);
     if (badge) {
       badge.textContent = '🔴 Gagal Terkoneksi';
@@ -7477,7 +7623,7 @@ function parseNeonCredentials() {
       urlKey = decodeURIComponent(urlParams.get('key') || urlParams.get('neon_key') || urlParams.get('pass'));
       localStorage.setItem('zettcbt_neon_key', urlKey);
     }
-  } catch(e) {}
+  } catch (e) { }
 
   let rawEp = (epInput && epInput.value ? epInput.value : (state.neon.endpoint || urlEp || localStorage.getItem('zettcbt_neon_endpoint') || '')).trim();
   let rawKey = (keyInput && keyInput.value ? keyInput.value : (state.neon.apiKey || urlKey || localStorage.getItem('zettcbt_neon_key') || '')).trim();
@@ -7487,12 +7633,12 @@ function parseNeonCredentials() {
   if (!isRawEpValid && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.host) {
     rawEp = window.DEFAULT_NEON_CONFIG.host.trim();
     state.neon.endpoint = rawEp;
-    try { localStorage.setItem('zettcbt_neon_endpoint', rawEp); } catch(e) {}
+    try { localStorage.setItem('zettcbt_neon_endpoint', rawEp); } catch (e) { }
   }
   if (!rawKey && typeof window !== 'undefined' && window.DEFAULT_NEON_CONFIG && window.DEFAULT_NEON_CONFIG.password) {
     rawKey = window.DEFAULT_NEON_CONFIG.password.trim();
     state.neon.apiKey = rawKey;
-    try { localStorage.setItem('zettcbt_neon_key', rawKey); } catch(e) {}
+    try { localStorage.setItem('zettcbt_neon_key', rawKey); } catch (e) { }
   }
 
   // If user pasted a full postgresql:// connection string
@@ -7511,7 +7657,7 @@ function parseNeonCredentials() {
         database: db,
         connectionString: rawEp
       };
-    } catch(e) {}
+    } catch (e) { }
   }
 
   // Extract clean host
@@ -7640,14 +7786,14 @@ async function syncStudentPasswordVaultToNeon() {
 async function executeNeonSql(query, params = []) {
   const creds = parseNeonCredentials();
   if (!creds.host) throw new Error('Host atau Endpoint Neon belum diisi!');
-  
+
   if (!creds.host.includes('ep-') && creds.host.includes('neon.tech')) {
     throw new Error('Host Neon tidak lengkap! Host wajib diawali dengan "ep-..." (contoh: ep-cool-fog-123456.ap-southeast-1.aws.neon.tech). Cek kembali dashboard Neon Anda.');
   }
 
   // Neon HTTP API requires 'Neon-Connection-String' header.
   // Note: We intentionally omit 'Content-Type: application/json' and 'Authorization' because Neon's CORS preflight (Access-Control-Allow-Headers) does not include Content-Type, causing browser fetch to fail with CORS error. Neon parses JSON body seamlessly.
-  const headers = { 
+  const headers = {
     'Neon-Connection-String': creds.connectionString
   };
 
@@ -7671,7 +7817,7 @@ async function executeNeonSql(query, params = []) {
     try {
       const j = JSON.parse(txt);
       if (j.message) msg = j.message;
-    } catch(e) {}
+    } catch (e) { }
 
     // Terjemahkan error umum Neon agar mudah dipahami guru/operator
     if (msg.includes('password authentication failed')) {
@@ -7725,7 +7871,7 @@ async function testNeonConnection() {
     await executeNeonSql('SELECT NOW() as server_time, version() as version;');
     const latency = Date.now() - startTime;
     showToast(`🟢 Terhubung ke Neon PostgreSQL! Latensi: ${latency}ms. Siap melayani 200 siswa serentak.`, 'success');
-    
+
     const badge = document.getElementById('db-status-badge');
     if (badge) {
       badge.textContent = `🟢 Neon Online (${latency}ms)`;
@@ -7887,14 +8033,14 @@ async function exportLocalDataToNeonCloud(options = {}) {
                     ON CONFLICT (setting_key) DO UPDATE
                     SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
       await executeNeonSql(qSch, [JSON.stringify(schData)]);
-    } catch(eSch) {
+    } catch (eSch) {
       console.warn('Sync school identity to Neon deferred:', eSch.message);
     }
 
     // Sync Token Ujian Seluruh Mapel ke Neon Cloud (app_settings)
     try {
       await syncTokensToNeonCloud();
-    } catch(eTok) {
+    } catch (eTok) {
       console.warn('Sync exam tokens to Neon deferred:', eTok.message);
     }
 
@@ -7928,7 +8074,7 @@ async function syncSchoolIdentityToNeonCloud(schoolObj) {
                ON CONFLICT (setting_key) DO UPDATE
                SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
     await executeNeonSql(q, [JSON.stringify(schoolObj)]);
-  } catch(e) {
+  } catch (e) {
     console.warn('syncSchoolIdentityToNeonCloud error:', e.message);
   }
 }
@@ -7952,7 +8098,7 @@ try {
       }
     };
   }
-} catch(e) {
+} catch (e) {
   console.warn('BroadcastChannel not supported:', e);
 }
 
@@ -7982,7 +8128,7 @@ function applySynchronizedSingleToken(data, notifyBroadcast = true) {
         previousToken: state.proctorToken.previousToken,
         remainingSeconds: state.proctorToken.remainingSeconds
       });
-    } catch(e) {}
+    } catch (e) { }
   }
 }
 
@@ -8000,7 +8146,7 @@ async function syncSingleTokenToNeonCloud() {
         previousToken: state.proctorToken.previousToken || '',
         remainingSeconds: state.proctorToken.remainingSeconds
       });
-    } catch(e) {}
+    } catch (e) { }
   }
 
   const creds = parseNeonCredentials();
@@ -8020,7 +8166,7 @@ async function syncSingleTokenToNeonCloud() {
                SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
     await executeNeonSql(q, [payload]);
     console.log('✅ Token ujian tunggal berhasil disinkronkan ke Neon Cloud:', token);
-  } catch(e) {
+  } catch (e) {
     console.warn('syncSingleTokenToNeonCloud error:', e.message);
   }
 }
@@ -8042,7 +8188,7 @@ async function fetchSingleTokenFromNeonCloud() {
         return parsed;
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.warn('fetchSingleTokenFromNeonCloud error:', e.message);
   }
   return null;
@@ -8092,13 +8238,13 @@ function applySynchronizedTokens(incomingSubjects, notifyBroadcast = true) {
       renderSingleProctorTokenRibbon();
       if (typeof renderTeacherExamSchedules === 'function') renderTeacherExamSchedules();
       if (typeof renderSubjectTokensTable === 'function') renderSubjectTokensTable();
-    } catch(e) {}
+    } catch (e) { }
   }
 
   if (notifyBroadcast && tokenSyncChannel) {
     try {
       tokenSyncChannel.postMessage({ type: 'TOKENS_UPDATED', subjects: state.subjects });
-    } catch(e) {}
+    } catch (e) { }
   }
 }
 
@@ -8109,7 +8255,7 @@ async function syncTokensToNeonCloud(subjectsList) {
   if (tokenSyncChannel) {
     try {
       tokenSyncChannel.postMessage({ type: 'TOKENS_UPDATED', subjects: state.subjects });
-    } catch(e) {}
+    } catch (e) { }
   }
 
   const creds = parseNeonCredentials();
@@ -8132,7 +8278,7 @@ async function syncTokensToNeonCloud(subjectsList) {
                SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
     await executeNeonSql(q, [JSON.stringify(cleanList)]);
     console.log('✅ Token ujian mapel per mata pelajaran tersinkronkan ke Neon Cloud');
-  } catch(e) {
+  } catch (e) {
     console.warn('syncTokensToNeonCloud error:', e.message);
   }
 }
@@ -8156,7 +8302,7 @@ async function fetchTokensFromNeonCloud() {
         return parsed;
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.warn('fetchTokensFromNeonCloud error:', e.message);
   }
   return null;
@@ -8183,7 +8329,7 @@ async function syncQuestionsToNeonCloud() {
                SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
     await executeNeonSql(q, [payload]);
     console.log('✅ Master Bank Soal berhasil disinkronkan ke Neon Cloud:', (state.questions || []).length, 'soal');
-  } catch(e) {
+  } catch (e) {
     console.warn('syncQuestionsToNeonCloud error:', e.message);
   }
 }
@@ -8206,7 +8352,7 @@ async function fetchQuestionsFromNeonCloud() {
         return parsed;
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.warn('fetchQuestionsFromNeonCloud error:', e.message);
   }
   return null;
@@ -8224,7 +8370,7 @@ async function syncSchedulesToNeonCloud() {
                SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
     await executeNeonSql(q, [payload]);
     console.log('✅ Master Jadwal Ujian berhasil disinkronkan ke Neon Cloud');
-  } catch(e) {
+  } catch (e) {
     console.warn('syncSchedulesToNeonCloud error:', e.message);
   }
 }
@@ -8247,7 +8393,7 @@ async function fetchSchedulesFromNeonCloud() {
         return parsed;
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.warn('fetchSchedulesFromNeonCloud error:', e.message);
   }
   return null;
@@ -8310,7 +8456,7 @@ async function pullRealtimeUpdatesFromNeon(options = {}) {
           await importDataFromNeonCloud({ silent: true });
         }
       }
-    } catch(eCount) {}
+    } catch (eCount) { }
 
     // Jika di dashboard guru/admin, periksa juga perubahan master soal
     if (state.currentTeacher) {
@@ -8362,7 +8508,7 @@ async function pullRealtimeUpdatesFromNeon(options = {}) {
             renderSrmsDashboard();
             updateAdminMetrics();
           }
-        } catch(eAtt) {}
+        } catch (eAtt) { }
       }
     }
 
@@ -8372,7 +8518,7 @@ async function pullRealtimeUpdatesFromNeon(options = {}) {
       badge.style.background = 'var(--emerald-100)';
       badge.style.color = 'var(--emerald-700)';
     }
-  } catch(e) {
+  } catch (e) {
     console.warn('pullRealtimeUpdatesFromNeon deferred:', e.message);
   } finally {
     isRealtimePulling = false;
@@ -8441,7 +8587,7 @@ async function importDataFromNeonCloud(options = {}) {
               customName = existing.fullName;
               customNip = existing.nip;
             }
-          } catch(e) {}
+          } catch (e) { }
 
           // Cek Teacher Vault lokal untuk mempertahankan password kustom jika di server bernilai seed bawaan
           try {
@@ -8458,7 +8604,7 @@ async function importDataFromNeonCloud(options = {}) {
             } else if (existing && existing.password && (!r.password_hash || r.password_hash === 'guru123' || r.password_hash === 'admin123')) {
               customPass = existing.password;
             }
-          } catch(eV) {}
+          } catch (eV) { }
 
           return {
             id: existing ? existing.id : ('t-' + Math.random().toString(36).substr(2, 9)),
@@ -8491,7 +8637,7 @@ async function importDataFromNeonCloud(options = {}) {
         if (vaultRows.length > 0 && vaultRows[0].setting_value) {
           vaultPasswords = typeof vaultRows[0].setting_value === 'string' ? JSON.parse(vaultRows[0].setting_value) : vaultRows[0].setting_value;
         }
-      } catch(eVault) {}
+      } catch (eVault) { }
 
       let rawStudents = null;
       try {
@@ -8550,7 +8696,7 @@ async function importDataFromNeonCloud(options = {}) {
         if (needNeonUpdate.length > 0) {
           (async () => {
             for (const item of needNeonUpdate) {
-              await executeNeonSql('UPDATE students SET password = $1 WHERE nisn = $2;', [item.password, item.nisn]).catch(() => {});
+              await executeNeonSql('UPDATE students SET password = $1 WHERE nisn = $2;', [item.password, item.nisn]).catch(() => { });
             }
             await syncStudentPasswordVaultToNeon();
           })();
@@ -8885,11 +9031,22 @@ function closeAllActiveModals() {
     closeSubmitConfirmModal();
     return;
   }
+  const modalAddRoom = document.getElementById('modal-add-subject-room');
+  if (modalAddRoom && modalAddRoom.style.display !== 'none') {
+    closeAddSubjectRoomModal();
+    return;
+  }
 }
 window.closeAllActiveModals = closeAllActiveModals;
 window.filterLiveMonitoringStatus = filterLiveMonitoringStatus;
 window.startLiveMonitorInterval = startLiveMonitorInterval;
 window.stopLiveMonitorInterval = stopLiveMonitorInterval;
+window.renderKkmRoomTable = renderKkmRoomTable;
+window.saveKkmRoomSettings = saveKkmRoomSettings;
+window.openAddSubjectRoomModal = openAddSubjectRoomModal;
+window.closeAddSubjectRoomModal = closeAddSubjectRoomModal;
+window.handleSaveNewSubjectRoom = handleSaveNewSubjectRoom;
+window.deleteSubjectRoom = deleteSubjectRoom;
 
 // ==============================================================================
 // MODAL TAUTKAN KE HP (QR CODE & LINK SINKRONISASI NEON TERPADU)
@@ -9068,14 +9225,14 @@ function initApp() {
   const nisnEl = document.getElementById('login-nisn');
   const passEl = document.getElementById('login-password');
   if (nisnEl) {
-    nisnEl.addEventListener('focus', function() {
+    nisnEl.addEventListener('focus', function () {
       if (this.value && (this.value.startsWith('1993') || this.value.length > 15)) {
         clearStudentLoginForm();
       }
     });
   }
   if (passEl) {
-    passEl.addEventListener('focus', function() {
+    passEl.addEventListener('focus', function () {
       if (nisnEl && (nisnEl.value.startsWith('1993') || nisnEl.value.length > 15)) {
         clearStudentLoginForm();
       }
