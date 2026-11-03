@@ -5236,6 +5236,8 @@ function renderTeachersTable() {
 function openAddTeacherModal() {
   document.getElementById('modal-teacher-title').textContent = 'Tambah Akun Guru Baru';
   document.getElementById('edit-teacher-id').value = '';
+  const origUserEl = document.getElementById('edit-teacher-original-username');
+  if (origUserEl) origUserEl.value = '';
   document.getElementById('form-teacher-editor').reset();
   document.getElementById('edit-teacher-username').readOnly = false;
   handleTeacherRoleChange();
@@ -5248,11 +5250,14 @@ function openEditTeacherModal(id) {
 
   document.getElementById('modal-teacher-title').textContent = 'Edit Akun Guru & Pengawas';
   document.getElementById('edit-teacher-id').value = t.id;
-  document.getElementById('edit-teacher-fullname').value = t.fullName;
-  document.getElementById('edit-teacher-username').value = t.username;
+  const origUserEl = document.getElementById('edit-teacher-original-username');
+  if (origUserEl) origUserEl.value = t.username || '';
+
+  document.getElementById('edit-teacher-fullname').value = t.fullName || '';
+  document.getElementById('edit-teacher-username').value = t.username || '';
   document.getElementById('edit-teacher-username').readOnly = (t.username === 'admin');
-  document.getElementById('edit-teacher-password').value = t.password;
-  document.getElementById('edit-teacher-role').value = t.role;
+  document.getElementById('edit-teacher-password').value = t.password || '';
+  document.getElementById('edit-teacher-role').value = t.role || 'guru_kelas';
   document.getElementById('edit-teacher-class').value = t.assignedClass || '';
   document.getElementById('edit-teacher-subject').value = t.assignedSubject || '';
 
@@ -5287,7 +5292,7 @@ function handleTeacherRoleChange() {
     if (grpClass) grpClass.style.display = 'block';
     if (grpSubject) grpSubject.style.display = 'none';
   } else if (role === 'guru_mapel') {
-    if (grpClass) grpClass.style.display = 'none';
+    if (grpClass) grpClass.style.display = 'block';
     if (grpSubject) grpSubject.style.display = 'block';
   } else {
     if (grpClass) grpClass.style.display = 'none';
@@ -5298,21 +5303,39 @@ function handleTeacherRoleChange() {
 async function handleSaveTeacher(event) {
   event.preventDefault();
   const id = document.getElementById('edit-teacher-id').value;
+  const origUserEl = document.getElementById('edit-teacher-original-username');
+  const originalUsername = origUserEl ? origUserEl.value.trim().toLowerCase() : '';
   const fullName = document.getElementById('edit-teacher-fullname').value.trim();
   const username = document.getElementById('edit-teacher-username').value.trim().toLowerCase();
   const password = document.getElementById('edit-teacher-password').value.trim();
   const role = document.getElementById('edit-teacher-role').value;
-  const assignedClass = document.getElementById('edit-teacher-class').value.trim().toUpperCase() || null;
-  const assignedSubject = document.getElementById('edit-teacher-subject').value.trim() || null;
+  
+  let assignedClass = null;
+  let assignedSubject = null;
+
+  if (role === 'guru_kelas') {
+    const rawClass = document.getElementById('edit-teacher-class').value.trim();
+    assignedClass = rawClass ? rawClass.toUpperCase() : 'SEMUA KELAS';
+    assignedSubject = 'Tematik SD';
+  } else if (role === 'guru_mapel') {
+    const rawClass = document.getElementById('edit-teacher-class').value.trim();
+    assignedClass = rawClass ? rawClass.toUpperCase() : 'SEMUA KELAS';
+    const rawSubj = document.getElementById('edit-teacher-subject').value.trim();
+    assignedSubject = rawSubj || 'Semua Mata Pelajaran';
+  } else {
+    assignedClass = null;
+    assignedSubject = null;
+  }
 
   if (!fullName || !username || !password) {
     showToast('Harap lengkapi nama, username, dan password guru!', 'warning');
     return;
   }
 
-  // Cek duplikasi username jika akun baru
-  if (!id && state.teachers.some(t => t.username === username)) {
-    showToast('Username "' + username + '" sudah digunakan oleh guru lain!', 'danger');
+  // Cek duplikasi username (baik untuk akun baru maupun akun yang diedit ganti username)
+  const isDuplicate = state.teachers.some(t => t.username === username && t.id !== id);
+  if (isDuplicate) {
+    showToast('Username "' + username + '" sudah digunakan oleh akun guru lain!', 'danger');
     return;
   }
 
@@ -5333,23 +5356,74 @@ async function handleSaveTeacher(event) {
     state.teachers.push(teacherObj);
   }
 
+  // 1. Simpan ke localStorage utama
   localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
-  localStorage.setItem('zettcbt_admin_profile_' + teacherObj.username, JSON.stringify({
-    fullName: teacherObj.fullName,
-    nip: teacherObj.nip || ''
-  }));
 
-  // Sinkronisasi ke Neon Cloud jika aktif
-  if (state.neon && state.neon.endpoint) {
-    executeNeonSql(`INSERT INTO teachers (username, password_hash, full_name, role, assigned_class, assigned_subject)
-                    VALUES ($1, $2, $3, $4, $5, $6)
-                    ON CONFLICT (username) DO UPDATE
-                    SET full_name = EXCLUDED.full_name, role = EXCLUDED.role, assigned_class = EXCLUDED.assigned_class, assigned_subject = EXCLUDED.assigned_subject, updated_at = NOW();`,
-      [teacherObj.username, teacherObj.password, teacherObj.fullName, teacherObj.role, teacherObj.assignedClass, teacherObj.assignedSubject]
-    ).catch(e => console.warn('Gagal sinkron guru ke Neon:', e.message));
+  // 2. Dedicated Teacher Vault (melindungi password & profil dari overwrite seed default Neon)
+  try {
+    let teacherVault = JSON.parse(localStorage.getItem('zettcbt_teacher_vault') || '{}');
+    if (originalUsername && originalUsername !== username) {
+      delete teacherVault[originalUsername];
+      localStorage.removeItem('zettcbt_admin_profile_' + originalUsername);
+    }
+    teacherVault[username] = {
+      password: password,
+      fullName: fullName,
+      role: role,
+      assignedClass: assignedClass,
+      assignedSubject: assignedSubject,
+      updatedAt: Date.now()
+    };
+    localStorage.setItem('zettcbt_teacher_vault', JSON.stringify(teacherVault));
+    localStorage.setItem('zettcbt_admin_profile_' + username, JSON.stringify({
+      fullName: fullName,
+      nip: teacherObj.nip || ''
+    }));
+  } catch(eVault) {}
+
+  // 3. Update sesi aktif jika pengguna yang sedang login mengedit akunnya sendiri
+  if (state.currentTeacher && (state.currentTeacher.id === teacherObj.id || state.currentTeacher.username === originalUsername || state.currentTeacher.username === username)) {
+    state.currentTeacher = { ...state.currentTeacher, ...teacherObj };
+    sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(state.currentTeacher));
+    const navLabel = document.getElementById('nav-teacher-label');
+    if (navLabel) navLabel.textContent = teacherObj.fullName || teacherObj.username;
   }
 
-  // Sinkronisasi ke Supabase jika aktif
+  // 4. Sinkronisasi Realtime Seketika ke Neon Cloud Database (Awaited with password_hash & clean rename)
+  const creds = parseNeonCredentials();
+  if (creds && creds.host) {
+    try {
+      if (originalUsername && originalUsername !== username) {
+        // Jika username diubah: UPDATE baris lama di Neon secara langsung
+        await executeNeonSql(
+          `UPDATE teachers 
+           SET username = $1, password_hash = $2, full_name = $3, role = $4, assigned_class = $5, assigned_subject = $6, updated_at = NOW()
+           WHERE username = $7;`,
+          [teacherObj.username, teacherObj.password, teacherObj.fullName, teacherObj.role, teacherObj.assignedClass, teacherObj.assignedSubject, originalUsername]
+        );
+        console.log(`✅ Rename teacher di Neon: "${originalUsername}" -> "${username}"`);
+      } else {
+        // Insert atau update data guru dengan password_hash ikut ter-update permanen
+        await executeNeonSql(
+          `INSERT INTO teachers (username, password_hash, full_name, role, assigned_class, assigned_subject)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (username) DO UPDATE
+           SET password_hash = EXCLUDED.password_hash,
+               full_name = EXCLUDED.full_name,
+               role = EXCLUDED.role,
+               assigned_class = EXCLUDED.assigned_class,
+               assigned_subject = EXCLUDED.assigned_subject,
+               updated_at = NOW();`,
+          [teacherObj.username, teacherObj.password, teacherObj.fullName, teacherObj.role, teacherObj.assignedClass, teacherObj.assignedSubject]
+        );
+        console.log('✅ Realtime write teacher ke Neon:', teacherObj.username);
+      }
+    } catch (eNeon) {
+      console.warn('Gagal sinkron guru ke Neon:', eNeon.message);
+    }
+  }
+
+  // 5. Sinkronisasi ke Supabase jika aktif
   if (state.supabase.url && state.supabase.key) {
     try {
       await fetch(state.supabase.url + '/rest/v1/teachers', {
@@ -5376,7 +5450,7 @@ async function handleSaveTeacher(event) {
 
   renderTeachersTable();
   closeTeacherModal();
-  showToast('Akun guru ' + fullName + ' berhasil disimpan!', 'success');
+  showToast('Akun guru ' + fullName + ' (' + username + ') berhasil disimpan permanen!', 'success');
 }
 
 async function deleteTeacher(id) {
@@ -7533,7 +7607,7 @@ async function exportLocalDataToNeonCloud(options = {}) {
       const q = `INSERT INTO teachers (username, password_hash, full_name, role, assigned_class, assigned_subject)
                  VALUES ($1, $2, $3, $4, $5, $6)
                  ON CONFLICT (username) DO UPDATE 
-                 SET full_name = EXCLUDED.full_name, role = EXCLUDED.role, assigned_class = EXCLUDED.assigned_class, assigned_subject = EXCLUDED.assigned_subject, updated_at = NOW();`;
+                 SET password_hash = EXCLUDED.password_hash, full_name = EXCLUDED.full_name, role = EXCLUDED.role, assigned_class = EXCLUDED.assigned_class, assigned_subject = EXCLUDED.assigned_subject, updated_at = NOW();`;
       await executeNeonSql(q, [t.username, t.password || 'guru123', t.fullName, t.role, t.assignedClass, t.assignedSubject]);
       teachersCount++;
     }
@@ -8119,6 +8193,11 @@ async function importDataFromNeonCloud(options = {}) {
           // Proteksi Profile Vault: JANGAN menimpa nama admin kustom dengan seed default Neon
           let customName = r.full_name;
           let customNip = null;
+          let customPass = r.password_hash;
+          let customRole = r.role;
+          let customClass = r.assigned_class;
+          let customSubject = r.assigned_subject;
+
           try {
             const vault = JSON.parse(localStorage.getItem('zettcbt_admin_profile_' + r.username) || 'null');
             if (vault && vault.fullName) {
@@ -8130,15 +8209,32 @@ async function importDataFromNeonCloud(options = {}) {
             }
           } catch(e) {}
 
+          // Cek Teacher Vault lokal untuk mempertahankan password kustom jika di server bernilai seed bawaan
+          try {
+            const teacherVault = JSON.parse(localStorage.getItem('zettcbt_teacher_vault') || '{}');
+            const vData = teacherVault[r.username];
+            if (vData) {
+              if (vData.password && (!r.password_hash || r.password_hash === 'guru123' || r.password_hash === 'admin123')) {
+                customPass = vData.password;
+              }
+              if (vData.fullName) customName = vData.fullName;
+              if (vData.assignedClass) customClass = vData.assignedClass;
+              if (vData.assignedSubject) customSubject = vData.assignedSubject;
+              if (vData.role) customRole = vData.role;
+            } else if (existing && existing.password && (!r.password_hash || r.password_hash === 'guru123' || r.password_hash === 'admin123')) {
+              customPass = existing.password;
+            }
+          } catch(eV) {}
+
           return {
             id: existing ? existing.id : ('t-' + Math.random().toString(36).substr(2, 9)),
             username: r.username,
-            password: r.password_hash || (existing ? existing.password : 'guru123'),
+            password: customPass || (existing ? existing.password : 'guru123'),
             fullName: customName,
             nip: customNip || (existing ? existing.nip : null),
-            role: r.role || 'guru_kelas',
-            assignedClass: r.assigned_class || null,
-            assignedSubject: r.assigned_subject || null
+            role: customRole || 'guru_kelas',
+            assignedClass: customClass || null,
+            assignedSubject: customSubject || null
           };
         });
         state.teachers = importedTeachers;
