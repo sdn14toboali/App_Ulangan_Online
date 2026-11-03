@@ -3624,28 +3624,6 @@ function submitFinalExam(forced = false) {
   if (state.session.showScore) {
     scoreBox.style.display = 'block';
     scoreVal.textContent = totalScore;
-
-    // Evaluasi KKM & Status Ketuntasan
-    const currentKkm = getSubjectKkm(state.session.subject);
-    const isTuntas = totalScore >= currentKkm;
-    const kkmBadge = document.getElementById('finish-kkm-info');
-    const statusBadge = document.getElementById('finish-status-pill');
-    if (kkmBadge) {
-      kkmBadge.textContent = `Standar KKM: ${currentKkm}`;
-    }
-    if (statusBadge) {
-      if (isTuntas) {
-        statusBadge.style.background = '#dcfce7';
-        statusBadge.style.color = '#15803d';
-        statusBadge.style.border = '1.5px solid #86efac';
-        statusBadge.innerHTML = '🟢 TUNTAS (MEMENUHI KKM)';
-      } else {
-        statusBadge.style.background = '#fef2f2';
-        statusBadge.style.color = '#b91c1c';
-        statusBadge.style.border = '1.5px solid #fecaca';
-        statusBadge.innerHTML = '⚠️ PERLU REMEDIAL (BELUM MENCAPAI KKM)';
-      }
-    }
   } else {
     scoreBox.style.display = 'none';
   }
@@ -3730,7 +3708,10 @@ function switchAdminTab(tabId, element) {
   } else {
     stopLiveMonitorInterval();
   }
-  if (tabId === 'question-bank') renderAdminQuestionBank();
+  if (tabId === 'question-bank') {
+    renderAdminQuestionBank();
+    renderSubjectTokensTable();
+  }
   if (tabId === 'session-setting') {
     populateSessionSettings();
     renderTeacherExamSchedules();
@@ -6065,12 +6046,44 @@ function renderExamCardsTab() {
 }
 
 /**
- * Manajemen Token Ujian & Standar KKM per Mata Pelajaran (Admin Tab Pengaturan Sesi)
+ * Navigasi Sub-Tab Bank Soal vs Entry KKM Mata Pelajaran
  */
-function renderSubjectTokensTable() {
-  const tbody = document.getElementById('table-subject-tokens-body');
-  if (!tbody) return;
+function switchQBankSubTab(mode) {
+  const viewQ = document.getElementById('qbank-view-questions');
+  const viewKkm = document.getElementById('qbank-view-kkm');
+  const btnQ = document.getElementById('btn-subtab-qbank');
+  const btnKkm = document.getElementById('btn-subtab-kkm');
+  if (mode === 'kkm') {
+    if (viewQ) viewQ.style.display = 'none';
+    if (viewKkm) viewKkm.style.display = 'block';
+    if (btnQ) {
+      btnQ.className = 'btn btn-outline btn-sm';
+      btnQ.style.fontWeight = '700';
+    }
+    if (btnKkm) {
+      btnKkm.className = 'btn btn-primary btn-sm';
+      btnKkm.style.fontWeight = '700';
+    }
+    renderSubjectTokensTable();
+  } else {
+    if (viewQ) viewQ.style.display = 'block';
+    if (viewKkm) viewKkm.style.display = 'none';
+    if (btnQ) {
+      btnQ.className = 'btn btn-primary btn-sm';
+      btnQ.style.fontWeight = '700';
+    }
+    if (btnKkm) {
+      btnKkm.className = 'btn btn-outline btn-sm';
+      btnKkm.style.fontWeight = '700';
+    }
+  }
+}
 
+/**
+ * Manajemen Token Ujian & Standar KKM per Mata Pelajaran (Admin Tab Pengaturan Sesi & Bank Soal)
+ */
+function populateSubjectTokensTbody(tbody, prefix = '') {
+  if (!tbody) return;
   const subjects = state.subjects || [];
   tbody.innerHTML = '';
 
@@ -6086,30 +6099,41 @@ function renderSubjectTokensTable() {
       <td><strong>${escapeHtml(sub.name)}</strong></td>
       <td style="text-align: center;"><span class="badge" style="background: var(--slate-200); font-weight: 700;">${escapeHtml(sub.code)}</span></td>
       <td style="text-align: center;">
-        <input type="number" id="kkm-input-${sub.id}" value="${typeof sub.kkm === 'number' ? sub.kkm : 75}" min="0" max="100" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; font-weight: 700; color: var(--primary-700); padding: 0.3rem 0.5rem; font-size: 0.9rem;" title="Batas Nilai KKM (0-100)">
+        <input type="number" id="${prefix}kkm-input-${sub.id}" value="${typeof sub.kkm === 'number' ? sub.kkm : 75}" min="0" max="100" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; font-weight: 700; color: var(--primary-700); padding: 0.3rem 0.5rem; font-size: 0.9rem;" title="Batas Nilai KKM (0-100)">
       </td>
       <td>
         <div style="display: flex; gap: 0.4rem; align-items: center;">
-          <input type="text" id="token-input-${sub.id}" value="${escapeHtml(sub.token)}" class="form-control" style="width: 110px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
-          <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}')" title="Acak Token">🎲</button>
+          <input type="text" id="${prefix}token-input-${sub.id}" value="${escapeHtml(sub.token)}" class="form-control" style="width: 110px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}', '${prefix}')" title="Acak Token">🎲</button>
         </div>
       </td>
       <td style="text-align: center;">
-        <input type="number" id="duration-input-${sub.id}" value="${sub.durationMinutes || 90}" min="10" max="300" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+        <input type="number" id="${prefix}duration-input-${sub.id}" value="${sub.durationMinutes || 90}" min="10" max="300" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-function randomizeSingleSubjectToken(subId) {
+function renderSubjectTokensTable() {
+  const tbody1 = document.getElementById('table-subject-tokens-body');
+  const tbody2 = document.getElementById('table-subject-tokens-body-qbank');
+  if (tbody1) populateSubjectTokensTbody(tbody1, '');
+  if (tbody2) populateSubjectTokensTbody(tbody2, 'qbank-');
+}
+
+function randomizeSingleSubjectToken(subId, prefix = '') {
   const sub = (state.subjects || []).find(s => s.id === subId);
   if (!sub) return;
-  const input = document.getElementById('token-input-' + subId);
   const randomNum = Math.floor(Math.random() * 89 + 10);
   const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
   const newToken = `${sub.code}${randomNum}${randomLetter}`;
-  if (input) input.value = newToken;
+  
+  const input1 = document.getElementById('token-input-' + subId);
+  const input2 = document.getElementById('qbank-token-input-' + subId);
+  if (input1) input1.value = newToken;
+  if (input2) input2.value = newToken;
+
   sub.token = newToken;
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
 
@@ -6128,11 +6152,13 @@ function randomizeSingleSubjectToken(subId) {
 
 function generateAllSubjectTokens() {
   (state.subjects || []).forEach(sub => {
-    const input = document.getElementById('token-input-' + sub.id);
+    const input1 = document.getElementById('token-input-' + sub.id);
+    const input2 = document.getElementById('qbank-token-input-' + sub.id);
     const randomNum = Math.floor(Math.random() * 89 + 10);
     const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
     const newToken = `${sub.code}${randomNum}${randomLetter}`;
-    if (input) input.value = newToken;
+    if (input1) input1.value = newToken;
+    if (input2) input2.value = newToken;
     sub.token = newToken;
   });
   localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
@@ -6151,11 +6177,11 @@ function generateAllSubjectTokens() {
   showToast('Seluruh token mata pelajaran berhasil diacak & disinkronkan ke seluruh perangkat!', 'info');
 }
 
-function saveSubjectTokensSettings() {
+function saveSubjectTokensSettings(sourcePrefix = '') {
   (state.subjects || []).forEach(sub => {
-    const kkmInput = document.getElementById('kkm-input-' + sub.id);
-    const tokenInput = document.getElementById('token-input-' + sub.id);
-    const durationInput = document.getElementById('duration-input-' + sub.id);
+    const kkmInput = (sourcePrefix && document.getElementById(sourcePrefix + 'kkm-input-' + sub.id)) || document.getElementById('kkm-input-' + sub.id) || document.getElementById('qbank-kkm-input-' + sub.id);
+    const tokenInput = (sourcePrefix && document.getElementById(sourcePrefix + 'token-input-' + sub.id)) || document.getElementById('token-input-' + sub.id) || document.getElementById('qbank-token-input-' + sub.id);
+    const durationInput = (sourcePrefix && document.getElementById(sourcePrefix + 'duration-input-' + sub.id)) || document.getElementById('duration-input-' + sub.id) || document.getElementById('qbank-duration-input-' + sub.id);
     if (kkmInput) {
       const parsedKkm = parseInt(kkmInput.value, 10);
       sub.kkm = (!isNaN(parsedKkm) && parsedKkm >= 0 && parsedKkm <= 100) ? parsedKkm : 75;
@@ -6182,7 +6208,7 @@ function saveSubjectTokensSettings() {
   applySchoolBrandingUI();
   syncTokensToNeonCloud();
   syncSchedulesToNeonCloud();
-  showToast('Pengaturan KKM, token, dan durasi per mata pelajaran berhasil disimpan & disinkronkan!', 'success');
+  showToast('Entry KKM, token, dan durasi per mata pelajaran berhasil disimpan & disinkronkan!', 'success');
 }
 
 function regenerateAllStudentPasswords() {
