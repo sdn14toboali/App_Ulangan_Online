@@ -707,6 +707,15 @@ window.triggerPwaPromptDirect = triggerPwaPromptDirect;
 window.openPwaGuideModal = openPwaGuideModal;
 window.closePwaGuideModal = closePwaGuideModal;
 window.switchPwaGuideTab = switchPwaGuideTab;
+window.showScreen = showScreen;
+window.executeScreenSwitch = executeScreenSwitch;
+window.openTeacherPortal = openTeacherPortal;
+window.handleTeacherLogin = handleTeacherLogin;
+window.handleTeacherLogout = handleTeacherLogout;
+window.handleStudentLogin = handleStudentLogin;
+window.autoFillStudentInfo = autoFillStudentInfo;
+window.toggleTeacherPasswordVisibility = toggleTeacherPasswordVisibility;
+window.toggleStudentPasswordVisibility = toggleStudentPasswordVisibility;
 
 // ==============================================================================
 // THEME ENGINE: DARK MODE & LIGHT MODE (ZETTBOT ANTI-AI)
@@ -6385,8 +6394,6 @@ function deleteSubjectRoom(id) {
   renderHorizontalTokenRibbon();
   syncTokensToNeonCloud();
   showToast(`Mata pelajaran "${sub.name}" berhasil dihapus!`, 'info');
-}
-  showToast('Entry KKM, token, dan durasi per mata pelajaran berhasil disimpan & disinkronkan!', 'success');
 }
 
 function regenerateAllStudentPasswords() {
