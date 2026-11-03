@@ -1076,55 +1076,8 @@ function clearStudentLoginForm() {
   }
 }
 
-// Navigation between Screen Views with Sliding Double-Panel Card
+// Navigation between Screen Views
 function showScreen(screenId) {
-  const slidingCard = document.getElementById('sliding-auth-card');
-
-  // 1. Mode Login Guru (Panel Biru Geser ke Kanan, Form Guru Buka di Kiri)
-  if (screenId === 'teacher-login') {
-    state.currentView = 'teacher-login';
-    localStorage.setItem('zettcbt_current_view', 'teacher-login');
-    clearTeacherLoginForm();
-
-    // Pastikan layar auth (#screen-student-login yang memuat kartu sliding) aktif
-    const screens = document.querySelectorAll('.view-screen');
-    screens.forEach((s) => s.classList.remove('active'));
-    const mainScreen = document.getElementById('screen-student-login');
-    if (mainScreen) mainScreen.classList.add('active');
-
-    // Geser overlay ke kanan ("Putih ke Biru") & Buka form guru di kiri ("Biru ke Putih")
-    if (slidingCard) {
-      slidingCard.classList.add('teacher-active');
-    }
-
-    updateHeaderNav('teacher-login');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
-  }
-
-  // 2. Mode Login Siswa (Panel Biru Geser ke Kiri, Form Siswa Buka di Kanan)
-  if (screenId === 'student-login') {
-    state.currentView = 'student-login';
-    localStorage.setItem('zettcbt_current_view', 'student-login');
-    clearStudentLoginForm();
-
-    // Pastikan layar auth (#screen-student-login yang memuat kartu sliding) aktif
-    const screens = document.querySelectorAll('.view-screen');
-    screens.forEach((s) => s.classList.remove('active'));
-    const mainScreen = document.getElementById('screen-student-login');
-    if (mainScreen) mainScreen.classList.add('active');
-
-    // Geser overlay ke kiri ("Putih ke Biru") & Buka form siswa di kanan ("Biru ke Putih")
-    if (slidingCard) {
-      slidingCard.classList.remove('teacher-active');
-    }
-
-    updateHeaderNav('student-login');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
-  }
-
-  // 3. Layar Lainnya (Dashboard Admin, Ruang Ujian Siswa, Konfirmasi, Selesai)
   executeScreenSwitch(screenId);
 }
 
