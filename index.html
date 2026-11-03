@@ -324,16 +324,16 @@
             <p class="split-form-subtitle">Sistem Isolasi Bank Soal & Nilai per Kelas & Mata Pelajaran</p>
           </div>
 
-          <form id="form-teacher-login" onsubmit="handleTeacherLogin(event)">
+          <form id="form-teacher-login" onsubmit="handleTeacherLogin(event)" autocomplete="off">
             <div class="form-group">
               <label class="form-label" for="teacher-login-username">Username / NIP Guru</label>
-              <input type="text" id="teacher-login-username" class="form-control" placeholder="Masukkan username guru atau operator..." required autocomplete="username">
+              <input type="text" id="teacher-login-username" class="form-control" placeholder="Masukkan username guru atau operator..." value="" required autocomplete="off">
             </div>
 
             <div class="form-group">
               <label class="form-label" for="teacher-login-password">Kata Sandi (Password)</label>
               <div style="position: relative;">
-                <input type="password" id="teacher-login-password" class="form-control" placeholder="Masukkan password..." required autocomplete="current-password" style="padding-right: 42px;">
+                <input type="password" id="teacher-login-password" class="form-control" placeholder="Masukkan password..." value="" required autocomplete="new-password" style="padding-right: 42px;">
                 <button type="button" onclick="toggleTeacherPasswordVisibility()" title="Tampilkan / Sembunyikan Password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--slate-500); padding: 4px;">
                   <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -2974,6 +2974,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.44.0"></script>
+  <script src="app.js?v=3.45.0"></script>
 </body>
 </html>
