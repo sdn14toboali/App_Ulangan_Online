@@ -1085,47 +1085,22 @@ function clearStudentLoginForm() {
   }
 }
 
-// Navigation between Screen Views with Sliding Auth Card Controller (Florin Pop / Pinterest v3.55.0)
-function setAuthMode(mode) {
-  const card = document.getElementById('sliding-auth-card');
-  const btnStudent = document.getElementById('nav-btn-student');
-  const btnAdmin = document.getElementById('nav-btn-admin');
-  const mobStudent = document.getElementById('mob-switch-student');
-  const mobTeacher = document.getElementById('mob-switch-teacher');
-
-  if (mode === 'teacher') {
-    if (card) card.classList.add('teacher-active');
-    if (btnStudent) { btnStudent.className = 'btn btn-outline btn-sm'; }
-    if (btnAdmin) { btnAdmin.className = 'btn btn-primary btn-sm'; }
-    if (mobStudent) mobStudent.classList.remove('active');
-    if (mobTeacher) mobTeacher.classList.add('active');
-    clearTeacherLoginForm();
-    state.currentView = 'teacher-login';
-  } else {
-    if (card) card.classList.remove('teacher-active');
-    if (btnStudent) { btnStudent.className = 'btn btn-primary btn-sm'; }
-    if (btnAdmin) { btnAdmin.className = 'btn btn-outline btn-sm'; }
-    if (mobStudent) mobStudent.classList.add('active');
-    if (mobTeacher) mobTeacher.classList.remove('active');
-    clearStudentLoginForm();
-    state.currentView = 'student-login';
-  }
-}
-window.setAuthMode = setAuthMode;
-
+// Navigasi Antar Layar Mandiri (Arsitektur Stabil v3.56.0)
 function showScreen(screenId) {
-  if (screenId === 'teacher-login') {
-    executeScreenSwitch('student-login');
-    setAuthMode('teacher');
-    return;
-  }
-  if (screenId === 'student-login') {
-    executeScreenSwitch('student-login');
-    setAuthMode('student');
-    return;
-  }
   executeScreenSwitch(screenId);
 }
+window.showScreen = showScreen;
+
+function openTeacherPortal() {
+  if (state.currentTeacher) {
+    applyTeacherIsolation();
+    showScreen('admin-dashboard');
+  } else {
+    clearTeacherLoginForm();
+    showScreen('teacher-login');
+  }
+}
+window.openTeacherPortal = openTeacherPortal;
 
 function updateHeaderNav(screenId) {
   // Sembunyikan header global pada Admin Dashboard & Ruang Ujian Siswa (Fokus 100%)
