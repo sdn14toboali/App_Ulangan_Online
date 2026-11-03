@@ -1937,6 +1937,7 @@ function handleTeacherLogout() {
   localStorage.removeItem('zettcbt_current_teacher');
   localStorage.removeItem('zettcbt_current_view');
   localStorage.removeItem('zettcbt_current_admin_tab');
+  localStorage.removeItem('zettcbt_dashboard_class_filter');
   state.currentTeacher = null;
 
   const navLabel = document.getElementById('nav-teacher-label');
@@ -3760,7 +3761,109 @@ function switchAdminTab(tabId, element) {
 }
 
 // ==============================================================================
-// SRMS DASHBOARD ENGINE (REF: GAMBAR 1 & 2)
+// BILAH FILTER KELAS / ROMBEL DASBOR UTAMA (v3.61.0)
+// ==============================================================================
+
+function populateDashboardClassFilter() {
+  const select = document.getElementById('srms-dashboard-class-filter');
+  if (!select) return;
+
+  const t = state.currentTeacher;
+  const allStudents = state.students || [];
+
+  // Hitung jumlah siswa per kelas
+  const classCountMap = {};
+  allStudents.forEach(s => {
+    if (s && s.className) {
+      const cls = normalizeClassName(s.className);
+      classCountMap[cls] = (classCountMap[cls] || 0) + 1;
+    }
+  });
+
+  // Ekstrak daftar kelas unik
+  const rawClasses = [];
+  allStudents.forEach(s => {
+    if (s && s.className) {
+      const raw = String(s.className).trim();
+      if (!rawClasses.some(c => isClassMatch(c, raw))) {
+        rawClasses.push(raw);
+      }
+    }
+  });
+
+  // Fallback jika belum ada data siswa di memori
+  if (rawClasses.length === 0) {
+    ['6A', '6B', '5A', '5B', '4A', '4B'].forEach(c => rawClasses.push(c));
+  }
+
+  // Urutkan kelas secara natural (4A, 4B, 5A, 5B, 6A, 6B)
+  rawClasses.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+  let optionsHtml = '';
+
+  // 1. Jika Guru Kelas Login: Terkunci khusus kelas binaan
+  if (t && t.role === 'guru_kelas' && t.assignedClass) {
+    const normAssigned = normalizeClassName(t.assignedClass);
+    const count = classCountMap[normAssigned] || allStudents.filter(s => isClassMatch(s.className, t.assignedClass)).length;
+    optionsHtml = `<option value="${escapeHtml(t.assignedClass)}">🔒 Kelas ${escapeHtml(t.assignedClass)} (${count} Siswa)</option>`;
+    select.innerHTML = optionsHtml;
+    select.value = t.assignedClass;
+    select.disabled = true;
+
+    const badge = document.getElementById('srms-dashboard-class-badge');
+    if (badge) badge.textContent = `Kelas ${t.assignedClass} (${count} Siswa)`;
+
+    const desc = document.getElementById('srms-dashboard-filter-desc');
+    if (desc) desc.textContent = `Dasbor terisolasi otomatis khusus murid Kelas ${t.assignedClass} binaan Anda`;
+    return;
+  }
+
+  // 2. Jika Operator Sekolah (Admin) atau Guru Mapel: Bebas memilih kelas
+  select.disabled = false;
+  optionsHtml += `<option value="ALL">Semua Kelas (${allStudents.length} Siswa)</option>`;
+
+  rawClasses.forEach(cls => {
+    const norm = normalizeClassName(cls);
+    const count = classCountMap[norm] || allStudents.filter(s => isClassMatch(s.className, cls)).length;
+    optionsHtml += `<option value="${escapeHtml(cls)}">Kelas ${escapeHtml(cls)} (${count} Siswa)</option>`;
+  });
+
+  select.innerHTML = optionsHtml;
+
+  // Pulihkan pilihan sebelumnya dari localStorage
+  const saved = localStorage.getItem('zettcbt_dashboard_class_filter') || 'ALL';
+  const isValidOption = saved === 'ALL' || rawClasses.some(c => isClassMatch(c, saved));
+  select.value = isValidOption ? saved : 'ALL';
+
+  const badge = document.getElementById('srms-dashboard-class-badge');
+  if (badge) {
+    if (select.value === 'ALL') {
+      badge.textContent = `${allStudents.length} Siswa Terdaftar`;
+    } else {
+      const activeCount = allStudents.filter(s => isClassMatch(s.className, select.value)).length;
+      badge.textContent = `${activeCount} Siswa Kelas ${select.value}`;
+    }
+  }
+
+  const desc = document.getElementById('srms-dashboard-filter-desc');
+  if (desc) {
+    if (select.value === 'ALL') {
+      desc.textContent = 'Menampilkan akumulasi seluruh murid SD Negeri 14 Toboali (148 Siswa)';
+    } else {
+      desc.textContent = `Menampilkan metrik & kehadiran khusus murid Kelas ${select.value}`;
+    }
+  }
+}
+
+function handleDashboardClassFilterChange(classVal) {
+  localStorage.setItem('zettcbt_dashboard_class_filter', classVal);
+  renderSrmsDashboard();
+  const label = classVal === 'ALL' ? 'Semua Kelas' : 'Kelas ' + classVal;
+  showToast(`Metrik dasbor disesuaikan untuk: ${label}`, 'info');
+}
+
+// ==============================================================================
+// SRMS DASHBOARD ENGINE (REF: GAMBAR 1 & 2 - PENYESUAIAN KELAS v3.61.0)
 // ==============================================================================
 
 function renderSrmsDashboard() {
@@ -3780,56 +3883,124 @@ function renderSrmsDashboard() {
   const headerRoleEl = document.getElementById('srms-header-user-role');
   if (headerRoleEl) headerRoleEl.textContent = teacherRole;
 
-  // 2. Metrics & KPI Row (Gambar 2 Atas)
-  const submittedList = getVisibleSubmittedResults();
-  const visibleLive = (typeof getVisibleLiveStudents === 'function') ? getVisibleLiveStudents() : (state.liveStudents || []);
-  const totalStudents = (state.students && state.students.length > 0) ? state.students.length : (submittedList.length || 1);
+  // 2. Inisialisasi Filter Kelas Dasbor
+  populateDashboardClassFilter();
 
-  // Rata-rata Nilai
-  const avgScore = submittedList.length > 0
-    ? (submittedList.reduce((acc, curr) => acc + (typeof curr.score === 'number' ? curr.score : 0), 0) / submittedList.length).toFixed(1)
+  // 3. Tentukan Kelas Aktif (Selected Class)
+  let activeClass = 'ALL';
+  if (t && t.role === 'guru_kelas' && t.assignedClass) {
+    activeClass = t.assignedClass;
+  } else {
+    const filterEl = document.getElementById('srms-dashboard-class-filter');
+    activeClass = filterEl ? filterEl.value : (localStorage.getItem('zettcbt_dashboard_class_filter') || 'ALL');
+  }
+
+  // 4. Filter Data Siswa Target Berdasarkan Kelas Aktif
+  const allMasterStudents = state.students || [];
+  const targetStudents = (activeClass === 'ALL')
+    ? allMasterStudents
+    : allMasterStudents.filter(s => isClassMatch(s.className, activeClass));
+
+  // Total Siswa kelas bersangkutan
+  const totalStudents = targetStudents.length > 0 ? targetStudents.length : (activeClass === 'ALL' ? allMasterStudents.length : 0);
+
+  // 5. Filter Siswa Ujian Submit & Live Monitoring
+  const allSubmitted = (typeof getVisibleSubmittedResults === 'function')
+    ? getVisibleSubmittedResults()
+    : (state.liveStudents || []).filter(s => s.status === 'submitted');
+
+  const filteredSubmitted = (activeClass === 'ALL')
+    ? allSubmitted
+    : allSubmitted.filter(s => isClassMatch(s.className, activeClass));
+
+  const allLive = (typeof getVisibleLiveStudents === 'function')
+    ? getVisibleLiveStudents()
+    : (state.liveStudents || []);
+
+  const filteredLive = (activeClass === 'ALL')
+    ? allLive
+    : allLive.filter(s => isClassMatch(s.className, activeClass));
+
+  // Update Badge Jumlah Siswa & Keterangan
+  const badge = document.getElementById('srms-dashboard-class-badge');
+  if (badge) {
+    if (activeClass === 'ALL') {
+      badge.textContent = `${totalStudents} Siswa Terdaftar`;
+    } else {
+      badge.textContent = `${totalStudents} Siswa Kelas ${activeClass}`;
+    }
+  }
+
+  const desc = document.getElementById('srms-dashboard-filter-desc');
+  if (desc && !(t && t.role === 'guru_kelas')) {
+    if (activeClass === 'ALL') {
+      desc.textContent = `Menampilkan akumulasi seluruh murid SD Negeri 14 Toboali (${totalStudents} Siswa)`;
+    } else {
+      desc.textContent = `Menampilkan metrik & kehadiran khusus murid Kelas ${activeClass} (${totalStudents} Siswa)`;
+    }
+  }
+
+  const classLabelText = (activeClass === 'ALL') ? '' : ` Kelas ${activeClass}`;
+
+  // KPI 1: Rata-rata Nilai
+  const avgScore = filteredSubmitted.length > 0
+    ? (filteredSubmitted.reduce((acc, curr) => acc + (typeof curr.score === 'number' ? curr.score : 0), 0) / filteredSubmitted.length).toFixed(1)
     : '0';
   const cgpaEl = document.getElementById('srms-kpi-cgpa') || document.getElementById('srms-cgpa-val');
   if (cgpaEl) cgpaEl.textContent = avgScore;
   const cgpaSub = document.getElementById('srms-kpi-cgpa-sub');
-  if (cgpaSub) cgpaSub.textContent = submittedList.length > 0 ? `${submittedList.length} Siswa Sudah Dinilai` : 'Rata-rata Nilai UAS';
+  if (cgpaSub) {
+    cgpaSub.textContent = filteredSubmitted.length > 0
+      ? `${filteredSubmitted.length} Siswa${classLabelText} Dinilai`
+      : `Rata-rata Nilai UAS${classLabelText}`;
+  }
 
-  // Mata Pelajaran
+  // KPI 2: Mata Pelajaran
   const coursesEl = document.getElementById('srms-kpi-courses') || document.getElementById('srms-courses-count');
   if (coursesEl) {
     const activeSubjCount = (state.subjects && state.subjects.length > 0) ? state.subjects.length : 1;
     coursesEl.textContent = activeSubjCount;
   }
 
-  // Ujian Selesai (Submit vs Total Siswa)
+  // KPI 3: Ujian Selesai (Submit vs Total Siswa Kelas Terkait)
   const examsEl = document.getElementById('srms-kpi-exams') || document.getElementById('srms-exams-completed');
-  if (examsEl) examsEl.textContent = `${submittedList.length} / ${totalStudents}`;
+  if (examsEl) examsEl.textContent = `${filteredSubmitted.length} / ${totalStudents}`;
   const examsSub = document.getElementById('srms-kpi-exams-sub');
-  if (examsSub) examsSub.textContent = 'Siswa Sudah Submit';
+  if (examsSub) {
+    examsSub.textContent = (activeClass === 'ALL')
+      ? 'Siswa Sudah Submit'
+      : `Siswa Kelas ${activeClass} Submit`;
+  }
 
-  // Ketuntasan Siswa (KKM Dinamis per Mapel)
-  const passCount = submittedList.filter(s => (s.score || 0) >= getSubjectKkm(s.subject)).length;
-  const passPct = submittedList.length > 0 ? Math.round((passCount / submittedList.length) * 100) : 0;
+  // KPI 4: Ketuntasan Siswa (KKM Dinamis per Mapel)
+  const passCount = filteredSubmitted.filter(s => (s.score || 0) >= getSubjectKkm(s.subject)).length;
+  const passPct = filteredSubmitted.length > 0 ? Math.round((passCount / filteredSubmitted.length) * 100) : 0;
   const rankEl = document.getElementById('srms-kpi-rank') || document.getElementById('srms-overall-rank');
   if (rankEl) rankEl.textContent = `${passPct}%`;
   const rankLabel = document.getElementById('srms-kpi-rank-label');
   if (rankLabel) rankLabel.textContent = 'Ketuntasan Siswa';
   const rankSub = document.getElementById('srms-kpi-rank-sub');
-  if (rankSub) rankSub.textContent = `${passCount} dari ${submittedList.length} Tuntas KKM`;
+  if (rankSub) {
+    rankSub.textContent = `${passCount} dari ${filteredSubmitted.length} Tuntas KKM`;
+  }
 
-  // Kehadiran Siswa
-  const activeStudents = visibleLive.filter(s => s.status === 'in_progress' || s.status === 'submitted').length;
-  const attPct = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : (submittedList.length > 0 ? 100 : 0);
+  // KPI 5: Kehadiran Peserta (Presensi Aktif & Submit vs Total Siswa Kelas Terkait)
+  const activeStudents = filteredLive.filter(s => s.status === 'in_progress' || s.status === 'submitted').length;
+  const attPct = totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100) : (filteredSubmitted.length > 0 ? 100 : 0);
   const attEl = document.getElementById('srms-kpi-attendance') || document.getElementById('srms-attendance-pct');
   if (attEl) attEl.textContent = `${attPct}%`;
   const attSub = document.getElementById('srms-kpi-attendance-sub');
-  if (attSub) attSub.textContent = `${activeStudents} dari ${totalStudents} Siswa Hadir`;
+  if (attSub) {
+    attSub.textContent = (activeClass === 'ALL')
+      ? `${activeStudents} dari ${totalStudents} Siswa Hadir`
+      : `${activeStudents} dari ${totalStudents} Siswa Kelas ${activeClass} Hadir`;
+  }
 
-  // 3. Render Recent Results Table (Gambar 2 Tengah)
-  renderSrmsRecentResults();
+  // 3. Render Recent Results Table (Disesuaikan dengan Kelas Terkait)
+  renderSrmsRecentResults(filteredSubmitted);
 
-  // 4. Render Dynamic Donut Chart Ketuntasan (Gambar 2 Bawah)
-  renderSrmsDonutChart(submittedList);
+  // 4. Render Dynamic Donut Chart Ketuntasan (Disesuaikan dengan Kelas Terkait)
+  renderSrmsDonutChart(filteredSubmitted);
 
   // 5. Render Horizontal Token Ribbon
   renderHorizontalTokenRibbon();
@@ -3903,11 +4074,11 @@ function renderSrmsDonutChart(submittedList) {
   if (legD) legD.textContent = total > 0 ? `${pctD}% (${countD})` : '0%';
 }
 
-function renderSrmsRecentResults() {
+function renderSrmsRecentResults(customSubmittedList) {
   const tbody = document.getElementById('srms-results-tbody');
   if (!tbody) return;
 
-  const submittedList = getVisibleSubmittedResults();
+  const submittedList = Array.isArray(customSubmittedList) ? customSubmittedList : getVisibleSubmittedResults();
 
   if (submittedList.length > 0) {
     let rowsHtml = '';
