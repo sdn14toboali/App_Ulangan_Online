@@ -3708,7 +3708,7 @@ function switchAdminTab(tabId, element) {
       'srms-dashboard': 'Dasbor Utama Guru & Pengawas',
       'live-monitor': 'Monitor Ujian Langsung (Realtime Siswa & Sisa Waktu)',
       'question-bank': 'Bank Soal (5 Tipe ANBK)',
-      'kkm-setting': 'Standar KKM & Durasi Mata Pelajaran',
+      'kkm-setting': 'Standar KKM Mata Pelajaran',
       'session-setting': 'Jadwal & Sesi Pelaksanaan Ujian (Hari, Jam, Ruangan)',
       'manage-students': 'Kelola Data Siswa Peserta Ujian',
       'manage-teachers': 'Kelola Data Guru & Pengawas',
@@ -6272,7 +6272,7 @@ function renderKkmRoomTable() {
   let countKkm = 0;
 
   if (subjects.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--slate-400);">Belum ada mata pelajaran / room terdaftar. Klik "+ Tambah Mapel / Room Baru" di atas.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--slate-400);">Belum ada mata pelajaran / room terdaftar. Klik "+ Tambah Mapel / Room Baru" di atas.</td></tr>';
   } else {
     subjects.forEach((sub, idx) => {
       const kkmVal = typeof sub.kkm === 'number' ? sub.kkm : 75;
@@ -6281,24 +6281,22 @@ function renderKkmRoomTable() {
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="text-align: center;">${idx + 1}</td>
-        <td><strong>${escapeHtml(sub.name)}</strong></td>
-        <td style="text-align: center;"><span class="badge" style="background: var(--slate-200); font-weight: 700;">${escapeHtml(sub.code)}</span></td>
+        <td style="text-align: center; color: var(--slate-500); font-weight: 600;">${idx + 1}</td>
+        <td class="col-subject-name">${escapeHtml(sub.name)}</td>
         <td style="text-align: center;">
-          <input type="number" id="room-kkm-input-${sub.id}" value="${kkmVal}" min="0" max="100" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; font-weight: 700; color: var(--primary-700); padding: 0.3rem 0.5rem; font-size: 0.9rem;" title="Batas Nilai KKM (0-100)">
-        </td>
-        <td>
-          <div style="display: flex; gap: 0.4rem; align-items: center;">
-            <input type="text" id="room-token-input-${sub.id}" value="${escapeHtml(sub.token || '')}" class="form-control" style="width: 110px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
-            <button type="button" class="btn btn-outline btn-sm" onclick="randomizeSingleSubjectToken('${sub.id}', 'room-')" title="Acak Token">🎲</button>
-          </div>
+          <span class="kkm-badge-code">${escapeHtml(sub.code)}</span>
         </td>
         <td style="text-align: center;">
-          <input type="number" id="room-duration-input-${sub.id}" value="${sub.durationMinutes || 90}" min="10" max="300" class="form-control" style="width: 80px; margin: 0 auto; text-align: center; padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+          <input type="number" id="room-kkm-input-${sub.id}" value="${kkmVal}" min="0" max="100" class="kkm-input-number" title="Batas Nilai KKM / KKTP (0-100)">
         </td>
         <td style="text-align: center;">
-          <button type="button" class="btn btn-outline btn-sm" onclick="deleteSubjectRoom('${sub.id}')" title="Hapus Mapel / Room Ini" style="color: #ef4444; border-color: #fca5a5; padding: 0.25rem 0.5rem; font-size: 0.78rem;">
-            🗑️
+          <button type="button" class="kkm-btn-delete" onclick="deleteSubjectRoom('${sub.id}')" title="Hapus Mapel / Room Ini">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
           </button>
         </td>
       `;
@@ -6313,7 +6311,22 @@ function renderKkmRoomTable() {
 }
 
 function saveKkmRoomSettings() {
-  saveSubjectTokensSettings('room-');
+  (state.subjects || []).forEach(sub => {
+    const kkmInput = document.getElementById('room-kkm-input-' + sub.id);
+    if (kkmInput) {
+      const parsedKkm = parseInt(kkmInput.value, 10);
+      sub.kkm = (!isNaN(parsedKkm) && parsedKkm >= 0 && parsedKkm <= 100) ? parsedKkm : 75;
+    }
+  });
+
+  localStorage.setItem('zettcbt_subjects', JSON.stringify(state.subjects));
+
+  renderKkmRoomTable();
+  renderSubjectTokensTable();
+  renderResultsTable();
+  renderSrmsDashboard();
+  syncTokensToNeonCloud();
+  showToast('Standar nilai KKM mata pelajaran berhasil disimpan & disinkronkan!', 'success');
 }
 
 function openAddSubjectRoomModal() {
