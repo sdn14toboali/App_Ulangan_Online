@@ -2757,7 +2757,7 @@ function renderCurrentQuestion() {
   const cbtSub = document.getElementById('cbt-card-subject-val');
   if (cbtSub) cbtSub.textContent = state.student.subject || state.session.subject || '-';
   const cbtClass = document.getElementById('cbt-card-class-val');
-  if (cbtClass) cbtClass.textContent = 'Kelas ' + (state.student.className || '-') + ' • UAS Resmi';
+  if (cbtClass) cbtClass.textContent = 'Kelas ' + (state.student.className || '-') + ' • Sumatif Resmi';
 
   // Content Text
   const content = document.getElementById('question-content-text');
@@ -6619,9 +6619,9 @@ function applySchoolBrandingUI() {
   document.querySelectorAll('.brand-school-name').forEach(el => el.textContent = schoolName);
   document.querySelectorAll('.brand-school-subtitle').forEach(el => {
     if (el.textContent.includes('Portal Guru') || el.textContent.includes('Pengawas')) {
-      el.textContent = `Portal Guru & Pengawas Ujian Online (${examType})`;
+      el.textContent = 'Portal Guru & Pengawas Ujian Online (Sumatif)';
     } else {
-      el.textContent = `Ujian Online Resmi (${examType})`;
+      el.textContent = 'Ujian Sumatif Resmi';
     }
   });
 
@@ -6680,7 +6680,7 @@ function applySchoolBrandingUI() {
     if (heroSchool) heroSchool.textContent = schoolName;
 
     const heroTag = studentScreen.querySelector('.split-hero-tag');
-    if (heroTag) heroTag.textContent = 'UJIAN ONLINE RESMI';
+    if (heroTag) heroTag.textContent = 'UJIAN SUMATIF RESMI';
 
     const heroHeadline = studentScreen.querySelector('.split-hero-headline');
     if (heroHeadline) heroHeadline.textContent = 'Ruang Ujian Sumatif Siswa';
@@ -6716,10 +6716,10 @@ function applySchoolBrandingUI() {
     if (heroSchool) heroSchool.textContent = schoolName;
 
     const heroTag = teacherScreen.querySelector('.split-hero-tag');
-    if (heroTag) heroTag.textContent = 'UJIAN ONLINE RESMI';
+    if (heroTag) heroTag.textContent = 'PORTAL GURU & PENGAWAS';
 
     const heroHeadline = teacherScreen.querySelector('.split-hero-headline');
-    if (heroHeadline) heroHeadline.textContent = `Portal Pendidik & Pengawas Ujian Online (${examType})`;
+    if (heroHeadline) heroHeadline.textContent = 'Portal Pendidik & Pengawas Ujian Online (Sumatif)';
 
     // Update label fitur 5 tipe soal
     const featureItems = teacherScreen.querySelectorAll('.split-feature-item span');
@@ -8084,6 +8084,9 @@ async function exportLocalDataToNeonCloud(options = {}) {
 // Sinkronisasi Langsung Identitas Sekolah ke Neon Cloud
 async function syncSchoolIdentityToNeonCloud(schoolObj) {
   if (!schoolObj) return;
+  if (!schoolObj.examType || schoolObj.examType === 'UAS') {
+    schoolObj.examType = 'Sumatif';
+  }
   const creds = parseNeonCredentials();
   if (!creds.host) return;
   try {
@@ -8758,7 +8761,13 @@ async function importDataFromNeonCloud(options = {}) {
       const settingRows = (rawSettings && rawSettings.rows) ? rawSettings.rows : (Array.isArray(rawSettings) ? rawSettings : []);
       if (settingRows && settingRows.length > 0) {
         const cloudSchool = JSON.parse(settingRows[0].setting_value || '{}');
+        if (cloudSchool && (!cloudSchool.examType || cloudSchool.examType === 'UAS')) {
+          cloudSchool.examType = 'Sumatif';
+        }
         const vault = JSON.parse(localStorage.getItem('zettcbt_school_vault') || 'null');
+        if (vault && (!vault.examType || vault.examType === 'UAS')) {
+          vault.examType = 'Sumatif';
+        }
         const hasLocalCustom = vault && (vault.isCustomLogo || vault.isCustomName);
         if (!hasLocalCustom && cloudSchool && cloudSchool.name) {
           state.school = { ...state.school, ...cloudSchool };
