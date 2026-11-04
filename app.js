@@ -171,7 +171,7 @@ const state = {
       name: 'SD NEGERI 14 TOBOALI',
       npsn: '10901234',
       academicYear: '2026/2027 - Ganjil',
-      examType: 'UAS',
+      examType: 'Sumatif',
       address: 'Jl. Jenderal Sudirman No. 14, Toboali, Kab. Bangka Selatan, Kep. Bangka Belitung',
       headmaster: 'H. Suhardi, S.Pd., M.Pd',
       headmasterNip: '19750312 199903 1 004',
@@ -3813,7 +3813,7 @@ function renderSrmsDashboard() {
   const cgpaEl = document.getElementById('srms-kpi-cgpa') || document.getElementById('srms-cgpa-val');
   if (cgpaEl) cgpaEl.textContent = avgScore;
   const cgpaSub = document.getElementById('srms-kpi-cgpa-sub');
-  if (cgpaSub) cgpaSub.textContent = submittedList.length > 0 ? `${submittedList.length} Siswa Sudah Dinilai` : 'Rata-rata Nilai UAS';
+  if (cgpaSub) cgpaSub.textContent = submittedList.length > 0 ? `${submittedList.length} Siswa Sudah Dinilai` : 'Rata-rata Nilai Sumatif';
 
   // Mata Pelajaran
   const coursesEl = document.getElementById('srms-kpi-courses') || document.getElementById('srms-courses-count');
@@ -6063,7 +6063,7 @@ function renderExamCardsTab() {
       <div style="display: flex; align-items: center; gap: 0.5rem; border-bottom: 1.5px solid var(--slate-200); padding-bottom: 0.35rem; margin-bottom: 0.5rem;">
         <img src="${sch.logoUrl}" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px; background: #fff; padding: 1px;" alt="Logo">
         <div style="line-height: 1.2;">
-          <div style="font-size: 0.64rem; font-weight: 700; color: var(--primary-600); text-transform: uppercase;">KARTU PESERTA CBT (${sch.examType || 'UAS'})</div>
+          <div style="font-size: 0.64rem; font-weight: 700; color: var(--primary-600); text-transform: uppercase;">KARTU PESERTA CBT (${sch.examType || 'Sumatif'})</div>
           <div style="font-size: 0.82rem; font-weight: 800; color: var(--slate-900);">${sch.name}</div>
         </div>
       </div>
