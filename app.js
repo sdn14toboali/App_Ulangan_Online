@@ -188,6 +188,18 @@ const state = {
       const customSource = (vault && (vault.isCustomLogo || vault.isCustomName || vault.name)) ? { ...saved, ...vault } : saved;
       const merged = { ...defaultSchool, ...customSource };
 
+      // Auto-heal migrasi examType dari 'UAS' ke 'Sumatif' secara permanen
+      if (!merged.examType || merged.examType === 'UAS') {
+        merged.examType = 'Sumatif';
+        try {
+          localStorage.setItem('zettcbt_school', JSON.stringify(merged));
+          if (vault) {
+            vault.examType = 'Sumatif';
+            localStorage.setItem('zettcbt_school_vault', JSON.stringify(vault));
+          }
+        } catch (eStorage) { }
+      }
+
       // Sanitasi jika logoUrl sebelumnya merujuk ke berkas rusak assets/logo-sdn14.png
       if (merged.logoUrl && typeof merged.logoUrl === 'string' && merged.logoUrl.includes('logo-sdn14.png')) {
         merged.logoUrl = defaultSchoolLogo;
@@ -6586,7 +6598,7 @@ function applySchoolBrandingUI() {
   }
   sch.logoUrl = logo;
   const schoolName = sch.name || 'SD NEGERI 14 TOBOALI';
-  const examType = sch.examType || 'UAS';
+  const examType = (sch.examType && sch.examType !== 'UAS') ? sch.examType : 'Sumatif';
 
   // 0. Update Judul Tab Browser
   if (typeof document !== 'undefined') {
@@ -6603,7 +6615,7 @@ function applySchoolBrandingUI() {
     }
   }
   document.querySelectorAll('.brand-title').forEach(el => el.textContent = schoolName);
-  document.querySelectorAll('.brand-badge').forEach(el => el.textContent = 'UJIAN ONLINE');
+  document.querySelectorAll('.brand-badge').forEach(el => el.textContent = 'UJIAN SUMATIF');
   document.querySelectorAll('.brand-school-name').forEach(el => el.textContent = schoolName);
   document.querySelectorAll('.brand-school-subtitle').forEach(el => {
     if (el.textContent.includes('Portal Guru') || el.textContent.includes('Pengawas')) {
@@ -6627,12 +6639,12 @@ function applySchoolBrandingUI() {
     };
   }
   const srmsBrandTitle = document.querySelector('.srms-brand-title');
-  if (srmsBrandTitle) srmsBrandTitle.textContent = 'UJIAN ONLINE';
+  if (srmsBrandTitle) srmsBrandTitle.textContent = 'Ujian Sumatif';
 
   // Subtitle Sidebar
   const sidebarSub = document.querySelector('.srms-brand-subtitle');
   if (sidebarSub) {
-    sidebarSub.innerHTML = `Sistem Ujian &amp; Hasil Belajar<br><span class="brand-school-name">${escapeHtml(schoolName)}</span>`;
+    sidebarSub.innerHTML = `<span class="brand-school-name">${escapeHtml(schoolName)}</span>`;
   }
 
   // Header user role di Dasbor Admin
@@ -6671,7 +6683,7 @@ function applySchoolBrandingUI() {
     if (heroTag) heroTag.textContent = 'UJIAN ONLINE RESMI';
 
     const heroHeadline = studentScreen.querySelector('.split-hero-headline');
-    if (heroHeadline) heroHeadline.textContent = `Ruang Ujian Siswa Berstandar ${examType}`;
+    if (heroHeadline) heroHeadline.textContent = 'Ruang Ujian Sumatif Siswa';
 
     const formSubtitle = studentScreen.querySelector('.split-form-subtitle');
     if (formSubtitle) formSubtitle.textContent = 'Masukkan data peserta dan token ujian dari pengawas';
