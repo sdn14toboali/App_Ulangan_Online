@@ -53,6 +53,15 @@
           vault.logoUrl = window.OFFICIAL_SDN14_LOGO || 'assets/icon-192.png';
           localStorage.setItem('zettcbt_school_vault', JSON.stringify(vault));
         }
+        // Auto-heal migrasi examType dari 'UAS' ke 'Sumatif'
+        if (s && (!s.examType || s.examType === 'UAS')) {
+          s.examType = 'Sumatif';
+          localStorage.setItem('zettcbt_school', JSON.stringify(s));
+        }
+        if (vault && (!vault.examType || vault.examType === 'UAS')) {
+          vault.examType = 'Sumatif';
+          localStorage.setItem('zettcbt_school_vault', JSON.stringify(vault));
+        }
 
         var sch = (vault && (vault.isCustomLogo || vault.isCustomName || vault.name)) ? Object.assign({}, s || {}, vault) : (s || {});
 
@@ -107,13 +116,42 @@
             el.textContent = activeName;
           });
           document.title = activeName + ' - Ujian Online';
+
+          // Multi-tier DOM Enforcer: Kunci teks Sumatif secara instan
+          var sHero = document.querySelector('#screen-student-login .split-hero-headline');
+          if (sHero) sHero.textContent = 'Ruang Ujian Sumatif Siswa';
+          var sTag = document.querySelector('#screen-student-login .split-hero-tag');
+          if (sTag) sTag.textContent = 'UJIAN SUMATIF RESMI';
+          var sSub = document.querySelector('#screen-student-login .brand-school-subtitle');
+          if (sSub) sSub.textContent = 'Ujian Sumatif Resmi';
+
+          var tHero = document.querySelector('#screen-teacher-login .split-hero-headline');
+          if (tHero) tHero.textContent = 'Portal Pendidik & Pengawas Ujian Online (Sumatif)';
+          var tSub = document.querySelector('#screen-teacher-login .brand-school-subtitle');
+          if (tSub) tSub.textContent = 'Portal Guru & Pengawas Ujian Online (Sumatif)';
+
+          var sbTitle = document.querySelector('.srms-brand-title');
+          if (sbTitle) sbTitle.textContent = 'Ujian Sumatif';
+          var sbSub = document.querySelector('.srms-brand-subtitle');
+          if (sbSub) sbSub.innerHTML = '<span class="brand-school-name">' + activeName + '</span>';
+
+          document.querySelectorAll('.brand-badge').forEach(function(b) {
+            b.textContent = 'UJIAN SUMATIF';
+          });
+
+          // Force Service Worker Update
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              regs.forEach(function(r) { r.update(); });
+            });
+          }
         });
       } catch(e) {}
     })();
   </script>
 
   <!-- Core Design System & Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=3.66.0">
+  <link rel="stylesheet" href="style.css?v=3.67.0">
 </head>
 <body>
 
@@ -163,7 +201,7 @@
             </div>
             <div>
               <div class="split-hero-school">SD NEGERI 14 TOBOALI</div>
-              <div class="split-hero-tag">UJIAN ONLINE RESMI</div>
+              <div class="split-hero-tag">UJIAN SUMATIF RESMI</div>
             </div>
           </div>
 
@@ -195,7 +233,7 @@
               <img src="assets/icon-192.png" class="school-login-logo-img" id="student-form-school-logo" alt="Logo SD Negeri 14 Toboali" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}else if(this.src.indexOf('icon-512')===-1){this.src='assets/icon-512.png';}">
               <div class="school-login-brand-text">
                 <strong class="brand-school-name">SD NEGERI 14 TOBOALI</strong>
-                <span class="brand-school-subtitle">Ujian Online Resmi</span>
+                <span class="brand-school-subtitle">Ujian Sumatif Resmi</span>
               </div>
             </div>
             <h3 class="split-form-title">Masuk Ruang Ujian</h3>
@@ -289,7 +327,7 @@
               <img src="assets/icon-192.png" class="school-login-logo-img" id="teacher-form-school-logo" alt="Logo SD Negeri 14 Toboali" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}else if(this.src.indexOf('icon-512')===-1){this.src='assets/icon-512.png';}">
               <div class="school-login-brand-text">
                 <strong class="brand-school-name">SD NEGERI 14 TOBOALI</strong>
-                <span class="brand-school-subtitle">Portal Guru &amp; Pengawas</span>
+                <span class="brand-school-subtitle">Portal Guru &amp; Pengawas Ujian Online (Sumatif)</span>
               </div>
             </div>
             <h3 class="split-form-title">Portal Pendidik</h3>
@@ -3217,6 +3255,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.66.0"></script>
+  <script src="app.js?v=3.67.0"></script>
 </body>
 </html>
