@@ -1548,7 +1548,13 @@ function normalizeClassName(cls) {
 
 function isClassMatch(classA, classB) {
   if (!classA || !classB) return false;
-  return normalizeClassName(classA) === normalizeClassName(classB);
+  const a = normalizeClassName(classA);
+  const b = normalizeClassName(classB);
+  if (a === b) return true;
+  // Toleransi tingkat kelas tunggal (misal '6' cocok dengan '6A', '6B' atau sebaliknya)
+  if (/^[1-6]$/.test(a) && b.startsWith(a)) return true;
+  if (/^[1-6]$/.test(b) && a.startsWith(b)) return true;
+  return false;
 }
 
 // JADWAL PELAKSANAAN UJIAN GURU (ROLE-BASED ISOLATION)
@@ -3783,7 +3789,10 @@ function renderSrmsDashboard() {
   // 2. Metrics & KPI Row (Gambar 2 Atas)
   const submittedList = getVisibleSubmittedResults();
   const visibleLive = (typeof getVisibleLiveStudents === 'function') ? getVisibleLiveStudents() : (state.liveStudents || []);
-  const totalStudents = (state.students && state.students.length > 0) ? state.students.length : (submittedList.length || 1);
+  const visibleStudents = (typeof getVisibleStudents === 'function') ? getVisibleStudents() : (state.students || []);
+  const totalStudents = visibleStudents.length > 0
+    ? visibleStudents.length
+    : ((state.students && state.students.length > 0) ? state.students.length : (submittedList.length || 1));
 
   // Rata-rata Nilai
   const avgScore = submittedList.length > 0
