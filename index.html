@@ -113,6 +113,7 @@
   </script>
 
   <!-- Core Design System & Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=3.63.0">
 </head>
 <body>
 
@@ -167,7 +168,7 @@
           </div>
 
           <div class="split-hero-body">
-            <h2 class="split-hero-headline">Ruang Ujian Siswa</h2>
+            <h2 class="split-hero-headline">Ruang Ujian ONLINE SUMATIF</h2>
             <p class="split-hero-subtext">Selamat datang peserta didik. Kerjakan soal dengan jujur, teliti, dan percaya pada kemampuan diri sendiri.</p>
 
             <div class="split-hero-features">
@@ -343,7 +344,7 @@
           </div>
 
           <div class="split-hero-body">
-            <h2 class="split-hero-headline">Portal Pendidik &amp; Pengawas</h2>
+            <h2 class="split-hero-headline">Portal Pendidik &amp; Pengawas Ujian Online (Sumatif)</h2>
             <p class="split-hero-subtext">Sistem evaluasi digital berstandar ANBK dengan manajemen bank soal mandiri, isolasi kelas, dan rekapitulasi nilai instan.</p>
 
             <div class="split-hero-features">
@@ -563,7 +564,7 @@
               <div class="cbt-stacked-card">
                 <div class="cbt-card-tag">Test</div>
                 <div class="cbt-card-val" id="cbt-card-subject-val">Matematika</div>
-                <div class="cbt-card-sub" id="cbt-card-class-val">Kelas 6A • UAS Resmi</div>
+                <div class="cbt-card-sub" id="cbt-card-class-val">Kelas 6A • Sumatif Resmi</div>
                 <div style="margin-top: 0.35rem;">
                   <span class="badge" id="cbt-card-duration-badge" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.3rem;">⏱️ Batas Waktu: 90 Menit</span>
                 </div>
@@ -1659,10 +1660,10 @@
                 <div class="form-group">
                   <label class="form-label">Jenis Ujian (Ganti ANBK)</label>
                   <select id="school-exam-type" class="form-control" required>
+                    <option value="SUMATIF" selected>Asesmen Sumatif</option>
                     <option value="UTS">UTS (Ujian Tengah Semester)</option>
                     <option value="UAS">UAS (Ujian Akhir Semester)</option>
                     <option value="ANBK">ANBK (Asesmen Nasional)</option>
-                    <option value="SUMATIF">Asesmen Sumatif</option>
                   </select>
                 </div>
               </div>
@@ -3216,6 +3217,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.61.0"></script>
+  <script src="app.js?v=3.63.0"></script>
 </body>
 </html>
