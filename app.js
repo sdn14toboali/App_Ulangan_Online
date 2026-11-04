@@ -1557,6 +1557,18 @@ function isClassMatch(classA, classB) {
   return false;
 }
 
+function isSubjectMatch(subA, subB) {
+  if (!subA || !subB) return false;
+  const a = String(subA).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const b = String(subB).toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (a === b) return true;
+  if (a.includes(b) || b.includes(a)) return true;
+  if ((a.includes('pjok') || a.includes('penjas')) && (b.includes('pjok') || b.includes('penjas'))) return true;
+  if (a.includes('pai') && (b.includes('pai') || b.includes('agama'))) return true;
+  if (b.includes('pai') && (a.includes('pai') || a.includes('agama'))) return true;
+  return false;
+}
+
 // JADWAL PELAKSANAAN UJIAN GURU (ROLE-BASED ISOLATION)
 function getVisibleSchedules() {
   const allSchedules = state.schedules || [];
@@ -1575,11 +1587,7 @@ function getVisibleSchedules() {
 
   // Guru Mapel melihat jadwal mata pelajarannya
   if (teacher.role === 'guru_mapel') {
-    const sub = (teacher.assignedSubject || '').toLowerCase();
-    return allSchedules.filter(sc => {
-      const scSub = (sc.subjectName || '').toLowerCase();
-      return scSub.includes(sub) || sub.includes(scSub);
-    });
+    return allSchedules.filter(sc => isSubjectMatch(sc.subjectName, teacher.assignedSubject));
   }
 
   return allSchedules;
@@ -2041,7 +2049,7 @@ function applyTeacherIsolation() {
   const navSchoolId = document.getElementById('tab-nav-school-identity');
   if (navSchoolId) navSchoolId.style.display = (t.role === 'admin_sekolah') ? 'flex' : 'none';
 
-  // Kunci dropdown filter siswa jika Guru Kelas
+  // Kunci dropdown filter siswa jika Guru Kelas; buka dan reset ke 'ALL' jika Guru Mapel / Admin
   const studentFilter = document.getElementById('filter-manage-student-class');
   if (studentFilter) {
     if (t.role === 'guru_kelas' && t.assignedClass) {
@@ -2049,6 +2057,7 @@ function applyTeacherIsolation() {
       studentFilter.disabled = true;
     } else {
       studentFilter.disabled = false;
+      studentFilter.value = 'ALL';
     }
   }
 
@@ -2133,8 +2142,7 @@ function getVisibleLiveStudents() {
   }
 
   if (t.role === 'guru_mapel') {
-    const sub = (t.assignedSubject || '').toLowerCase();
-    return syncedLive.filter(s => (s.subject || '').toLowerCase().includes(sub) || sub.includes((s.subject || '').toLowerCase()));
+    return syncedLive.filter(s => isSubjectMatch(s.subject, t.assignedSubject));
   }
 
   return syncedLive;
@@ -2156,8 +2164,7 @@ function getVisibleSubmittedResults() {
   }
 
   if (t.role === 'guru_mapel' && t.assignedSubject) {
-    const sub = (t.assignedSubject || '').toLowerCase();
-    return finishedList.filter(s => (s.subject || '').toLowerCase().includes(sub) || sub.includes((s.subject || '').toLowerCase()));
+    return finishedList.filter(s => isSubjectMatch(s.subject, t.assignedSubject));
   }
 
   return finishedList;
@@ -3789,10 +3796,15 @@ function renderSrmsDashboard() {
   // 2. Metrics & KPI Row (Gambar 2 Atas)
   const submittedList = getVisibleSubmittedResults();
   const visibleLive = (typeof getVisibleLiveStudents === 'function') ? getVisibleLiveStudents() : (state.liveStudents || []);
-  const visibleStudents = (typeof getVisibleStudents === 'function') ? getVisibleStudents() : (state.students || []);
-  const totalStudents = visibleStudents.length > 0
-    ? visibleStudents.length
-    : ((state.students && state.students.length > 0) ? state.students.length : (submittedList.length || 1));
+
+  // Hitung total siswa secara akurat per peran:
+  // - Guru Kelas: terisolasi ke jumlah siswa rombel binaannya (misal: tepat 23 siswa untuk Kelas 6)
+  // - Guru Mapel & Operator Sekolah: menampilkan seluruh siswa sekolah (148 siswa)
+  let totalStudents = (state.students && state.students.length > 0) ? state.students.length : (submittedList.length || 1);
+  if (t && t.role === 'guru_kelas' && t.assignedClass) {
+    const classStudents = (state.students || []).filter(s => isClassMatch(s.className, t.assignedClass));
+    totalStudents = classStudents.length > 0 ? classStudents.length : ((typeof getVisibleStudents === 'function' ? getVisibleStudents().length : 0) || totalStudents);
+  }
 
   // Rata-rata Nilai
   const avgScore = submittedList.length > 0
