@@ -38,7 +38,7 @@
       if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
         var sLink = document.createElement('link');
         sLink.rel = 'stylesheet';
-        sLink.href = 'style.css?v=3.76.0';
+        sLink.href = 'style.css?v=3.77.0';
         document.head.appendChild(sLink);
       }
     })();
@@ -205,8 +205,11 @@
             b.textContent = 'UJIAN SUMATIF';
           });
 
-          // Force Service Worker Update
+          // Force Service Worker Update & Self-Healing
           if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('controllerchange', function() {
+              console.log('✅ Service Worker v3.77.0 aktif!');
+            });
             navigator.serviceWorker.getRegistrations().then(function(regs) {
               regs.forEach(function(r) { r.update(); });
             });
@@ -217,7 +220,7 @@
   </script>
 
   <!-- Core Design System & Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=3.76.0">
+  <link rel="stylesheet" href="style.css?v=3.77.0">
 </head>
 <body>
 
@@ -3357,6 +3360,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.76.0"></script>
+  <script src="app.js?v=3.77.0"></script>
 </body>
 </html>
