@@ -595,17 +595,23 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==============================================================================
 let deferredPwaPrompt = (typeof window !== 'undefined' && window.deferredPwaPrompt) ? window.deferredPwaPrompt : null;
 
-function initPwaSupport() {
+function registerServiceWorkerHelper() {
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => {
-          console.log('✅ ZettCBT PWA Service Worker terdaftar:', reg.scope);
-        })
-        .catch((err) => {
-          console.warn('PWA Service Worker gagal didaftarkan:', err);
-        });
-    });
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => {
+        console.log('✅ ZettCBT PWA Service Worker terdaftar:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('PWA Service Worker gagal didaftarkan:', err);
+      });
+  }
+}
+
+function initPwaSupport() {
+  if (document.readyState === 'complete') {
+    registerServiceWorkerHelper();
+  } else {
+    window.addEventListener('load', registerServiceWorkerHelper);
   }
 
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -9501,7 +9507,7 @@ if (typeof document !== 'undefined') {
   if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
     const sLink = document.createElement('link');
     sLink.rel = 'stylesheet';
-    sLink.href = 'style.css?v=3.76.0';
+    sLink.href = 'style.css?v=3.77.0';
     document.head.appendChild(sLink);
   }
 
