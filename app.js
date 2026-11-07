@@ -2126,6 +2126,7 @@ async function handleTeacherLogin(event) {
       if (savedVault) {
         if (savedVault.fullName) matchedTeacher.fullName = savedVault.fullName;
         if (savedVault.nip) matchedTeacher.nip = savedVault.nip;
+        if (savedVault.avatar) matchedTeacher.avatar = savedVault.avatar;
       }
     } catch (e) { }
 
@@ -2187,13 +2188,18 @@ function handleTeacherLogout() {
   const navTeachers = document.getElementById('tab-nav-manage-teachers');
   if (navTeachers) navTeachers.style.display = 'none';
 
-  // Kembalikan teks topbar ke default
+  // Kembalikan teks dan avatar topbar ke default
+  const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
   const elWelcome = document.getElementById('welcome-teacher-name');
   if (elWelcome) elWelcome.textContent = 'Bapak/Ibu Guru';
   const elHeaderName = document.getElementById('srms-header-user-name');
   if (elHeaderName) elHeaderName.textContent = 'Bapak/Ibu Guru';
   const elHeaderRole = document.getElementById('srms-header-user-role');
   if (elHeaderRole) elHeaderRole.textContent = (state.school && state.school.name) ? state.school.name : 'SD Negeri 14 Toboali';
+  const elHeaderAvatar = document.getElementById('srms-user-avatar-img');
+  if (elHeaderAvatar) elHeaderAvatar.src = defaultAvatar;
+  const modalAvatar = document.getElementById('teacher-profile-avatar-img');
+  if (modalAvatar) modalAvatar.src = defaultAvatar;
 
   // Bersihkan form login guru & siswa dari residu kredensial
   clearTeacherLoginForm();
@@ -2218,6 +2224,22 @@ function applyTeacherIsolation() {
 
   const elWelcome = document.getElementById('welcome-teacher-name');
   if (elWelcome) elWelcome.textContent = t.fullName;
+
+  const elHeaderName = document.getElementById('srms-header-user-name');
+  if (elHeaderName) elHeaderName.textContent = t.fullName;
+
+  let userAvatar = t.avatar;
+  if (!userAvatar) {
+    try {
+      const savedProf = JSON.parse(localStorage.getItem('zettcbt_admin_profile_' + t.username) || 'null');
+      if (savedProf && savedProf.avatar) userAvatar = savedProf.avatar;
+    } catch (e) { }
+  }
+  const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
+  const srmsAvatar = document.getElementById('srms-user-avatar-img');
+  if (srmsAvatar) srmsAvatar.src = userAvatar || defaultAvatar;
+  const profModalAvatar = document.getElementById('teacher-profile-avatar-img');
+  if (profModalAvatar) profModalAvatar.src = userAvatar || defaultAvatar;
 
   if (elBadge) {
     if (t.role === 'guru_kelas') {
@@ -2291,6 +2313,241 @@ function applyTeacherIsolation() {
   if (t.role === 'admin_sekolah') renderTeachersTable();
   updateAdminMetrics();
   renderResultsTable();
+}
+
+// ==============================================================================
+// MODAL PROFIL GURU & PENGAWAS + FITUR UNGGAH FOTO PROFIL (v3.78.0)
+// ==============================================================================
+
+function openTeacherProfileModal() {
+  const modal = document.getElementById('modal-teacher-profile');
+  if (!modal) return;
+
+  const t = state.currentTeacher || {
+    fullName: 'Bapak/Ibu Guru',
+    username: 'admin',
+    role: 'admin_sekolah',
+    nip: ''
+  };
+
+  // Hidrasi data profil dari local Profile Vault jika pernah disimpan
+  let vaultProfile = null;
+  try {
+    vaultProfile = JSON.parse(localStorage.getItem('zettcbt_admin_profile_' + t.username) || 'null');
+  } catch (e) { }
+
+  const displayName = (vaultProfile && vaultProfile.fullName) || t.fullName || 'Bapak/Ibu Guru';
+  const displayNip = (vaultProfile && vaultProfile.nip) || t.nip || '';
+  const displayAvatar = (vaultProfile && vaultProfile.avatar) || t.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
+
+  const nameEl = document.getElementById('teacher-profile-display-name');
+  if (nameEl) nameEl.textContent = displayName;
+
+  const roleEl = document.getElementById('teacher-profile-display-role');
+  let roleText = 'Operator Sekolah';
+  if (t.role === 'guru_kelas') {
+    roleText = 'Guru Kelas ' + (t.assignedClass || '');
+  } else if (t.role === 'guru_mapel') {
+    roleText = 'Guru Mapel ' + (t.assignedSubject || '');
+  }
+  const schoolName = (state.school && state.school.name) ? state.school.name : 'SD NEGERI 14 TOBOALI';
+  if (roleEl) roleEl.textContent = `${roleText} • ${schoolName}`;
+
+  const inputName = document.getElementById('teacher-profile-input-name');
+  if (inputName) inputName.value = displayName;
+
+  const inputNip = document.getElementById('teacher-profile-input-nip');
+  if (inputNip) inputNip.value = displayNip;
+
+  const inputRole = document.getElementById('teacher-profile-input-role');
+  if (inputRole) inputRole.value = roleText;
+
+  const inputSchool = document.getElementById('teacher-profile-input-school');
+  if (inputSchool) inputSchool.value = schoolName;
+
+  const avatarImg = document.getElementById('teacher-profile-avatar-img');
+  if (avatarImg) avatarImg.src = displayAvatar;
+
+  state._tempTeacherAvatar = (vaultProfile && vaultProfile.avatar) || t.avatar || null;
+
+  const btnReset = document.getElementById('btn-reset-avatar');
+  if (btnReset) {
+    btnReset.style.display = (vaultProfile && vaultProfile.avatar && !vaultProfile.avatar.includes('unsplash.com')) ? 'inline-block' : 'none';
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeTeacherProfileModal() {
+  const modal = document.getElementById('modal-teacher-profile');
+  if (modal) modal.style.display = 'none';
+  state._tempTeacherAvatar = null;
+  const fileInput = document.getElementById('teacher-profile-avatar-input');
+  if (fileInput) fileInput.value = '';
+}
+
+function handleTeacherAvatarUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast('File yang dipilih harus berupa berkas gambar (JPG, PNG, WebP)!', 'warning');
+    return;
+  }
+
+  // Gunakan FileReader dan Canvas untuk kompresi otomatis (max 256x256 px)
+  // Menghasilkan base64 ringan (<30KB) agar penyimpanan localStorage aman tanpa resiko kuota penuh
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const tempImg = new Image();
+    tempImg.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxDim = 256;
+      let width = tempImg.width;
+      let height = tempImg.height;
+
+      // Center crop square
+      const minSide = Math.min(width, height);
+      const sx = (width - minSide) / 2;
+      const sy = (height - minSide) / 2;
+
+      canvas.width = maxDim;
+      canvas.height = maxDim;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(tempImg, sx, sy, minSide, minSide, 0, 0, maxDim, maxDim);
+
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      state._tempTeacherAvatar = compressedDataUrl;
+
+      // Update preview langsung di modal dan topbar
+      const avatarImg = document.getElementById('teacher-profile-avatar-img');
+      if (avatarImg) avatarImg.src = compressedDataUrl;
+
+      const topbarAvatar = document.getElementById('srms-user-avatar-img');
+      if (topbarAvatar) topbarAvatar.src = compressedDataUrl;
+
+      const btnReset = document.getElementById('btn-reset-avatar');
+      if (btnReset) btnReset.style.display = 'inline-block';
+
+      showToast('📷 Foto profil berhasil dimuat! Klik "Simpan Profil" untuk menyimpan.', 'info');
+    };
+    tempImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleTeacherAvatarReset() {
+  const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
+  state._tempTeacherAvatar = defaultAvatar;
+
+  const avatarImg = document.getElementById('teacher-profile-avatar-img');
+  if (avatarImg) avatarImg.src = defaultAvatar;
+
+  const topbarAvatar = document.getElementById('srms-user-avatar-img');
+  if (topbarAvatar) topbarAvatar.src = defaultAvatar;
+
+  const btnReset = document.getElementById('btn-reset-avatar');
+  if (btnReset) btnReset.style.display = 'none';
+
+  const fileInput = document.getElementById('teacher-profile-avatar-input');
+  if (fileInput) fileInput.value = '';
+
+  showToast('Foto profil dikembalikan ke default. Klik "Simpan Profil" untuk menerapkan.', 'info');
+}
+
+async function handleSaveTeacherProfile(event) {
+  if (event) event.preventDefault();
+
+  const t = state.currentTeacher;
+  if (!t) {
+    showToast('Sesi akun guru tidak aktif.', 'warning');
+    return;
+  }
+
+  const nameInput = document.getElementById('teacher-profile-input-name');
+  const nipInput = document.getElementById('teacher-profile-input-nip');
+
+  const newName = nameInput ? nameInput.value.trim() : t.fullName;
+  const newNip = nipInput ? nipInput.value.trim() : (t.nip || '');
+  const finalAvatar = (state._tempTeacherAvatar !== null && state._tempTeacherAvatar !== undefined)
+    ? state._tempTeacherAvatar
+    : (t.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80');
+
+  if (!newName) {
+    showToast('Nama lengkap dan gelar tidak boleh kosong!', 'warning');
+    return;
+  }
+
+  // 1. Perbarui memory session
+  t.fullName = newName;
+  t.nip = newNip;
+  t.avatar = finalAvatar;
+  sessionStorage.setItem('zettcbt_current_teacher', JSON.stringify(t));
+
+  // 2. Perbarui list state.teachers
+  const tObj = (state.teachers || []).find(item => item.username === t.username || item.id === t.id);
+  if (tObj) {
+    tObj.fullName = newName;
+    tObj.nip = newNip;
+    tObj.avatar = finalAvatar;
+    localStorage.setItem('zettcbt_teachers', JSON.stringify(state.teachers));
+  }
+
+  // 3. Simpan ke Dedicated Profile Vault & Teacher Vault
+  const profileVault = {
+    fullName: newName,
+    nip: newNip,
+    avatar: finalAvatar,
+    updatedAt: Date.now()
+  };
+  localStorage.setItem('zettcbt_admin_profile_' + t.username, JSON.stringify(profileVault));
+
+  try {
+    let tVault = JSON.parse(localStorage.getItem('zettcbt_teacher_vault') || '{}');
+    if (tVault[t.username]) {
+      tVault[t.username].fullName = newName;
+      tVault[t.username].nip = newNip;
+      tVault[t.username].avatar = finalAvatar;
+      localStorage.setItem('zettcbt_teacher_vault', JSON.stringify(tVault));
+    }
+  } catch (eVault) { }
+
+  // 4. Update elemen UI
+  const navLabel = document.getElementById('nav-teacher-label');
+  if (navLabel) navLabel.textContent = newName;
+
+  const headerUserName = document.getElementById('srms-header-user-name');
+  if (headerUserName) headerUserName.textContent = newName;
+
+  const welcomeName = document.getElementById('welcome-teacher-name');
+  if (welcomeName) welcomeName.textContent = newName;
+
+  const profName = document.getElementById('teacher-profile-name');
+  if (profName) profName.textContent = newName;
+
+  const topbarAvatar = document.getElementById('srms-user-avatar-img');
+  if (topbarAvatar) topbarAvatar.src = finalAvatar;
+
+  const profileModalAvatar = document.getElementById('teacher-profile-avatar-img');
+  if (profileModalAvatar) profileModalAvatar.src = finalAvatar;
+
+  // 5. Sinkronisasi ke Neon Cloud Database
+  const creds = parseNeonCredentials();
+  if (creds && creds.host) {
+    try {
+      const q = `INSERT INTO app_settings (setting_key, setting_value, updated_at)
+                 VALUES ($1, $2, NOW())
+                 ON CONFLICT (setting_key) DO UPDATE
+                 SET setting_value = EXCLUDED.setting_value, updated_at = NOW();`;
+      await executeNeonSql(q, ['profile_' + t.username, JSON.stringify(profileVault)]);
+      console.log('✅ Profil & Foto guru berhasil disinkronkan ke Neon Cloud:', t.username);
+    } catch (eNeon) {
+      console.warn('Sync profile to Neon deferred:', eNeon.message);
+    }
+  }
+
+  closeTeacherProfileModal();
+  showToast('✅ Profil & Foto berhasil disimpan secara permanen!', 'success');
 }
 
 // Filter Bank Soal Terisolasi
@@ -9283,6 +9540,11 @@ window.openAddSubjectRoomModal = openAddSubjectRoomModal;
 window.closeAddSubjectRoomModal = closeAddSubjectRoomModal;
 window.handleSaveNewSubjectRoom = handleSaveNewSubjectRoom;
 window.deleteSubjectRoom = deleteSubjectRoom;
+window.openTeacherProfileModal = openTeacherProfileModal;
+window.closeTeacherProfileModal = closeTeacherProfileModal;
+window.handleTeacherAvatarUpload = handleTeacherAvatarUpload;
+window.handleTeacherAvatarReset = handleTeacherAvatarReset;
+window.handleSaveTeacherProfile = handleSaveTeacherProfile;
 
 // ==============================================================================
 // MODAL TAUTKAN KE HP (QR CODE & LINK SINKRONISASI NEON TERPADU)
@@ -9507,7 +9769,7 @@ if (typeof document !== 'undefined') {
   if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
     const sLink = document.createElement('link');
     sLink.rel = 'stylesheet';
-    sLink.href = 'style.css?v=3.77.0';
+    sLink.href = 'style.css?v=3.78.0';
     document.head.appendChild(sLink);
   }
 
