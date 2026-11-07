@@ -1,4 +1,5 @@
-// Service Worker untuk Ujian Online SD Negeri 14 Toboali
+// Service Worker untuk Ujian Online SD Negeri 14 Toboali (v3.76.0)
+const CACHE_NAME = 'zettcbt-sdn14-v3.76.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
