@@ -683,34 +683,69 @@ function togglePwaTutorialDetails() {
   details.style.display = isHidden ? 'block' : 'none';
 }
 
+function triggerPwaManualGuide() {
+  showToast('Memasang ke Layar Utama: Ikuti petunjuk browser di bawah!', 'info');
+  const details = document.getElementById('pwa-tutorial-details-box');
+  if (details) {
+    details.style.display = 'block';
+    try {
+      details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {}
+  }
+}
+
 function downloadAndroidApk() {
   const sch = state.school || {};
-  let targetUrl = (sch.apkUrl && typeof sch.apkUrl === 'string' && sch.apkUrl.trim().length > 0)
-    ? sch.apkUrl.trim()
-    : 'assets/apk/Ujian_SDN14_Toboali.apk';
+  const customApkUrl = (sch.apkUrl && typeof sch.apkUrl === 'string') ? sch.apkUrl.trim() : '';
 
-  // Otomatis ubah Google Drive View link menjadi Direct Download link
-  if (targetUrl.includes('drive.google.com/file/d/')) {
-    const match = targetUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) {
-      targetUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+  // Skenario A: Sekolah telah menyediakan tautan APK khusus (Google Drive / Hosting / Direct URL)
+  if (customApkUrl.length > 0) {
+    let targetUrl = customApkUrl;
+
+    // Otomatis ubah Google Drive View/Share link menjadi Direct Download link
+    if (targetUrl.includes('drive.google.com/file/d/')) {
+      const match = targetUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        targetUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
     }
+
+    showToast('Memulai pengunduhan berkas APK Ujian SDN 14 Toboali...', 'info');
+
+    try {
+      const a = document.createElement('a');
+      a.href = targetUrl;
+      a.download = 'Ujian_SDN14_Toboali.apk';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) a.parentNode.removeChild(a);
+      }, 2500);
+    } catch (err) {
+      window.location.href = targetUrl;
+    }
+    return;
   }
 
-  showToast('Memulai pengunduhan aplikasi Ujian SDN 14 Toboali...', 'info');
-
-  try {
-    const a = document.createElement('a');
-    a.href = targetUrl;
-    a.download = 'Ujian_SDN14_Toboali.apk';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      if (a.parentNode) a.parentNode.removeChild(a);
-    }, 2500);
-  } catch (err) {
-    window.location.href = targetUrl;
+  // Skenario B: Belum ada berkas APK fisik di server/link kustom -> Pasang WebAPK 1-Klik bebas 404!
+  if (deferredPwaPrompt) {
+    showToast('Memasang aplikasi resmi SDN 14 Toboali ke layar HP...', 'info');
+    deferredPwaPrompt.prompt();
+    deferredPwaPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult && choiceResult.outcome === 'accepted') {
+        showToast('🎉 Aplikasi SDN 14 Toboali berhasil terpasang di HP!', 'success');
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'none';
+        closePwaGuideModal();
+      }
+      deferredPwaPrompt = null;
+    }).catch(() => {
+      triggerPwaManualGuide();
+    });
+  } else {
+    // Jika prompt browser belum siap atau di perangkat lain: Buka panduan langsung
+    triggerPwaManualGuide();
   }
 }
 
@@ -723,6 +758,44 @@ function openPwaGuideModal() {
     const waWarning = document.getElementById('pwa-whatsapp-warning');
     if (waWarning) {
       waWarning.style.display = isWhatsAppBrowser() ? 'block' : 'none';
+    }
+
+    // Perbarui teks Kartu 1 secara dinamis berdasarkan keberadaan APK kustom
+    const sch = state.school || {};
+    const hasCustomApk = Boolean(sch.apkUrl && typeof sch.apkUrl === 'string' && sch.apkUrl.trim().length > 0);
+
+    const badgeTag = document.getElementById('apk-card-badge-tag');
+    const titleText = document.getElementById('apk-card-title-text');
+    const descText = document.getElementById('apk-card-desc-text');
+    const btnTitle = document.getElementById('btn-apk-action-title');
+    const stepsBox = document.getElementById('apk-card-steps-box');
+
+    if (hasCustomApk) {
+      if (badgeTag) badgeTag.innerText = 'PILIHAN 1 • BERKAS APK ANDROID';
+      if (titleText) titleText.innerText = 'Unduh Berkas APK Android Langsung';
+      if (descText) descText.innerHTML = 'Dapatkan berkas mentah <strong>Ujian_SDN14_Toboali.apk</strong> untuk dipasang ke HP siswa (Xiaomi, Samsung, Oppo, Vivo, Realme, Infinix, dll).';
+      if (btnTitle) btnTitle.innerHTML = '📥 Unduh File APK Android (.apk)';
+      if (stepsBox) {
+        stepsBox.innerHTML = `
+          <strong>3 Langkah Setelah Unduh Selesai:</strong>
+          <div style="display: flex; gap: 0.4rem; margin-top: 0.25rem;">1. Buka file hasil unduhan di notifikasi HP atau folder <em>Download</em>.</div>
+          <div style="display: flex; gap: 0.4rem;">2. Tekan <strong>"Instal"</strong>.</div>
+          <div style="display: flex; gap: 0.4rem;">3. Jika ada peringatan keamanan, pilih <strong>"Tetap Instal / Izinkan dari sumber ini"</strong>.</div>
+        `;
+      }
+    } else {
+      if (badgeTag) badgeTag.innerText = 'PILIHAN 1 • PASANG APLIKASI (WEBAPK)';
+      if (titleText) titleText.innerText = 'Pasang Aplikasi Resmi SDN 14 Toboali';
+      if (descText) descText.innerHTML = 'Pasang aplikasi resmi berlogo SDN 14 Toboali langsung ke layar HP Anda (layar penuh, tanpa kuota unduh besar, bebas 404).';
+      if (btnTitle) btnTitle.innerHTML = '📱 Pasang Aplikasi ke Layar HP Sekarang';
+      if (stepsBox) {
+        stepsBox.innerHTML = `
+          <strong>3 Keunggulan Aplikasi Resmi:</strong>
+          <div style="display: flex; gap: 0.4rem; margin-top: 0.25rem;">1. Ikon resmi SD Negeri 14 Toboali langsung di menu HP.</div>
+          <div style="display: flex; gap: 0.4rem;">2. Tampilan ujian layar penuh tanpa terganggu kolom alamat browser.</div>
+          <div style="display: flex; gap: 0.4rem;">3. Lebih ringan, cepat dibuka, dan auto-save jawaban ujian.</div>
+        `;
+      }
     }
   }
 }
