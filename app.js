@@ -740,11 +740,11 @@ function handlePrimaryAppInstall() {
 
 function downloadAndroidApk() {
   const sch = state.school || {};
-  const customApkUrl = (sch.apkUrl && typeof sch.apkUrl === 'string') ? sch.apkUrl.trim() : '';
+  let customApkUrl = (sch.apkUrl && typeof sch.apkUrl === 'string') ? sch.apkUrl.trim() : '';
 
   // 1. Cek jika pengguna membuka dari iPhone / iPad (iOS)
   if (isIos()) {
-    showToast('ℹ️ HP iPhone tidak menggunakan berkas .APK. Gunakan Pilihan 1 di atas untuk pasang di iPhone!', 'warning');
+    showToast('🍏 iPhone menggunakan sistem PWA Layar Utama (PILIHAN 1). Ikuti petunjuk untuk iPhone di atas!', 'info');
     switchPwaGuideTab('ios');
     const details = document.getElementById('pwa-tutorial-details-box');
     if (details) {
@@ -754,55 +754,121 @@ function downloadAndroidApk() {
     return;
   }
 
-  // 2. Jika Admin telah menautkan berkas APK (Google Drive / Hosting / Direct Link)
+  // 2. Jika Admin BELUM menautkan berkas APK di Pengaturan Sekolah:
+  if (!customApkUrl) {
+    const userPrompt = prompt(
+      'Guru/Pengawas: Masukkan link tautan berkas APK (Google Drive / Direct Link) untuk diunduh sekarang:\n\n' +
+      '(Atau klik Batal jika ingin memasang aplikasi resmi langsung ke layar HP lewat PILIHAN 1)',
+      ''
+    );
+
+    if (userPrompt && userPrompt.trim().length > 0) {
+      customApkUrl = userPrompt.trim();
+      state.school.apkUrl = customApkUrl;
+      try {
+        localStorage.setItem('zettcbt_school', JSON.stringify(state.school));
+        const vault = JSON.parse(localStorage.getItem('zettcbt_school_vault') || '{}');
+        vault.apkUrl = customApkUrl;
+        localStorage.setItem('zettcbt_school_vault', JSON.stringify(vault));
+        if (typeof syncSchoolIdentityToNeonCloud === 'function') {
+          syncSchoolIdentityToNeonCloud(state.school);
+        }
+      } catch (e) {}
+      showToast('✅ Tautan APK berhasil disimpan ke sistem sekolah!', 'success');
+      const hintBox = document.getElementById('apk-status-hint-box');
+      if (hintBox) {
+        hintBox.innerHTML = '<span style="color: #16a34a; font-weight: 700; font-size: 0.74rem;">✓ Tautan berkas resmi APK aktif</span>';
+      }
+    } else {
+      // Tampilkan hint box interaktif dengan form inline agar guru bisa paste kapan saja
+      const hintBox = document.getElementById('apk-status-hint-box');
+      if (hintBox) {
+        hintBox.style.display = 'block';
+        hintBox.innerHTML = `
+          <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 10px; padding: 0.75rem 0.85rem; color: #1e40af; font-size: 0.76rem; line-height: 1.45; margin-top: 0.45rem;">
+            <strong>🔗 Tautkan Link Google Drive APK Sekarang:</strong>
+            <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem;">
+              <input type="url" id="inline-apk-link-input" placeholder="https://drive.google.com/file/d/..." style="flex: 1; padding: 0.4rem 0.6rem; font-size: 0.76rem; border: 1px solid #60a5fa; border-radius: 6px; outline: none; background: #ffffff;">
+              <button type="button" onclick="saveInlineApkLinkAndDownload()" style="background: #2563eb; color: #ffffff; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; font-weight: 800; font-size: 0.74rem; cursor: pointer; white-space: nowrap;">Simpan &amp; Unduh</button>
+            </div>
+            <div style="font-size: 0.7rem; color: #3b82f6; margin-top: 0.35rem;">
+              💡 <em>Siswa dapat langsung klik <strong>PILIHAN 1</strong> di atas untuk memasang aplikasi ke HP dalam 1 detik tanpa download APK.</em>
+            </div>
+          </div>
+        `;
+      }
+      // Jika di HP Android dan WebAPK prompt siap, tawarkan langsung pasang
+      if (deferredPwaPrompt) {
+        showToast('Memasang aplikasi resmi langsung ke layar HP...', 'info');
+        deferredPwaPrompt.prompt();
+        deferredPwaPrompt.userChoice.then((choice) => {
+          if (choice && choice.outcome === 'accepted') {
+            showToast('🎉 Aplikasi SDN 14 Toboali berhasil terpasang!', 'success');
+            closePwaGuideModal();
+          }
+          deferredPwaPrompt = null;
+        });
+      }
+      return;
+    }
+  }
+
+  // 3. Eksekusi Download Berkas APK (dengan konversi otomatis Google Drive direct download)
   if (customApkUrl.length > 0) {
     let targetUrl = customApkUrl;
 
-    // Otomatis ubah Google Drive View/Share link menjadi Direct Download link
     if (targetUrl.includes('drive.google.com/file/d/')) {
       const match = targetUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
         targetUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
       }
+    } else if (targetUrl.includes('drive.google.com/open?id=') || targetUrl.includes('drive.google.com/uc?id=')) {
+      const match = targetUrl.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        targetUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
     }
 
-    showToast('Memulai pengunduhan berkas APK Ujian SDN 14 Toboali...', 'info');
+    showToast('📥 Memulai pengunduhan berkas APK Ujian SDN 14 Toboali...', 'info');
 
     try {
       const a = document.createElement('a');
       a.href = targetUrl;
       a.download = 'Ujian_SDN14_Toboali.apk';
       a.target = '_blank';
+      a.rel = 'noopener noreferrer';
       document.body.appendChild(a);
       a.click();
       setTimeout(() => {
         if (a.parentNode) a.parentNode.removeChild(a);
-      }, 2500);
+      }, 3000);
     } catch (err) {
-      window.location.href = targetUrl;
+      window.open(targetUrl, '_blank');
     }
+  }
+}
+
+function saveInlineApkLinkAndDownload() {
+  const input = document.getElementById('inline-apk-link-input');
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) {
+    showToast('Silakan tempelkan link Google Drive berkas APK terlebih dahulu!', 'warning');
+    input.focus();
     return;
   }
-
-  // 3. Jika Admin BELUM menautkan berkas APK di Pengaturan Sekolah:
-  showToast('ℹ️ Berkas APK mentah belum ditautkan oleh Admin Sekolah.', 'warning');
-  const hintBox = document.getElementById('apk-status-hint-box');
-  if (hintBox) {
-    hintBox.style.display = 'block';
-    hintBox.innerHTML = `
-      <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.65rem 0.85rem; color: #92400e; font-size: 0.76rem; line-height: 1.45; margin-top: 0.45rem;">
-        <strong>💡 Informasi Guru &amp; Siswa:</strong><br>
-        Berkas APK mentah dapat diunggah Guru/Admin ke Google Drive lalu ditautkan pada menu <em>Pengaturan Sekolah &rarr; Tab 5</em>.<br>
-        <strong>Siswa disarankan menekan tombol PILIHAN 1 (Tombol Putih di Atas)</strong> untuk langsung memasang aplikasi resmi ke layar HP dalam 1 detik tanpa perlu unduh file mentah!
-      </div>
-    `;
-  }
-
-  // Alihkan pandangan siswa ke Pilihan 1 yang 100% instan
-  const primaryBtn = document.getElementById('btn-pwa-primary-action');
-  if (primaryBtn) {
-    try { primaryBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {}
-  }
+  state.school.apkUrl = val;
+  try {
+    localStorage.setItem('zettcbt_school', JSON.stringify(state.school));
+    const vault = JSON.parse(localStorage.getItem('zettcbt_school_vault') || '{}');
+    vault.apkUrl = val;
+    localStorage.setItem('zettcbt_school_vault', JSON.stringify(vault));
+    if (typeof syncSchoolIdentityToNeonCloud === 'function') {
+      syncSchoolIdentityToNeonCloud(state.school);
+    }
+  } catch (e) {}
+  showToast('✅ Tautan APK berhasil disimpan!', 'success');
+  downloadAndroidApk();
 }
 
 function openPwaGuideModal() {
@@ -887,10 +953,12 @@ function switchPwaGuideTab(platform) {
 
 window.triggerPwaInstall = triggerPwaInstall;
 window.triggerPwaPromptDirect = triggerPwaPromptDirect;
+window.handlePrimaryAppInstall = handlePrimaryAppInstall;
 window.openPwaGuideModal = openPwaGuideModal;
 window.closePwaGuideModal = closePwaGuideModal;
 window.switchPwaGuideTab = switchPwaGuideTab;
 window.downloadAndroidApk = downloadAndroidApk;
+window.saveInlineApkLinkAndDownload = saveInlineApkLinkAndDownload;
 window.isWhatsAppBrowser = isWhatsAppBrowser;
 window.openInExternalChrome = openInExternalChrome;
 window.togglePwaTutorialDetails = togglePwaTutorialDetails;
@@ -9475,7 +9543,7 @@ if (typeof document !== 'undefined') {
   if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
     const sLink = document.createElement('link');
     sLink.rel = 'stylesheet';
-    sLink.href = 'style.css?v=3.70.0';
+    sLink.href = 'style.css?v=3.71.0';
     document.head.appendChild(sLink);
   }
 
