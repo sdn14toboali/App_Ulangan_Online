@@ -699,43 +699,55 @@ function triggerPwaManualGuide() {
   }
 }
 
-function handlePrimaryAppInstall() {
-  // Jika di perangkat iOS (iPhone / iPad Safari)
-  if (isIos()) {
-    showToast('🍏 Di iPhone: Ketuk ikon Bagikan (⎘) di bawah Safari, lalu pilih "Tambah ke Layar Utama"!', 'info');
-    switchPwaGuideTab('ios');
-    const details = document.getElementById('pwa-tutorial-details-box');
-    if (details) {
-      details.style.display = 'block';
-      try {
-        details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } catch (e) {}
-    }
+function handleDirectAppInstall() {
+  // 1. Cek jika pengguna membuka dari peramban internal WhatsApp (WebView memblokir WebAPK/PWA)
+  if (isWhatsAppBrowser()) {
+    showToast('⚠️ Mengalihkan ke Google Chrome agar aplikasi bisa langsung terpasang otomatis...', 'warning');
+    setTimeout(() => {
+      openInExternalChrome();
+    }, 350);
     return;
   }
 
-  // Jika di Android dan Google Chrome WebAPK prompt siap
+  // 2. Cek jika pengguna membuka dari iPhone / iPad (iOS Safari)
+  if (isIos()) {
+    showToast('🍏 Di iPhone: Ketuk ikon Bagikan (⎘) di bawah Safari, lalu pilih "Tambah ke Layar Utama"!', 'info');
+    openPwaGuideModal();
+    switchPwaGuideTab('ios');
+    triggerPwaManualGuide();
+    return;
+  }
+
+  // 3. Jika di Android / Chrome dan native install prompt siap: LANGSUNG PICU INSTALASI OTOMATIS
   if (deferredPwaPrompt) {
-    showToast('Memasang aplikasi resmi SDN 14 Toboali ke layar HP...', 'info');
+    showToast('⚡ Membuka dialog pemasangan aplikasi Android...', 'info');
     deferredPwaPrompt.prompt();
     deferredPwaPrompt.userChoice.then((choiceResult) => {
       if (choiceResult && choiceResult.outcome === 'accepted') {
-        showToast('🎉 Aplikasi SDN 14 Toboali berhasil terpasang di HP!', 'success');
+        showToast('🎉 Aplikasi resmi SDN 14 Toboali berhasil terpasang di HP!', 'success');
         const banner = document.getElementById('pwa-install-banner');
         if (banner) banner.style.display = 'none';
         closePwaGuideModal();
       }
       deferredPwaPrompt = null;
-    }).catch(() => {
+    }).catch((err) => {
+      console.warn('PWA prompt error:', err);
+      openPwaGuideModal();
       switchPwaGuideTab('android');
       triggerPwaManualGuide();
     });
     return;
   }
 
-  // Jika prompt belum siap / peramban lain: Tampilkan panduan langkah demi langkah
+  // 4. Jika prompt otomatis belum ditangkap browser (Chrome sedang memproses manifest atau butuh klik manual)
+  showToast('💡 Ketuk Titik Tiga (⋮) di kanan atas Chrome -> Pilih "Install Aplikasi" atau "Tambahkan ke Layar Utama"', 'info');
+  openPwaGuideModal();
   switchPwaGuideTab('android');
   triggerPwaManualGuide();
+}
+
+function handlePrimaryAppInstall() {
+  handleDirectAppInstall();
 }
 
 function downloadAndroidApk() {
@@ -953,6 +965,7 @@ function switchPwaGuideTab(platform) {
 
 window.triggerPwaInstall = triggerPwaInstall;
 window.triggerPwaPromptDirect = triggerPwaPromptDirect;
+window.handleDirectAppInstall = handleDirectAppInstall;
 window.handlePrimaryAppInstall = handlePrimaryAppInstall;
 window.openPwaGuideModal = openPwaGuideModal;
 window.closePwaGuideModal = closePwaGuideModal;
@@ -9543,7 +9556,7 @@ if (typeof document !== 'undefined') {
   if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
     const sLink = document.createElement('link');
     sLink.rel = 'stylesheet';
-    sLink.href = 'style.css?v=3.72.0';
+    sLink.href = 'style.css?v=3.73.0';
     document.head.appendChild(sLink);
   }
 
