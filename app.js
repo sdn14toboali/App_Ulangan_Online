@@ -9543,7 +9543,7 @@ if (typeof document !== 'undefined') {
   if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
     const sLink = document.createElement('link');
     sLink.rel = 'stylesheet';
-    sLink.href = 'style.css?v=3.71.0';
+    sLink.href = 'style.css?v=3.72.0';
     document.head.appendChild(sLink);
   }
 
