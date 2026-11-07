@@ -151,7 +151,6 @@
   </script>
 
   <!-- Core Design System & Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=3.69.0">
 </head>
 <body>
 
@@ -241,16 +240,16 @@
           </div>
 
           <!-- Banner Pasang Aplikasi Android / PWA Standalone -->
-          <div id="pwa-install-banner" style="display: flex; background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #bfdbfe; border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; align-items: center; justify-content: space-between; gap: 0.75rem; cursor: pointer;" onclick="openPwaGuideModal()">
-            <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <img src="assets/icon-192.png" alt="Logo SD Negeri 14 Toboali" style="width: 36px; height: 36px; min-width: 36px; border-radius: 8px; object-fit: contain; background: #ffffff; padding: 2px; box-shadow: 0 2px 6px rgba(37,99,235,0.2);" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}else if(this.src.indexOf('icon-512')===-1){this.src='assets/icon-512.png';}">
-              <div>
-                <div style="font-size: 0.85rem; font-weight: 700; color: #1e40af;">Aplikasi Untuk Android (APK &amp; PWA)</div>
-                <div style="font-size: 0.72rem; color: #3b82f6;">Unduh berkas APK atau pasang layar penuh berlogo resmi SDN 14 Toboali</div>
+          <div id="pwa-install-banner" class="pwa-install-banner" onclick="openPwaGuideModal()">
+            <div class="pwa-banner-left">
+              <img src="assets/icon-192.png" alt="Logo SD Negeri 14 Toboali" class="pwa-banner-icon" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}else if(this.src.indexOf('icon-512')===-1){this.src='assets/icon-512.png';}">
+              <div class="pwa-banner-text">
+                <div class="pwa-banner-title">Aplikasi Ujian Resmi (Android &amp; iOS)</div>
+                <div class="pwa-banner-subtitle">Buka ujian layar penuh berlogo resmi SDN 14 Toboali di HP</div>
               </div>
             </div>
             <button type="button" class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openPwaGuideModal()" style="white-space: nowrap; font-size: 0.8rem; padding: 0.45rem 0.85rem; font-weight: 700; box-shadow: 0 2px 8px rgba(37,99,235,0.25);">
-              + Unduh APK / Pasang
+              + Pasang / Unduh App
             </button>
           </div>
 
@@ -3129,7 +3128,7 @@
           <img src="assets/icon-192.png" alt="Logo SD Negeri 14 Toboali" style="width: 38px; height: 38px; min-width: 38px; border-radius: 8px; object-fit: contain; background: #ffffff; padding: 2px; box-shadow: 0 2px 6px rgba(37,99,235,0.2);" onerror="if(window.OFFICIAL_SDN14_LOGO&&this.src!==window.OFFICIAL_SDN14_LOGO){this.src=window.OFFICIAL_SDN14_LOGO;}else if(this.src.indexOf('icon-512')===-1){this.src='assets/icon-512.png';}">
           <div>
             <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 0;">Aplikasi Android SDN 14 Toboali</h3>
-            <span style="font-size: 0.75rem; color: #64748b;">Akses ujian layar penuh resmi SD Negeri 14 Toboali</span>
+            <span style="font-size: 0.75rem; color: #64748b;">Mode Layar Penuh Resmi (Android &amp; iOS)</span>
           </div>
         </div>
         <button type="button" class="btn btn-outline btn-sm" onclick="closePwaGuideModal()" style="padding: 0.25rem 0.6rem; border-radius: 8px;">✕</button>
@@ -3151,7 +3150,7 @@
         <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); border-radius: 12px; padding: 1rem 1.15rem; color: #ffffff; margin-bottom: 1rem; box-shadow: 0 4px 14px rgba(37,99,235,0.25);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem;">
             <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255,255,255,0.2); padding: 0.15rem 0.55rem; border-radius: 99px;">
-              PILIHAN 1 • APLIKASI RESMI ANDROID
+              PILIHAN 1 • PASANG APLIKASI RESMI (1-KLIK)
             </span>
             <span style="font-size: 0.72rem; opacity: 0.9;">Semua Tipe HP Android</span>
           </div>
@@ -3159,11 +3158,11 @@
             Pasang Aplikasi Resmi SDN 14 Toboali
           </h4>
           <p style="margin: 0 0 0.85rem 0; font-size: 0.76rem; color: #dbeafe; line-height: 1.45;">
-            Pasang aplikasi resmi berlogo SDN 14 Toboali langsung ke layar HP Anda (layar penuh, tanpa kuota unduh besar, bebas 404).
+            Langsung pasang ikon resmi SDN 14 Toboali di menu HP Anda. Layar penuh tanpa kolom browser, hemat kuota (&lt;1 MB), dan auto-save jawaban ujian.
           </p>
           <button type="button" class="btn btn-lg" onclick="downloadAndroidApk()" style="width: 100%; justify-content: center; font-weight: 800; font-size: 0.95rem; background: #ffffff; color: #1e40af; border: none; padding: 0.7rem 1rem; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.18); display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            📥 Unduh File APK Android (.apk)
+            <span id="btn-primary-action-icon">⚡</span>
+            <span id="btn-primary-action-label">Pasang Aplikasi ke Layar HP Sekarang</span>
           </button>
           
           <!-- Panduan 3 Langkah Instal APK -->
@@ -3184,23 +3183,26 @@
             <span style="font-size: 0.72rem; color: #64748b;">Hemat Memori (&lt;1 MB)</span>
           </div>
           <div style="font-size: 0.82rem; color: #1e293b; font-weight: 700; margin-bottom: 0.2rem;">
-            Pasang Langsung ke Layar Utama (Home Screen)
+            Unduh Berkas Mentah APK Android (.apk)
           </div>
           <p style="margin: 0 0 0.65rem 0; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
             Bagi siswa yang memorinya penuh atau tidak mau download file APK, pasang langsung ikon resmi SDN 14 Toboali di layar beranda HP.
           </p>
 
           <div id="pwa-auto-install-cta" style="display: none; margin-bottom: 0.65rem;">
-            <button type="button" class="btn btn-outline btn-sm" onclick="triggerPwaPromptDirect()" style="width: 100%; justify-content: center; font-weight: 700; background: #ffffff; border-color: #2563eb; color: #2563eb;">
-              ⚡ Pasang Otomatis Sekarang (1-Klik)
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span id="btn-download-apk-label">📥 Unduh File APK Android (.apk)</span>
+          </button>
+
+          <div id="apk-status-hint-box" style="margin-top: 0.45rem;"></div>
+
+          <div style="margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px dashed #cbd5e1;">
+            <button type="button" onclick="togglePwaTutorialDetails()" style="background: none; border: none; font-size: 0.76rem; color: #2563eb; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline;">
+              📖 Cara Pasang Manual Lewat Menu Browser (Titik Tiga Chrome / Safari) &rarr;
             </button>
           </div>
 
           <button type="button" onclick="togglePwaTutorialDetails()" style="background: none; border: none; font-size: 0.76rem; color: #2563eb; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline;">
-            📖 Cara Pasang Manual Lewat Menu Browser (Titik Tiga Chrome / Safari) &rarr;
-          </button>
-
-          <!-- Kotak Rincian Tutorial Manual (Collapsible) -->
           <div id="pwa-tutorial-details-box" style="display: none; margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px dashed #cbd5e1;">
             <!-- Tab Selector: Android vs iOS -->
             <div style="display: flex; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 0.75rem; background: #f1f5f9;">
