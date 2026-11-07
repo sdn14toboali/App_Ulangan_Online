@@ -178,6 +178,7 @@ const state = {
       logoUrl: defaultSchoolLogo,
       teacherSigner: 'Siti Aminah, S.Pd',
       teacherSignerNip: '-',
+      apkUrl: '',
       isCustomLogo: false,
       isCustomName: false
     };
@@ -637,19 +638,7 @@ function initPwaSupport() {
 }
 
 function triggerPwaInstall() {
-  if (deferredPwaPrompt) {
-    deferredPwaPrompt.prompt();
-    deferredPwaPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        showToast('Memasang aplikasi ke layar HP...', 'info');
-        const banner = document.getElementById('pwa-install-banner');
-        if (banner) banner.style.display = 'none';
-      }
-      deferredPwaPrompt = null;
-    });
-  } else {
-    openPwaGuideModal();
-  }
+  openPwaGuideModal();
 }
 
 function triggerPwaPromptDirect() {
@@ -669,12 +658,72 @@ function triggerPwaPromptDirect() {
   }
 }
 
+function isWhatsAppBrowser() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || navigator.vendor || (window && window.opera) || '';
+  return /WhatsApp/i.test(ua);
+}
+
+function openInExternalChrome() {
+  const host = window.location.host;
+  const path = window.location.pathname;
+  const search = window.location.search;
+  const intentUrl = `intent://${host}${path}${search}#Intent;scheme=https;package=com.android.chrome;end`;
+  try {
+    window.location.href = intentUrl;
+  } catch (e) {
+    window.open(window.location.href, '_system');
+  }
+}
+
+function togglePwaTutorialDetails() {
+  const details = document.getElementById('pwa-tutorial-details-box');
+  if (!details) return;
+  const isHidden = details.style.display === 'none' || !details.style.display;
+  details.style.display = isHidden ? 'block' : 'none';
+}
+
+function downloadAndroidApk() {
+  const sch = state.school || {};
+  let targetUrl = (sch.apkUrl && typeof sch.apkUrl === 'string' && sch.apkUrl.trim().length > 0)
+    ? sch.apkUrl.trim()
+    : 'assets/apk/Ujian_SDN14_Toboali.apk';
+
+  // Otomatis ubah Google Drive View link menjadi Direct Download link
+  if (targetUrl.includes('drive.google.com/file/d/')) {
+    const match = targetUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      targetUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+    }
+  }
+
+  showToast('Memulai pengunduhan aplikasi Ujian SDN 14 Toboali...', 'info');
+
+  try {
+    const a = document.createElement('a');
+    a.href = targetUrl;
+    a.download = 'Ujian_SDN14_Toboali.apk';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      if (a.parentNode) a.parentNode.removeChild(a);
+    }, 2500);
+  } catch (err) {
+    window.location.href = targetUrl;
+  }
+}
+
 function openPwaGuideModal() {
   const modal = document.getElementById('modal-pwa-install-guide');
   if (modal) {
     modal.style.display = 'flex';
     const cta = document.getElementById('pwa-auto-install-cta');
     if (cta) cta.style.display = deferredPwaPrompt ? 'block' : 'none';
+    const waWarning = document.getElementById('pwa-whatsapp-warning');
+    if (waWarning) {
+      waWarning.style.display = isWhatsAppBrowser() ? 'block' : 'none';
+    }
   }
 }
 
@@ -719,6 +768,10 @@ window.triggerPwaPromptDirect = triggerPwaPromptDirect;
 window.openPwaGuideModal = openPwaGuideModal;
 window.closePwaGuideModal = closePwaGuideModal;
 window.switchPwaGuideTab = switchPwaGuideTab;
+window.downloadAndroidApk = downloadAndroidApk;
+window.isWhatsAppBrowser = isWhatsAppBrowser;
+window.openInExternalChrome = openInExternalChrome;
+window.togglePwaTutorialDetails = togglePwaTutorialDetails;
 window.showScreen = showScreen;
 window.executeScreenSwitch = executeScreenSwitch;
 window.openTeacherPortal = openTeacherPortal;
@@ -6533,6 +6586,7 @@ function populateSchoolIdentityForm() {
   if (document.getElementById('school-teacher-signer')) document.getElementById('school-teacher-signer').value = sch.teacherSigner || '';
   if (document.getElementById('school-teacher-signer-nip')) document.getElementById('school-teacher-signer-nip').value = sch.teacherSignerNip || '';
   if (document.getElementById('school-logo-url')) document.getElementById('school-logo-url').value = sch.logoUrl || '';
+  if (document.getElementById('school-apk-url')) document.getElementById('school-apk-url').value = sch.apkUrl || '';
   updateLogoPreviewUI(sch.logoUrl || '');
 }
 
@@ -6563,6 +6617,7 @@ function handleSaveSchoolIdentity(event) {
     logoUrl: finalLogo,
     teacherSigner: document.getElementById('school-teacher-signer') ? document.getElementById('school-teacher-signer').value.trim() : (state.school.teacherSigner || ''),
     teacherSignerNip: document.getElementById('school-teacher-signer-nip') ? document.getElementById('school-teacher-signer-nip').value.trim() : (state.school.teacherSignerNip || ''),
+    apkUrl: document.getElementById('school-apk-url') ? document.getElementById('school-apk-url').value.trim() : (state.school.apkUrl || ''),
     isCustomLogo: isCustomLogo,
     isCustomName: isCustomName,
     updatedAt: new Date().toISOString()
