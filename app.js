@@ -683,6 +683,11 @@ function togglePwaTutorialDetails() {
   details.style.display = isHidden ? 'block' : 'none';
 }
 
+function isIos() {
+  if (typeof navigator === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
 function triggerPwaManualGuide() {
   showToast('Memasang ke Layar Utama: Ikuti petunjuk browser di bawah!', 'info');
   const details = document.getElementById('pwa-tutorial-details-box');
@@ -694,11 +699,62 @@ function triggerPwaManualGuide() {
   }
 }
 
+function handlePrimaryAppInstall() {
+  // Jika di perangkat iOS (iPhone / iPad Safari)
+  if (isIos()) {
+    showToast('🍏 Di iPhone: Ketuk ikon Bagikan (⎘) di bawah Safari, lalu pilih "Tambah ke Layar Utama"!', 'info');
+    switchPwaGuideTab('ios');
+    const details = document.getElementById('pwa-tutorial-details-box');
+    if (details) {
+      details.style.display = 'block';
+      try {
+        details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (e) {}
+    }
+    return;
+  }
+
+  // Jika di Android dan Google Chrome WebAPK prompt siap
+  if (deferredPwaPrompt) {
+    showToast('Memasang aplikasi resmi SDN 14 Toboali ke layar HP...', 'info');
+    deferredPwaPrompt.prompt();
+    deferredPwaPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult && choiceResult.outcome === 'accepted') {
+        showToast('🎉 Aplikasi SDN 14 Toboali berhasil terpasang di HP!', 'success');
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'none';
+        closePwaGuideModal();
+      }
+      deferredPwaPrompt = null;
+    }).catch(() => {
+      switchPwaGuideTab('android');
+      triggerPwaManualGuide();
+    });
+    return;
+  }
+
+  // Jika prompt belum siap / peramban lain: Tampilkan panduan langkah demi langkah
+  switchPwaGuideTab('android');
+  triggerPwaManualGuide();
+}
+
 function downloadAndroidApk() {
   const sch = state.school || {};
   const customApkUrl = (sch.apkUrl && typeof sch.apkUrl === 'string') ? sch.apkUrl.trim() : '';
 
-  // Skenario A: Sekolah telah menyediakan tautan APK khusus (Google Drive / Hosting / Direct URL)
+  // 1. Cek jika pengguna membuka dari iPhone / iPad (iOS)
+  if (isIos()) {
+    showToast('ℹ️ HP iPhone tidak menggunakan berkas .APK. Gunakan Pilihan 1 di atas untuk pasang di iPhone!', 'warning');
+    switchPwaGuideTab('ios');
+    const details = document.getElementById('pwa-tutorial-details-box');
+    if (details) {
+      details.style.display = 'block';
+      try { details.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch(e) {}
+    }
+    return;
+  }
+
+  // 2. Jika Admin telah menautkan berkas APK (Google Drive / Hosting / Direct Link)
   if (customApkUrl.length > 0) {
     let targetUrl = customApkUrl;
 
@@ -728,24 +784,24 @@ function downloadAndroidApk() {
     return;
   }
 
-  // Skenario B: Belum ada berkas APK fisik di server/link kustom -> Pasang WebAPK 1-Klik bebas 404!
-  if (deferredPwaPrompt) {
-    showToast('Memasang aplikasi resmi SDN 14 Toboali ke layar HP...', 'info');
-    deferredPwaPrompt.prompt();
-    deferredPwaPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult && choiceResult.outcome === 'accepted') {
-        showToast('🎉 Aplikasi SDN 14 Toboali berhasil terpasang di HP!', 'success');
-        const banner = document.getElementById('pwa-install-banner');
-        if (banner) banner.style.display = 'none';
-        closePwaGuideModal();
-      }
-      deferredPwaPrompt = null;
-    }).catch(() => {
-      triggerPwaManualGuide();
-    });
-  } else {
-    // Jika prompt browser belum siap atau di perangkat lain: Buka panduan langsung
-    triggerPwaManualGuide();
+  // 3. Jika Admin BELUM menautkan berkas APK di Pengaturan Sekolah:
+  showToast('ℹ️ Berkas APK mentah belum ditautkan oleh Admin Sekolah.', 'warning');
+  const hintBox = document.getElementById('apk-status-hint-box');
+  if (hintBox) {
+    hintBox.style.display = 'block';
+    hintBox.innerHTML = `
+      <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 0.65rem 0.85rem; color: #92400e; font-size: 0.76rem; line-height: 1.45; margin-top: 0.45rem;">
+        <strong>💡 Informasi Guru &amp; Siswa:</strong><br>
+        Berkas APK mentah dapat diunggah Guru/Admin ke Google Drive lalu ditautkan pada menu <em>Pengaturan Sekolah &rarr; Tab 5</em>.<br>
+        <strong>Siswa disarankan menekan tombol PILIHAN 1 (Tombol Putih di Atas)</strong> untuk langsung memasang aplikasi resmi ke layar HP dalam 1 detik tanpa perlu unduh file mentah!
+      </div>
+    `;
+  }
+
+  // Alihkan pandangan siswa ke Pilihan 1 yang 100% instan
+  const primaryBtn = document.getElementById('btn-pwa-primary-action');
+  if (primaryBtn) {
+    try { primaryBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {}
   }
 }
 
@@ -753,48 +809,41 @@ function openPwaGuideModal() {
   const modal = document.getElementById('modal-pwa-install-guide');
   if (modal) {
     modal.style.display = 'flex';
-    const cta = document.getElementById('pwa-auto-install-cta');
-    if (cta) cta.style.display = deferredPwaPrompt ? 'block' : 'none';
     const waWarning = document.getElementById('pwa-whatsapp-warning');
     if (waWarning) {
       waWarning.style.display = isWhatsAppBrowser() ? 'block' : 'none';
     }
 
-    // Perbarui teks Kartu 1 secara dinamis berdasarkan keberadaan APK kustom
+    // Auto-detect perangkat pengguna
+    if (isIos()) {
+      switchPwaGuideTab('ios');
+      const actionLabel = document.getElementById('btn-primary-action-label');
+      if (actionLabel) actionLabel.innerText = '🍏 Petunjuk Pasang di Layar iPhone (Safari)';
+      const actionIcon = document.getElementById('btn-primary-action-icon');
+      if (actionIcon) actionIcon.innerText = '🍏';
+    } else {
+      switchPwaGuideTab('android');
+      const actionLabel = document.getElementById('btn-primary-action-label');
+      if (actionLabel) actionLabel.innerText = '⚡ Pasang Aplikasi ke Layar HP Sekarang';
+      const actionIcon = document.getElementById('btn-primary-action-icon');
+      if (actionIcon) actionIcon.innerText = '⚡';
+    }
+
+    // Cek status tautan APK kustom dari Admin
     const sch = state.school || {};
     const hasCustomApk = Boolean(sch.apkUrl && typeof sch.apkUrl === 'string' && sch.apkUrl.trim().length > 0);
-
-    const badgeTag = document.getElementById('apk-card-badge-tag');
-    const titleText = document.getElementById('apk-card-title-text');
-    const descText = document.getElementById('apk-card-desc-text');
-    const btnTitle = document.getElementById('btn-apk-action-title');
-    const stepsBox = document.getElementById('apk-card-steps-box');
+    const hintBox = document.getElementById('apk-status-hint-box');
+    const downloadLabel = document.getElementById('btn-download-apk-label');
 
     if (hasCustomApk) {
-      if (badgeTag) badgeTag.innerText = 'PILIHAN 1 • BERKAS APK ANDROID';
-      if (titleText) titleText.innerText = 'Unduh Berkas APK Android Langsung';
-      if (descText) descText.innerHTML = 'Dapatkan berkas mentah <strong>Ujian_SDN14_Toboali.apk</strong> untuk dipasang ke HP siswa (Xiaomi, Samsung, Oppo, Vivo, Realme, Infinix, dll).';
-      if (btnTitle) btnTitle.innerHTML = '📥 Unduh File APK Android (.apk)';
-      if (stepsBox) {
-        stepsBox.innerHTML = `
-          <strong>3 Langkah Setelah Unduh Selesai:</strong>
-          <div style="display: flex; gap: 0.4rem; margin-top: 0.25rem;">1. Buka file hasil unduhan di notifikasi HP atau folder <em>Download</em>.</div>
-          <div style="display: flex; gap: 0.4rem;">2. Tekan <strong>"Instal"</strong>.</div>
-          <div style="display: flex; gap: 0.4rem;">3. Jika ada peringatan keamanan, pilih <strong>"Tetap Instal / Izinkan dari sumber ini"</strong>.</div>
-        `;
+      if (downloadLabel) downloadLabel.innerText = '📥 Unduh File APK Android (.apk)';
+      if (hintBox) {
+        hintBox.innerHTML = '<span style="color: #16a34a; font-weight: 700; font-size: 0.74rem;">✓ Berkas resmi APK siap diunduh</span>';
       }
     } else {
-      if (badgeTag) badgeTag.innerText = 'PILIHAN 1 • PASANG APLIKASI (WEBAPK)';
-      if (titleText) titleText.innerText = 'Pasang Aplikasi Resmi SDN 14 Toboali';
-      if (descText) descText.innerHTML = 'Pasang aplikasi resmi berlogo SDN 14 Toboali langsung ke layar HP Anda (layar penuh, tanpa kuota unduh besar, bebas 404).';
-      if (btnTitle) btnTitle.innerHTML = '📱 Pasang Aplikasi ke Layar HP Sekarang';
-      if (stepsBox) {
-        stepsBox.innerHTML = `
-          <strong>3 Keunggulan Aplikasi Resmi:</strong>
-          <div style="display: flex; gap: 0.4rem; margin-top: 0.25rem;">1. Ikon resmi SD Negeri 14 Toboali langsung di menu HP.</div>
-          <div style="display: flex; gap: 0.4rem;">2. Tampilan ujian layar penuh tanpa terganggu kolom alamat browser.</div>
-          <div style="display: flex; gap: 0.4rem;">3. Lebih ringan, cepat dibuka, dan auto-save jawaban ujian.</div>
-        `;
+      if (downloadLabel) downloadLabel.innerText = '📥 Unduh File APK Android (.apk)';
+      if (hintBox) {
+        hintBox.innerHTML = '<span style="color: #64748b; font-size: 0.72rem;">*Gunakan Pilihan 1 di atas untuk pasang instan tanpa unduh berkas</span>';
       }
     }
   }
