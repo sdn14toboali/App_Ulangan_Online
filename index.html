@@ -12,12 +12,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Sumatif | Formatif">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
   <link rel="shortcut icon" type="image/png" href="assets/icon-192.png">
-  <link rel="apple-touch-icon" href="assets/icon.svg">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/icon.svg">
-  <link rel="apple-touch-icon" sizes="192x192" href="assets/icon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png">
 
   <!-- Logo Resmi SD NEGERI 14 TOBOALI Base64 (Anti-404 / Offline Safe) -->
   <script src="assets/logo.js"></script>
@@ -40,10 +38,74 @@
       if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
         var sLink = document.createElement('link');
         sLink.rel = 'stylesheet';
-        sLink.href = 'style.css?v=3.73.0';
+        sLink.href = 'style.css?v=3.74.0';
         document.head.appendChild(sLink);
       }
     })();
+
+    // Early PWA Install Interceptor: Tangkap event sebelum DOMContentLoaded agar tidak terlewat
+    window.deferredPwaPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      window.deferredPwaPrompt = e;
+      var banner = document.getElementById('pwa-install-banner');
+      if (banner) banner.style.display = 'flex';
+      var cta = document.getElementById('pwa-auto-install-cta');
+      if (cta) cta.style.display = 'block';
+    });
+    window.addEventListener('appinstalled', function() {
+      window.deferredPwaPrompt = null;
+      var banner = document.getElementById('pwa-install-banner');
+      if (banner) banner.style.display = 'none';
+      if (typeof closePwaGuideModal === 'function') closePwaGuideModal();
+      if (typeof showToast === 'function') showToast('🎉 Aplikasi SDN 14 Toboali berhasil terpasang di HP!', 'success');
+    });
+
+    function handleDirectAppInstall() {
+      if (typeof isWhatsAppBrowser === 'function' && isWhatsAppBrowser()) {
+        if (typeof showToast === 'function') showToast('⚠️ Mengalihkan ke Google Chrome agar aplikasi bisa langsung terpasang otomatis...', 'warning');
+        setTimeout(function() {
+          if (typeof openInExternalChrome === 'function') openInExternalChrome();
+        }, 350);
+        return;
+      }
+
+      if (typeof isIos === 'function' && isIos()) {
+        if (typeof showToast === 'function') showToast('🍏 Di iPhone: Ketuk ikon Bagikan (⎘) di bawah Safari, lalu pilih "Tambah ke Layar Utama"!', 'info');
+        if (typeof openPwaGuideModal === 'function') openPwaGuideModal();
+        if (typeof switchPwaGuideTab === 'function') switchPwaGuideTab('ios');
+        if (typeof triggerPwaManualGuide === 'function') triggerPwaManualGuide();
+        return;
+      }
+
+      var promptEvent = window.deferredPwaPrompt;
+      if (promptEvent) {
+        if (typeof showToast === 'function') showToast('⚡ Membuka dialog pemasangan aplikasi Android...', 'info');
+        promptEvent.prompt();
+        promptEvent.userChoice.then(function(choiceResult) {
+          if (choiceResult && choiceResult.outcome === 'accepted') {
+            if (typeof showToast === 'function') showToast('🎉 Aplikasi resmi SDN 14 Toboali berhasil terpasang di HP!', 'success');
+            var banner = document.getElementById('pwa-install-banner');
+            if (banner) banner.style.display = 'none';
+            if (typeof closePwaGuideModal === 'function') closePwaGuideModal();
+          }
+          window.deferredPwaPrompt = null;
+        }).catch(function(err) {
+          console.warn('PWA prompt error:', err);
+          if (typeof openPwaGuideModal === 'function') openPwaGuideModal();
+        });
+        return;
+      }
+
+      // Fallback jika belum ditangkap atau di desktop: buka modal panduan interaktif
+      if (typeof openPwaGuideModal === 'function') {
+        openPwaGuideModal();
+      } else {
+        var modal = document.getElementById('modal-pwa-install-guide');
+        if (modal) modal.style.display = 'flex';
+      }
+    }
+    window.handleDirectAppInstall = handleDirectAppInstall;
   </script>
   <script>
     // Fallback Darurat Logo Resmi SDN 14 Toboali jika berkas eksternal belum diunggah ke Vercel/GitHub
@@ -163,7 +225,7 @@
   </script>
 
   <!-- Core Design System & Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=3.73.0">
+  <link rel="stylesheet" href="style.css?v=3.74.0">
 </head>
 <body>
 
@@ -3333,6 +3395,6 @@
   <div id="print-container"></div>
 
   <!-- App Core Engine -->
-  <script src="app.js?v=3.73.0"></script>
+  <script src="app.js?v=3.74.0"></script>
 </body>
 </html>
