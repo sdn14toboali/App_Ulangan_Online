@@ -711,16 +711,7 @@ function handleDirectAppInstall() {
     return;
   }
 
-  // 2. Cek jika pengguna membuka dari iPhone / iPad (iOS Safari)
-  if (isIos()) {
-    showToast('🍏 Di iPhone: Ketuk ikon Bagikan (⎘) di bawah Safari, lalu pilih "Tambah ke Layar Utama"!', 'info');
-    openPwaGuideModal();
-    switchPwaGuideTab('ios');
-    triggerPwaManualGuide();
-    return;
-  }
-
-  // 3. Jika di Android / Chrome dan native install prompt siap: LANGSUNG PICU INSTALASI OTOMATIS
+  // 2. Jika di Android / Chrome dan native install prompt siap: LANGSUNG PICU INSTALASI OTOMATIS
   const promptEvt = deferredPwaPrompt || (typeof window !== 'undefined' && window.deferredPwaPrompt);
   if (promptEvt) {
     showToast('⚡ Membuka dialog pemasangan aplikasi Android...', 'info');
@@ -742,7 +733,7 @@ function handleDirectAppInstall() {
     return;
   }
 
-  // 4. Jika prompt otomatis belum ditangkap browser (Chrome sedang memproses manifest atau di PC)
+  // 3. Jika prompt otomatis belum ditangkap browser (Chrome sedang memproses manifest atau di PC)
   showToast('💡 Buka petunjuk pemasangan aplikasi resmi SDN 14 Toboali...', 'info');
   openPwaGuideModal();
   switchPwaGuideTab('android');
@@ -756,19 +747,7 @@ function downloadAndroidApk() {
   const sch = state.school || {};
   let customApkUrl = (sch.apkUrl && typeof sch.apkUrl === 'string') ? sch.apkUrl.trim() : '';
 
-  // 1. Cek jika pengguna membuka dari iPhone / iPad (iOS)
-  if (isIos()) {
-    showToast('🍏 iPhone menggunakan sistem PWA Layar Utama (PILIHAN 1). Ikuti petunjuk untuk iPhone di atas!', 'info');
-    switchPwaGuideTab('ios');
-    const details = document.getElementById('pwa-tutorial-details-box');
-    if (details) {
-      details.style.display = 'block';
-      try { details.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch(e) {}
-    }
-    return;
-  }
-
-  // 2. Jika Admin BELUM menautkan berkas APK di Pengaturan Sekolah:
+  // 1. Jika Admin BELUM menautkan berkas APK di Pengaturan Sekolah:
   if (!customApkUrl) {
     const userPrompt = prompt(
       'Guru/Pengawas: Masukkan link tautan berkas APK (Google Drive / Direct Link) untuk diunduh sekarang:\n\n' +
@@ -894,20 +873,10 @@ function openPwaGuideModal() {
       waWarning.style.display = isWhatsAppBrowser() ? 'block' : 'none';
     }
 
-    // Auto-detect perangkat pengguna
-    if (isIos()) {
-      switchPwaGuideTab('ios');
-      const actionLabel = document.getElementById('btn-primary-action-label');
-      if (actionLabel) actionLabel.innerText = '🍏 Petunjuk Pasang di Layar iPhone (Safari)';
-      const actionIcon = document.getElementById('btn-primary-action-icon');
-      if (actionIcon) actionIcon.innerText = '🍏';
-    } else {
-      switchPwaGuideTab('android');
-      const actionLabel = document.getElementById('btn-primary-action-label');
-      if (actionLabel) actionLabel.innerText = '⚡ Pasang Aplikasi ke Layar HP Sekarang';
-      const actionIcon = document.getElementById('btn-primary-action-icon');
-      if (actionIcon) actionIcon.innerText = '⚡';
-    }
+    const actionLabel = document.getElementById('btn-primary-action-label');
+    if (actionLabel) actionLabel.innerText = '⚡ Pasang Aplikasi Sekarang';
+    const actionIcon = document.getElementById('btn-primary-action-icon');
+    if (actionIcon) actionIcon.innerText = '⚡';
 
     // Cek status tautan APK kustom dari Admin
     const sch = state.school || {};
@@ -935,34 +904,8 @@ function closePwaGuideModal() {
 }
 
 function switchPwaGuideTab(platform) {
-  const tabAndroid = document.getElementById('pwa-tab-android');
-  const tabIos = document.getElementById('pwa-tab-ios');
   const guideAndroid = document.getElementById('pwa-guide-android');
-  const guideIos = document.getElementById('pwa-guide-ios');
-
-  if (platform === 'android') {
-    if (tabAndroid) {
-      tabAndroid.style.background = '#2563eb';
-      tabAndroid.style.color = '#ffffff';
-    }
-    if (tabIos) {
-      tabIos.style.background = 'transparent';
-      tabIos.style.color = '#64748b';
-    }
-    if (guideAndroid) guideAndroid.style.display = 'block';
-    if (guideIos) guideIos.style.display = 'none';
-  } else {
-    if (tabIos) {
-      tabIos.style.background = '#0f172a';
-      tabIos.style.color = '#ffffff';
-    }
-    if (tabAndroid) {
-      tabAndroid.style.background = 'transparent';
-      tabAndroid.style.color = '#64748b';
-    }
-    if (guideIos) guideIos.style.display = 'block';
-    if (guideAndroid) guideAndroid.style.display = 'none';
-  }
+  if (guideAndroid) guideAndroid.style.display = 'block';
 }
 
 window.triggerPwaInstall = triggerPwaInstall;
@@ -9558,7 +9501,7 @@ if (typeof document !== 'undefined') {
   if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
     const sLink = document.createElement('link');
     sLink.rel = 'stylesheet';
-    sLink.href = 'style.css?v=3.74.0';
+    sLink.href = 'style.css?v=3.76.0';
     document.head.appendChild(sLink);
   }
 
