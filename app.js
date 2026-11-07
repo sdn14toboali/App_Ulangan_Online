@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==============================================================================
 // PWA & ANDROID APK SUPPORT (INSTALL PROMPT & SERVICE WORKER)
 // ==============================================================================
-let deferredPwaPrompt = null;
+let deferredPwaPrompt = (typeof window !== 'undefined' && window.deferredPwaPrompt) ? window.deferredPwaPrompt : null;
 
 function initPwaSupport() {
   if ('serviceWorker' in navigator) {
@@ -620,6 +620,7 @@ function initPwaSupport() {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPwaPrompt = e;
+    if (typeof window !== 'undefined') window.deferredPwaPrompt = e;
     const banner = document.getElementById('pwa-install-banner');
     if (banner) {
       banner.style.display = 'flex';
@@ -630,6 +631,7 @@ function initPwaSupport() {
 
   window.addEventListener('appinstalled', () => {
     deferredPwaPrompt = null;
+    if (typeof window !== 'undefined') window.deferredPwaPrompt = null;
     const banner = document.getElementById('pwa-install-banner');
     if (banner) banner.style.display = 'none';
     closePwaGuideModal();
@@ -719,10 +721,11 @@ function handleDirectAppInstall() {
   }
 
   // 3. Jika di Android / Chrome dan native install prompt siap: LANGSUNG PICU INSTALASI OTOMATIS
-  if (deferredPwaPrompt) {
+  const promptEvt = deferredPwaPrompt || (typeof window !== 'undefined' && window.deferredPwaPrompt);
+  if (promptEvt) {
     showToast('⚡ Membuka dialog pemasangan aplikasi Android...', 'info');
-    deferredPwaPrompt.prompt();
-    deferredPwaPrompt.userChoice.then((choiceResult) => {
+    promptEvt.prompt();
+    promptEvt.userChoice.then((choiceResult) => {
       if (choiceResult && choiceResult.outcome === 'accepted') {
         showToast('🎉 Aplikasi resmi SDN 14 Toboali berhasil terpasang di HP!', 'success');
         const banner = document.getElementById('pwa-install-banner');
@@ -730,20 +733,19 @@ function handleDirectAppInstall() {
         closePwaGuideModal();
       }
       deferredPwaPrompt = null;
+      if (typeof window !== 'undefined') window.deferredPwaPrompt = null;
     }).catch((err) => {
       console.warn('PWA prompt error:', err);
       openPwaGuideModal();
       switchPwaGuideTab('android');
-      triggerPwaManualGuide();
     });
     return;
   }
 
-  // 4. Jika prompt otomatis belum ditangkap browser (Chrome sedang memproses manifest atau butuh klik manual)
-  showToast('💡 Ketuk Titik Tiga (⋮) di kanan atas Chrome -> Pilih "Install Aplikasi" atau "Tambahkan ke Layar Utama"', 'info');
+  // 4. Jika prompt otomatis belum ditangkap browser (Chrome sedang memproses manifest atau di PC)
+  showToast('💡 Buka petunjuk pemasangan aplikasi resmi SDN 14 Toboali...', 'info');
   openPwaGuideModal();
   switchPwaGuideTab('android');
-  triggerPwaManualGuide();
 }
 
 function handlePrimaryAppInstall() {
@@ -9556,7 +9558,7 @@ if (typeof document !== 'undefined') {
   if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
     const sLink = document.createElement('link');
     sLink.rel = 'stylesheet';
-    sLink.href = 'style.css?v=3.73.0';
+    sLink.href = 'style.css?v=3.74.0';
     document.head.appendChild(sLink);
   }
 
