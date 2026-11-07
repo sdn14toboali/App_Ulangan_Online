@@ -9470,7 +9470,15 @@ function initApp() {
   }, 1000);
 }
 
+// Auto-Enforce Stylesheet Protection: Pastikan style.css selalu aktif di peramban
 if (typeof document !== 'undefined') {
+  if (!document.querySelector('link[rel="stylesheet"][href*="style.css"]')) {
+    const sLink = document.createElement('link');
+    sLink.rel = 'stylesheet';
+    sLink.href = 'style.css?v=3.70.0';
+    document.head.appendChild(sLink);
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
   } else {
